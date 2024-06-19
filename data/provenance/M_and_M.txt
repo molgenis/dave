@@ -1,0 +1,124 @@
+
+--alphafold data:
+https://ftp.ebi.ac.uk/pub/databases/alphafold/latest/mane_overlap_v4.tar
+
+
+
+-- foldx 5:
+from https://foldxsuite.crg.eu/
+academic license
+
+/Applications/FoldX/foldx5MacStd/foldx_20231231
+/Applications/FoldX/foldx5MacC11/foldx_20231231
+
+
+
+-- Secretome:
+https://www.proteinatlas.org/humanproteome/tissue/secretome
+--> select '1665 secreted' --> download TSV
+rename protein_class_Predicted.tsv to protein-atlas-secreted.tsv
+replace: (.+?)\t.+
+by: \1
+save as protein-atlas-secreted-genenames.tsv
+
+
+
+-- Gene annotations
+BioMart, Ensembl genes 112, Human genes (GRCh38.p14)
+filters: MANE select:only, Gene Names: [protein-atlas-secreted-genenames.tsv]
+attributes: Gene name, Transcript stable ID,UniProtKB/Swiss-Prot ID
+export TSV, rename to protein-atlas-secreted-genenames-mane-uniprot.txt
+remove 2 lines with duplicate genes:
+ENST00000428956	C4A	P0C0L4
+ENST00000634014	CCL4L2
+remove lines without uniprot:
+replace ".+\t\r" with ""
+
+
+
+--- prep VKGL data:
+
+download latest VKGL release from
+https://vkgl.molgeniscloud.org/menu/main/background
+here: april 2024
+
+regex replace:
+.*?\t.*?\t(.*?)\t(.*?)\t.*?\t(.*?)\t(.*?)\t.*?\t.*?\t.*?\t.*?\t.*?\t(.*?)\t.*
+by
+\1\t\2\t\3\t\4\t\5
+
+regex replace:
+(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.*)
+by
+\1\t\2\t\.\t\3\t\4\t\.\tPASS\tVKGL=\5
+
+add header:
+(lengths b37 according to https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh37)
+
+##fileformat=VCFv4.2
+##contig=<ID=1,length=249250621>
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##fileDate=20240508
+##FILTER=<ID=PASS,Description="All filters passed">
+##INFO=<ID=VKGL,Number=1,Type=String,Description="VKGL consensus classification">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+
+See: VKGL_public_consensus_apr2024_unsorted_unannotated.vcf.zip
+
+copy over to hpc
+scp VKGL_public_consensus_apr2024.vcf airlock+gearshift:/groups/umcg-gcc/tmp01/umcg-jvelde/protein-folding
+
+--- run VEP on VKGL data
+
+ssh airlock+gearshift
+cd /groups/umcg-gcc/tmp01/umcg-jvelde/protein-folding/
+
+sort:
+module load BCFtools
+bcftools sort VKGL_public_consensus_apr2024.vcf -o VKGL_apr2024_sorted.vcf
+
+VEP container:
+wget https://download.molgeniscloud.org/downloads/vip/images/vep-111.0.sif
+
+using VEP cache:
+wget https://ftp.ensembl.org/pub/grch37/release-111/variation/vep/homo_sapiens_vep_111_GRCh37.tar.gz
+
+run VEP:
+nohup apptainer exec --bind="/groups,/apps,/tmp" vep-111.0.sif vep -i VKGL_apr2024_sorted.vcf -o VKGL_apr2024_annot.vcf --format=vcf --vcf --species=homo_sapiens --assembly=GRCh37 --symbol --offline --exclude_predicted --use_given_ref --cache --dir_cache /groups/umcg-gcc/tmp01/umcg-jvelde/protein-folding/vep_cache &
+
+exit
+scp airlock+gearshift:/groups/umcg-gcc/tmp01/umcg-jvelde/protein-folding/VKGL_apr2024_annot.vcf .
+
+postprocess VKGL_apr2024_annot.vcf:
+remove any lines that do not contain 'missense_variant'
+remove any duplicate lines
+ZIP the file to VKGL_apr2024_annot_missense_nodup.vcf.zip
+
+finally, use the created files  in Java VKGLProcessIntoProteinChanges.java
+using: VKGL_apr2024_annot_missense_nodup.vcf.zip and protein-atlas-secreted-genenames-mane-uniprot.txt
+to format VKGL variants per gene with headers:
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+
