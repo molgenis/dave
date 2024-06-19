@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	7	100319633	G	A	EPO	DA70N	70	LB
+GRCh37	7	100320381	C	T	EPO	PA114L	114	LB

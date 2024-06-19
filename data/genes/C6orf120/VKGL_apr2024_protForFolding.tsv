@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	6	170102664	G	A	C6orf120	EA37K	37	LB
+GRCh37	6	170102871	A	C	C6orf120	IA106L	106	LB

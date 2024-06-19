@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	8	24254922	G	A	ADAMDEC1	GA194R	194	LB
+GRCh37	8	24250787	C	A	ADAMDEC1	PA74T	74	LB

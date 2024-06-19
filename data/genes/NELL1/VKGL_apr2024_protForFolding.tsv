@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	11	20948870	C	A	NELL1	TA259K	259	VUS
+GRCh37	11	21556033	T	C	NELL1	YA587H	587	VUS

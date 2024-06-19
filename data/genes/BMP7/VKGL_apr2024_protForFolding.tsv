@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	20	55758836	G	T	BMP7	SA300R	300	LB
+GRCh37	20	55777600	T	G	BMP7	TA231P	231	LB

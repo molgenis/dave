@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	4	3443769	C	T	HGFAC	PA14L	14	LB
+GRCh37	4	3446058	C	T	HGFAC	RA207C	207	VUS

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	9	72840696	A	G	MAMDC2	IA648V	648	VUS
+GRCh37	9	72723339	C	A	MAMDC2	PA121T	121	LB

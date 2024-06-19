@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	10	54074381	G	A	DKK1	AA63T	63	VUS
+GRCh37	10	54074798	G	T	DKK1	RA120L	120	VUS

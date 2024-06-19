@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	3	194061955	C	T	CPN2	AA493T	493	VUS
+GRCh37	3	194061905	C	A	CPN2	QA509H	509	LB

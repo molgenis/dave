@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	2	42280448	G	A	PKDCC	AA237T	237	LB
+GRCh37	2	42282449	G	A	PKDCC	EA380K	380	VUS

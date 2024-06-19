@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	3	52825553	G	A	ITIH1	GA839S	839	LB
+GRCh37	3	52817325	A	C	ITIH1	IA399L	399	VUS

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	8	42036464	C	G	PLAT	GA494A	494	VUS
+GRCh37	8	42046568	G	A	PLAT	TA46M	46	VUS

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	22	29627111	G	A	EMID1	GA190R	190	VUS
+GRCh37	22	29629433	C	A	EMID1	PA297T	297	VUS

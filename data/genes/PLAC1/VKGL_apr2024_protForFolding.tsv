@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	X	133700567	C	G	PLAC1	CA49S	49	LB
+GRCh37	X	133700672	G	A	PLAC1	TA14I	14	VUS

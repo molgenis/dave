@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	11	71712876	C	A	IL18BP	SA185Y	185	VUS
+GRCh37	11	71711435	G	A	IL18BP	VA23I	23	LB

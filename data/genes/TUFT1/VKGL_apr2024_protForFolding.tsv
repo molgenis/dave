@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	1	151538661	G	A	TUFT1	GA146D	146	LB
+GRCh37	1	151554167	G	A	TUFT1	RA386Q	386	VUS
