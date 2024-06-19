@@ -1,0 +1,116 @@
+######################
+# Load used packages #
+######################
+library(R.utils)   # for 'gunzip', 'mkdirs'
+
+
+#######################
+# Adjustable settings #
+#######################
+rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability" # root directory that contains README.md, data/, img/, out/, src/, etc.
+vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv" # loading processed VKGL protein variants from: /data/genes/{gene}/{vkglProtVarFile}
+foldxExec <- "/Applications/FoldX/5/foldx5MacStd/foldx_20241231" # exact path to the FoldX executable
+alphaFoldLoc <- "/Applications/AlphaFold2/mane_overlap_v4.tar"
+
+
+##########################################
+# Derived paths of directories and files #
+##########################################
+dataGenesDir <- paste(rootDir, "data", "genes", sep="/")
+geneToUniprotLoc <- paste(rootDir, "data", "protein-atlas-secreted-genenames-mane-uniprot.txt", sep="/")
+
+
+#################################################
+# Retrieve mapping of HGNC symbol to UniProt ID #
+#################################################
+geneToUniprot <- read.table(file=geneToUniprotLoc, sep = '\t',header = TRUE)
+head(geneToUniprot)
+
+
+######################################################
+# Iterate over all gene directories, repair and fold #
+######################################################
+setwd(dataGenesDir)
+geneNames <- list.files(pattern="*", recursive=FALSE, include.dirs=TRUE)
+head(geneNames)
+
+for(i in seq_along(geneNames))
+{
+  geneName <- geneNames[i]
+  cat(paste("Working on ", geneName, " (gene ", i, " of ", length(geneNames), ")\n", sep=""))
+  uniProtID <- geneToUniprot$UniProtKB.Swiss.Prot.ID[geneToUniprot$Gene.name==geneName]
+  # Find in TAR file, extract into working dir, gunzip and repair (may take a while) #
+  specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
+  setwd(specificGeneDir)
+  # first cleanup repair fxout if present
+  file.remove(list.files(specificGeneDir, pattern="*.fxout"))
+  file.remove(list.files(specificGeneDir, pattern="molecules", include.dirs=TRUE))
+  if(length(list.files(pattern="*_Repair.pdb")) == 0){
+    alphaFoldAll <- untar(alphaFoldLoc, list = TRUE)
+    alphaFoldPDBs <- grep(".pdb.gz",alphaFoldAll, value=TRUE)
+    PDBForGeneGz <- grep(paste(uniProtID,collapse="|"), alphaFoldPDBs, value=TRUE)
+    if(identical(PDBForGeneGz, character(0))){
+      warning(paste("No PDB found for uniprot "), paste(uniProtID,collapse = " "))
+      next
+    }
+    if(length(PDBForGeneGz) > 1){
+      warning(paste("Multiple PDB and/or fragments found for uniprot "), paste(uniProtID, collapse = " "), ": ", paste(PDBForGeneGz, collapse=" "))
+      next
+    }
+    untar(alphaFoldLoc, files = PDBForGeneGz)
+    PDBForGene <- gunzip(PDBForGeneGz, overwrite=TRUE)[[1]]
+    system(paste(foldxExec, " --command=RepairPDB --pdb=",PDBForGene,sep=""), intern = TRUE)
+  } else{
+    # Cleanup original PDB if a repaired PDB is present
+    file.remove(list.files(pattern="*model_v4.pdb"))
+  }
+  repPDB_fileName <- list.files(pattern="*_Repair.pdb")
+  repPDB_fullLoc <- paste(specificGeneDir, repPDB_fileName, sep="/")
+  repPDB_fullLoc
+  
+  # Read the VKGL mutations for this protein
+  vkgl <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE)
+  mutations <- vkgl$ProtChange
+  
+  # Calculate change in protein stability for each mutation
+  foldingResultsDir <- paste(specificGeneDir, "folding-results", sep="/")
+  mkdirs(foldingResultsDir)
+  for(j in seq_along(mutations))
+  {
+    cat(paste("Working on ", mutations[j], " (gene ",geneName,", mutation ", j, " of ", length(mutations), ")\n", sep=""))
+    mutationDir <- paste(foldingResultsDir, mutations[j], sep="/")
+    mkdirs(mutationDir)
+    setwd(mutationDir)
+    file.remove(list.files(pattern="molecules", include.dirs=TRUE))
+    file.remove(list.files(pattern="*.pdb"))
+    file.remove(list.files(pattern="*individual_list.txt"))
+    file.remove(list.files(pattern="PdbList_*"))
+    file.remove(list.files(pattern="Dif_*"))
+    file.remove(list.files(pattern="Raw_*"))
+    if(length(list.files(mutationDir, pattern="*.fxout")) > 0)
+    {
+      cat("  already folded, skipping...\n")
+      next
+    }
+    if(length(list.files(mutationDir, pattern="exception.txt")) > 0)
+    {
+      cat("  already tried before but failed, breaking...\n")
+      break
+    }
+    file.copy(from = repPDB_fullLoc, to = mutationDir)
+    write(paste(vkgl[j, "ProtChange"], ";", sep=""), file = "individual_list.txt")
+    state <- system(paste(foldxExec, " --command=BuildModel --mutant-file=individual_list.txt --numberOfRuns=5 --pdb=", repPDB_fileName, sep=""), intern = TRUE)
+    if(any(grepl("Specified residue not found", state)))
+      {
+        write(state, file = "exception.txt")
+        break
+    }
+     file.remove(repPDB_fileName)
+     cat("...done!\n")
+  }
+  
+}
+
+
+
+
