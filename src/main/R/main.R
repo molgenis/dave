@@ -7,10 +7,18 @@ library(R.utils)   # for 'gunzip', 'mkdirs'
 #######################
 # Adjustable settings #
 #######################
+# Example for Unix
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability" # root directory that contains README.md, data/, img/, out/, src/, etc.
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv" # loading processed VKGL protein variants from: /data/genes/{gene}/{vkglProtVarFile}
 foldxExec <- "/Applications/FoldX/5/foldx5MacStd/foldx_20241231" # exact path to the FoldX executable
 alphaFoldLoc <- "/Applications/AlphaFold2/mane_overlap_v4.tar"
+UP000005640_9606_HUMAN_v4Loc <- "/Applications/AlphaFold2/UP000005640_9606_HUMAN_v4.tar"
+# Example for Windows
+rootDir <- "D:/github/vkgl-secretome-protein-stability"
+vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv"
+foldxExec <- "C:/\"Program Files\"/FoldX/foldx_20241231.exe"
+alphaFoldLoc <- "D:/mane_overlap_v4.tar"
+UP000005640_9606_HUMAN_v4Loc <- "D:/UP000005640_9606_HUMAN_v4.tar"
 
 
 ##########################################
@@ -38,26 +46,41 @@ for(i in seq_along(geneNames))
 {
   geneName <- geneNames[i]
   cat(paste("Working on ", geneName, " (gene ", i, " of ", length(geneNames), ")\n", sep=""))
-  uniProtID <- geneToUniprot$UniProtKB.Swiss.Prot.ID[geneToUniprot$Gene.name==geneName]
-  # Find in TAR file, extract into working dir, gunzip and repair (may take a while) #
   specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
   setwd(specificGeneDir)
+  if(length(list.files(pattern="exception.txt")) > 0)
+  {
+    cat("  gene already tried before but failed, continuing...\n")
+    next
+  }
+  uniProtID <- geneToUniprot$UniProtKB.Swiss.Prot.ID[geneToUniprot$Gene.name==geneName]
   # first cleanup repair fxout if present
   file.remove(list.files(specificGeneDir, pattern="*.fxout"))
   file.remove(list.files(specificGeneDir, pattern="molecules", include.dirs=TRUE))
+  file.remove(list.files(pattern="rotabase.txt"))
+  # Find in TAR file, extract into working dir, gunzip and repair (may take a while)
   if(length(list.files(pattern="*_Repair.pdb")) == 0){
     alphaFoldAll <- untar(alphaFoldLoc, list = TRUE)
     alphaFoldPDBs <- grep(".pdb.gz",alphaFoldAll, value=TRUE)
     PDBForGeneGz <- grep(paste(uniProtID,collapse="|"), alphaFoldPDBs, value=TRUE)
     if(identical(PDBForGeneGz, character(0))){
-      warning(paste("No PDB found for uniprot "), paste(uniProtID,collapse = " "))
-      next
+      cat("  gene not found in MANE AlphaFold, trying UP000005640_9606_HUMAN_v4...\n")
+      UP000005640_9606_HUMAN_v4_All <- untar(UP000005640_9606_HUMAN_v4Loc, list = TRUE)
+      UP000005640_9606_HUMAN_v4_PDBs <- grep(".pdb.gz", UP000005640_9606_HUMAN_v4_All, value=TRUE)
+      PDBForGeneGz <- grep(paste(uniProtID,collapse="|"), UP000005640_9606_HUMAN_v4_PDBs, value=TRUE)
+      if(identical(PDBForGeneGz, character(0))){
+        write(paste("No PDB found for uniprotID", uniProtID), file = "exception.txt")
+        next
+      }else{
+        untar(UP000005640_9606_HUMAN_v4Loc, files = PDBForGeneGz)
+      }
+    }else{
+      untar(alphaFoldLoc, files = PDBForGeneGz)
     }
     if(length(PDBForGeneGz) > 1){
-      warning(paste("Multiple PDB and/or fragments found for uniprot "), paste(uniProtID, collapse = " "), ": ", paste(PDBForGeneGz, collapse=" "))
+      write(paste("Multiple PDB and/or fragments found for uniprotID", uniProtID, ":", PDBForGeneGz), file = "exception.txt")
       next
     }
-    untar(alphaFoldLoc, files = PDBForGeneGz)
     PDBForGene <- gunzip(PDBForGeneGz, overwrite=TRUE)[[1]]
     system(paste(foldxExec, " --command=RepairPDB --pdb=",PDBForGene,sep=""), intern = TRUE)
   } else{
@@ -82,6 +105,7 @@ for(i in seq_along(geneNames))
     mkdirs(mutationDir)
     setwd(mutationDir)
     file.remove(list.files(pattern="molecules", include.dirs=TRUE))
+    file.remove(list.files(pattern="rotabase.txt"))
     file.remove(list.files(pattern="*.pdb"))
     file.remove(list.files(pattern="*individual_list.txt"))
     file.remove(list.files(pattern="PdbList_*"))
