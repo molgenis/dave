@@ -80,6 +80,7 @@ for(i in seq_along(geneNames))
     }
     if(length(PDBForGeneGz) > 1){
       write(paste("Multiple PDB and/or fragments found for uniprotID", uniProtID, ":", PDBForGeneGz), file = "exception.txt")
+      file.remove(list.files(pattern="*.pdb.gz"))
       next
     }
     PDBForGene <- gunzip(PDBForGeneGz, overwrite=TRUE)[[1]]
