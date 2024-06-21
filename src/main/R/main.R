@@ -2,6 +2,7 @@
 # Load used packages #
 ######################
 library(R.utils)   # for 'gunzip', 'mkdirs'
+library(ggplot2)   # for plotting
 
 
 #######################
@@ -132,9 +133,54 @@ for(i in seq_along(geneNames))
      file.remove(repPDB_fileName)
      cat("...done!\n")
   }
-  
 }
 
 
+##################
+# Gather results #
+##################
+setwd(dataGenesDir)
+geneNames <- list.files(pattern="*", recursive=FALSE, include.dirs=TRUE)
+head(geneNames)
+results <- data.frame()
+for(i in seq_along(geneNames))
+{
+  geneName <- geneNames[i]
+  cat(paste("Loading data for ", geneName, " (gene ", i, " of ", length(geneNames), ")\n", sep=""))
+  specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
+  setwd(specificGeneDir)
+  variants <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE)
+  foldingResultsDir <- paste(specificGeneDir, "folding-results", sep="/")
+  for(j in seq_along(variants))
+  {
+    mutationDir <- paste(foldingResultsDir, variants$ProtChange[j], sep="/")
+    if(!dir.exists(mutationDir))
+    {
+      next
+    }
+    if(length(list.files(mutationDir, pattern="*.fxout")) == 0){
+      next
+    }
+    avgDiff <- list.files(mutationDir, pattern="Average")
+    result <- read.table(file = paste(mutationDir, avgDiff, sep="/"), header = TRUE, skip = 8, sep="\t")
+    result$assembly <- variants[j, "Assembly"]
+    result$chrom <- variants[j, "Chrom"]
+    result$pos <- variants[j, "Pos"]
+    result$ref <- variants[j, "Ref"]
+    result$alt <- variants[j, "Alt"]
+    result$gene <- variants[j, "Gene"]
+    result$protChange <- variants[j, "ProtChange"]
+    result$classificationVKGL <- variants[j, "Classification"]
+    results <- rbind(results, result)
+  }
+}
 
-
+# some quick checks, replace later
+a <- subset(results, classificationVKGL == "LP")
+b <- subset(results, classificationVKGL == "LB")
+median(a$total.energy)
+median(b$total.energy)
+c <- subset(results, classificationVKGL == "LP" | classificationVKGL == "LB")
+ggplot(c, aes(x=total.energy, color=classificationVKGL, fill=classificationVKGL)) +
+  geom_histogram(aes(y=..density..), alpha=0.5, position="identity",binwidth=1)+
+  geom_density(alpha=.2)
