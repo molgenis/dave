@@ -1,0 +1,10 @@
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F10-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q99715 : AF-Q99715-F9-model_v4.pdb.gz
