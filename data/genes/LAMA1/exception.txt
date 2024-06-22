@@ -1,0 +1,10 @@
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F10-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P25391 : AF-P25391-F9-model_v4.pdb.gz
