@@ -20,13 +20,18 @@ vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv"
 foldxExec <- "C:/\"Program Files\"/FoldX/foldx_20241231.exe"
 alphaFoldLoc <- "D:/mane_overlap_v4.tar"
 UP000005640_9606_HUMAN_v4Loc <- "D:/UP000005640_9606_HUMAN_v4.tar"
+# Select which lists to work on
+secretedProteins <- "protein-atlas-secreted-genenames-mane-uniprot-withvariants.txt"
+intracellularProteins <- "protein-atlas-intracellular-genenames-mane-uniprot-random2000-withvariants.txt"
+membraneProteins <- "todo"
+geneListsToProcess <- intracellularProteins
 
 
 ##########################################
 # Derived paths of directories and files #
 ##########################################
 dataGenesDir <- paste(rootDir, "data", "genes", sep="/")
-geneToUniprotLoc <- paste(rootDir, "data", "protein-atlas-secreted-genenames-mane-uniprot.txt", sep="/")
+geneToUniprotLoc <- paste(rootDir, "data", geneListsToProcess, sep="/")
 
 
 #################################################
@@ -34,15 +39,13 @@ geneToUniprotLoc <- paste(rootDir, "data", "protein-atlas-secreted-genenames-man
 #################################################
 geneToUniprot <- read.table(file=geneToUniprotLoc, sep = '\t',header = TRUE)
 head(geneToUniprot)
-
+geneNames <- sort(geneToUniprot$Gene.name)
+head(geneNames)
 
 ######################################################
 # Iterate over all gene directories, repair and fold #
 ######################################################
 setwd(dataGenesDir)
-geneNames <- list.files(pattern="*", recursive=FALSE, include.dirs=TRUE)
-head(geneNames)
-
 for(i in seq_along(geneNames))
 {
   geneName <- geneNames[i]
