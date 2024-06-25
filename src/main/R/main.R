@@ -181,7 +181,20 @@ a <- subset(results, classificationVKGL == "LP")
 b <- subset(results, classificationVKGL == "LB")
 median(a$total.energy)
 median(b$total.energy)
-c <- subset(results, classificationVKGL == "LP" | classificationVKGL == "LB")
+c <- subset(results, classificationVKGL == "LP" | classificationVKGL == "LB"| classificationVKGL == "VUS"  )
+
 ggplot(c, aes(x=total.energy, color=classificationVKGL, fill=classificationVKGL)) +
-  geom_histogram(aes(y=..density..), alpha=0.5, position="identity",binwidth=1)+
-  geom_density(alpha=.2)
+  theme_bw() +
+  geom_boxplot(outlier.colour="black", outlier.shape=16, outlier.size=2, notch=T) +
+  scale_color_manual(values=c("black", "black", "black")) +
+  scale_fill_manual(values=c("green", "red", "grey"))
+
+youdenIndex = 5
+tp <- sum(c[c$classificationVKGL=="LP",'total.energy'] >= youdenIndex)
+fp <- sum(c[c$classificationVKGL=="LB",'total.energy'] >= youdenIndex)
+tn <- sum(c[c$classificationVKGL=="LB",'total.energy'] < youdenIndex)
+fn <- sum(c[c$classificationVKGL=="LP",'total.energy'] < youdenIndex)
+ppv <- 100 *tp/(tp+fp)
+npv <- 100 *tn/(tn+fn)
+ppv
+npv
