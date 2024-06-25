@@ -23,16 +23,36 @@ save as protein-atlas-secreted-genenames.tsv
 
 
 
+-- comparison to non-secretome:
+also download membrane (5,354) and intracellular (12,917) genes from
+https://www.proteinatlas.org/humanproteome/tissue/secretome
+rename protein_class_Predicted.tsv to protein-atlas-secreted.tsv
+replace: (.+?)\t.+
+by: \1
+save as protein-atlas-intracellular-genenames.tsv
+and protein-atlas-membrane-genenames.tsv
+
+
 -- Gene annotations
 BioMart, Ensembl genes 112, Human genes (GRCh38.p14)
 filters: MANE select:only, Gene Names: [protein-atlas-secreted-genenames.tsv]
-attributes: Gene name, Transcript stable ID,UniProtKB/Swiss-Prot ID
+attributes: Gene name, Transcript stable ID, UniProtKB/Swiss-Prot ID
 export TSV, rename to protein-atlas-secreted-genenames-mane-uniprot.txt
 remove 2 lines with duplicate genes:
 ENST00000428956	C4A	P0C0L4
 ENST00000634014	CCL4L2
 remove lines without uniprot:
 replace ".+\t\r" with ""
+
+filters: MANE select:only, Gene Names: [protein-atlas-membrane-genenames.tsv]
+same attrb
+remove lines without uniprot: replace ".+\t\r" by ""
+delete duplicate lines (1)
+
+filters: MANE select:only, Gene Names: [protein-atlas-intracellular-genenames.tsv]
+same attrb
+remove lines without uniprot: replace ".+\t\r" by ""
+delete duplicate lines (2)
 
 
 
@@ -91,6 +111,8 @@ See: VKGL_public_consensus_apr2024_unsorted_unannotated.vcf.zip
 copy over to hpc
 scp VKGL_public_consensus_apr2024.vcf airlock+gearshift:/groups/umcg-gcc/tmp01/umcg-jvelde/protein-folding
 
+
+
 --- run VEP on VKGL data
 
 ssh airlock+gearshift
@@ -121,4 +143,25 @@ finally, use the created files  in Java VKGLProcessIntoProteinChanges.java
 using: VKGL_apr2024_annot_missense_nodup.vcf.zip and protein-atlas-secreted-genenames-mane-uniprot.txt
 to format VKGL variants per gene with headers:
 Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+
+
+
+--- chaperones:
+194 from "The landscape of molecular chaperones across human tissues reveals a layered architecture of core and variable chaperones"
+https://www.nature.com/articles/s41467-021-22369-9#MOESM1
+supl mat https://static-content.springer.com/esm/art%3A10.1038%2Fs41467-021-22369-9/MediaObjects/41467_2021_22369_MOESM3_ESM.xlsx
+
+
+
+--- protein interactions:
+key article
+"A Quantitative Chaperone Interaction Network Reveals the Architecture of Cellular Protein Homeostasis Pathways"
+https://www.sciencedirect.com/science/article/pii/S0092867414007405
+was submitted to BioGRID
+so, lets use BioGRID...
+
+bioGRID
+https://downloads.thebiogrid.org/BioGRID
+BIOGRID-ORGANISM-4.4.234.tab3.zip
+BIOGRID-ORGANISM-Homo_sapiens-4.4.234.tab3.txt
 
