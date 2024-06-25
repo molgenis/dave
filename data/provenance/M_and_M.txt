@@ -53,6 +53,11 @@ filters: MANE select:only, Gene Names: [protein-atlas-intracellular-genenames.ts
 same attrb
 remove lines without uniprot: replace ".+\t\r" by ""
 delete duplicate lines (2)
+also remove dup gene IDs with other uniprots:
+ENST00000289373	TMSB15A	P0DX04
+--> then select 2000 random genes:
+shuf -n 2000 protein-atlas-intracellular-genenames-mane-uniprot.txt > protein-atlas-intracellular-genenames-mane-uniprot-random2000.txt
+and run the Java prog to get all variants etc
 
 
 
