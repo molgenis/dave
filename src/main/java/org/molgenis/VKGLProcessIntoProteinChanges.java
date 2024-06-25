@@ -14,23 +14,25 @@ public class VKGLProcessIntoProteinChanges {
         System.out.println("Starting...");
 
         // input files
-        File secretomeWithMane = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/protein-atlas-secreted-genenames-mane-uniprot.txt");
+        File proteinSetWithMane = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/protein-atlas-secreted-genenames-mane-uniprot.txt");
         String vkglMissenseFileName = "VKGL_apr2024_annot_missense_nodup.vcf";
         File vkglMissenseLocation = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + vkglMissenseFileName + ".zip");
 
         // output files
         File outputBaseDir = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/genes/");
-        File genesWithVariants = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/secreted-genenames-with-variants.txt");
+        File genesWithVariants = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/protein-atlas-secreted-genenames-mane-uniprot-withvariants.txt");
 
         System.out.println("Loading gene/transcript file...");
         HashMap<String, String> geneNameToTranscript = new HashMap<>();
+        HashMap<String, String> geneNameToUniprot = new HashMap<>();
         Set<String> geneNamesWithVariants = new TreeSet<>();
-        Scanner sc = new Scanner(secretomeWithMane);
+        Scanner sc = new Scanner(proteinSetWithMane);
         while (sc.hasNextLine()) {
             String line = sc.nextLine();
             String[] split = line.split("\t", -1);
             String transcript = split[0];
             String geneName = split[1];
+            String uniprot = split[2];
             if (split.length != 3) {
                 throw new Exception("Expected split 3 in line " + line);
             }
@@ -38,6 +40,7 @@ public class VKGLProcessIntoProteinChanges {
                 throw new Exception("Gene name duplicate " + geneName);
             }
             geneNameToTranscript.put(geneName, transcript);
+            geneNameToUniprot.put(geneName, uniprot);
         }
         sc.close();
         System.out.println("...done");
@@ -192,9 +195,9 @@ public class VKGLProcessIntoProteinChanges {
 
         System.out.println("Writing file which genes had >1 variants...");
         PrintWriter writer2 = new PrintWriter(genesWithVariants, "UTF-8");
-        writer2.write("Gene" + System.lineSeparator());
+        writer2.write("Transcript stable ID\tGene name\tUniProtKB/Swiss-Prot ID" + System.lineSeparator());
         for (String geneName : geneNamesWithVariants) {
-            writer2.write(geneName + System.lineSeparator());
+            writer2.write(geneNameToTranscript.get(geneName) + "\t" + geneName + "\t" + geneNameToUniprot.get(geneName) + System.lineSeparator());
         }
         writer2.flush();
         writer2.close();
