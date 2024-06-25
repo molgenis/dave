@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	2	47388889	C	G	CALM2	DA132H	132	LP
+GRCh37	2	47388947	G	C	CALM2	NA112K	112	VUS

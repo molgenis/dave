@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	16	30773902	C	G	RNF40	DA12E	12	LB
+GRCh37	16	30774748	A	G	RNF40	TA104A	104	VUS

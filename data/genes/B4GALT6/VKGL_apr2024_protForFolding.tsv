@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	18	29207017	C	G	B4GALT6	GA282R	282	VUS
+GRCh37	18	29218693	G	A	B4GALT6	HA168Y	168	LB

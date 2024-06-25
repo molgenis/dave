@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	9	22006147	C	T	CDKN2B	DA86N	86	VUS
+GRCh37	9	22008919	C	T	CDKN2B	GA12S	12	LB

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	17	45517841	G	A	EFCAB13	DA895N	895	LB
+GRCh37	17	45517940	A	G	EFCAB13	IA928V	928	LB

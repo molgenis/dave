@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	18	45567084	T	C	ZBTB7C	DA132G	132	LB
+GRCh37	18	45556089	T	C	ZBTB7C	KA468E	468	VUS

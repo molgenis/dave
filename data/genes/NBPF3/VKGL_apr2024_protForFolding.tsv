@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	1	21807427	G	T	NBPF3	MA462I	462	LB
+GRCh37	1	21809836	G	A	NBPF3	RA620K	620	LB

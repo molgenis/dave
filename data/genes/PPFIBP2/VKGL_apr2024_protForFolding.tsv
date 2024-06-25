@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	11	7673029	T	C	PPFIBP2	MA797T	797	LB
+GRCh37	11	7673049	C	G	PPFIBP2	PA804A	804	LB

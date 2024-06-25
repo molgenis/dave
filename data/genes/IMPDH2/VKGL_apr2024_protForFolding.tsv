@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	3	49064190	A	G	IMPDH2	IA250T	250	VUS
+GRCh37	3	49065217	G	A	IMPDH2	RA153C	153	VUS

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	20	376918	G	A	TRIB3	AA221T	221	VUS
+GRCh37	20	376921	T	C	TRIB3	CA222R	222	VUS

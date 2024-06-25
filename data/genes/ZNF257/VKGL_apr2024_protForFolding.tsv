@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	19	22270958	T	C	ZNF257	CA136R	136	LB
+GRCh37	19	22270959	G	A	ZNF257	CA136Y	136	LB

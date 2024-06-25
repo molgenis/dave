@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	4	106613140	T	C	INTS12	KA217R	217	VUS
+GRCh37	4	106607893	T	C	INTS12	KA254E	254	VUS

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	2	158182141	G	A	ERMN	PA5L	5	VUS
+GRCh37	2	158177847	C	A	ERMN	RA264L	264	VUS

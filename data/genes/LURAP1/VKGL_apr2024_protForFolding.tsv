@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	1	46685735	C	T	LURAP1	AA188V	188	VUS
+GRCh37	1	46685716	A	G	LURAP1	RA182G	182	LB

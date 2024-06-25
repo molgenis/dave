@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	11	113614603	G	C	ZW10	RA478G	478	LB
+GRCh37	11	113629336	T	C	ZW10	SA225G	225	VUS

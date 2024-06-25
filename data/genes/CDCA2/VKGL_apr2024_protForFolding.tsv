@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	8	25344792	A	G	CDCA2	HA492R	492	LB
+GRCh37	8	25341506	C	G	CDCA2	PA382R	382	LB

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	19	52942423	T	A	ZNF534	NA570K	570	LB
+GRCh37	19	52934741	A	C	ZNF534	QA5P	5	LB

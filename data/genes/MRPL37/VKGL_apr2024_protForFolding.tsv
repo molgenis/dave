@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	1	54681831	G	C	MRPL37	LA336F	336	VUS
+GRCh37	1	54666074	C	T	MRPL37	PA53L	53	LB

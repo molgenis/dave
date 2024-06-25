@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	22	50217894	G	C	BRD1	HA24Q	24	VUS
+GRCh37	22	50216627	C	A	BRD1	VA447L	447	VUS

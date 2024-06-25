@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	10	135369392	G	A	SYCE1	AA204V	204	VUS
+GRCh37	10	135371369	T	C	SYCE1	RA125G	125	VUS

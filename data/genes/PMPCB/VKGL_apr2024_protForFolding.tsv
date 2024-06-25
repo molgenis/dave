@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	7	102940652	C	A	PMPCB	LA119M	119	VUS
+GRCh37	7	102944316	A	G	PMPCB	QA162R	162	VUS

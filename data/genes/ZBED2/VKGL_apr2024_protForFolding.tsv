@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	3	111312687	C	T	ZBED2	RA121H	121	VUS
+GRCh37	3	111312849	C	T	ZBED2	RA67H	67	LB

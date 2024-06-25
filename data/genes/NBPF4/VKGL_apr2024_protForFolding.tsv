@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	1	108769306	C	T	NBPF4	AA624T	624	LB
+GRCh37	1	108786311	G	A	NBPF4	RA25C	25	LB

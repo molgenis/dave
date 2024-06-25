@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	8	28974511	G	A	KIF13B	AA1225V	1225	VUS
+GRCh37	8	29046043	T	C	KIF13B	YA102C	102	VUS

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	3	44488438	G	T	ZNF445	HA909N	909	VUS
+GRCh37	3	44488439	T	A	ZNF445	RA908S	908	LB

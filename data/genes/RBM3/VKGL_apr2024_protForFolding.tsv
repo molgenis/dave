@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	X	48434943	C	T	RBM3	PA122S	122	LB
+GRCh37	X	48435434	G	A	RBM3	RA145H	145	LB

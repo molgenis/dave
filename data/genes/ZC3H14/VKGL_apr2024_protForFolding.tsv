@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	14	89039313	C	A	ZC3H14	PA275T	275	VUS
+GRCh37	14	89068345	G	A	ZC3H14	VA478I	478	LB

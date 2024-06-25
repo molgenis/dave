@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	9	136199389	T	G	SURF6	NA201H	201	LB
+GRCh37	9	136199412	C	T	SURF6	RA193Q	193	LB

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	19	10528376	T	A	PDE4A	LA30Q	30	VUS
+GRCh37	19	10577771	C	T	PDE4A	TA690M	690	VUS

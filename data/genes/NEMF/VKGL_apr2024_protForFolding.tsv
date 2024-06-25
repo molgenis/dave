@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	14	50251693	G	A	NEMF	HA1035Y	1035	VUS
+GRCh37	14	50251694	C	T	NEMF	MA1034I	1034	VUS

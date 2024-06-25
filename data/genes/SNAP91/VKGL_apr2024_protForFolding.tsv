@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	6	84290192	G	A	SNAP91	SA759L	759	VUS
+GRCh37	6	84269827	G	A	SNAP91	TA876M	876	VUS

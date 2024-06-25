@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	17	4076716	C	T	ANKFY1	GA983S	983	LB
+GRCh37	17	4098747	T	C	ANKFY1	IA375V	375	LB

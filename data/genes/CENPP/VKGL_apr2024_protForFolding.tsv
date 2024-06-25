@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	9	95374837	T	C	CENPP	IA226T	226	VUS
+GRCh37	9	95142080	G	A	CENPP	RA168Q	168	LB

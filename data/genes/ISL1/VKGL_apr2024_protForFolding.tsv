@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	5	50683533	C	G	ISL1	AA143G	143	VUS
+GRCh37	5	50680510	G	A	ISL1	SA55N	55	VUS
