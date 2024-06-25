@@ -1,0 +1,9 @@
+Multiple PDB and/or fragments found for uniprotID P04275 : AF-P04275-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P04275 : AF-P04275-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P04275 : AF-P04275-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P04275 : AF-P04275-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P04275 : AF-P04275-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P04275 : AF-P04275-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P04275 : AF-P04275-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P04275 : AF-P04275-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P04275 : AF-P04275-F9-model_v4.pdb.gz
