@@ -24,7 +24,7 @@ UP000005640_9606_HUMAN_v4Loc <- "D:/UP000005640_9606_HUMAN_v4.tar"
 secretedProteins <- "protein-atlas-secreted-genenames-mane-uniprot-withvariants.txt"
 intracellularProteins <- "protein-atlas-intracellular-genenames-mane-uniprot-random2000-withvariants.txt"
 membraneProteins <- "todo"
-geneListsToProcess <- intracellularProteins
+geneListsToProcess <- secretedProteins
 
 
 ##########################################
@@ -41,6 +41,7 @@ geneToUniprot <- read.table(file=geneToUniprotLoc, sep = '\t',header = TRUE)
 head(geneToUniprot)
 geneNames <- sort(geneToUniprot$Gene.name)
 head(geneNames)
+
 
 ######################################################
 # Iterate over all gene directories, repair and fold #
@@ -144,8 +145,6 @@ for(i in seq_along(geneNames))
 # Gather results #
 ##################
 setwd(dataGenesDir)
-geneNames <- list.files(pattern="*", recursive=FALSE, include.dirs=TRUE)
-head(geneNames)
 results <- data.frame()
 for(i in seq_along(geneNames))
 {
@@ -179,6 +178,15 @@ for(i in seq_along(geneNames))
   }
 }
 
+
+################################################
+# Retrieve genes that interact with chaperones #
+################################################
+chapInteractingGenesLoc <- paste(rootDir, "data", "chaperones", "interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt", sep="/")
+chapInteractingGenes <- read.table(file=chapInteractingGenesLoc, sep = '\t',header = TRUE)
+results$chaparoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name)
+
+
 # some quick checks, replace later
 a <- subset(results, classificationVKGL == "LP")
 b <- subset(results, classificationVKGL == "LB")
@@ -186,11 +194,19 @@ median(a$total.energy)
 median(b$total.energy)
 c <- subset(results, classificationVKGL == "LP" | classificationVKGL == "LB"| classificationVKGL == "VUS"  )
 
+# by clsf
 ggplot(c, aes(x=total.energy, color=classificationVKGL, fill=classificationVKGL)) +
   theme_bw() +
   geom_boxplot(outlier.colour="black", outlier.shape=16, outlier.size=2, notch=T) +
   scale_color_manual(values=c("black", "black", "black")) +
   scale_fill_manual(values=c("green", "red", "grey"))
+
+# by chap
+ggplot(c, aes(x=total.energy, color=chaparoned, fill=chaparoned)) +
+  theme_bw() +
+  geom_boxplot(outlier.colour="black", outlier.shape=16, outlier.size=2, notch=T) +
+  scale_color_manual(values=c("black", "black", "black")) +
+  scale_fill_manual(values=c("yellow", "blue"))
 
 youdenIndex = 5
 tp <- sum(c[c$classificationVKGL=="LP",'total.energy'] >= youdenIndex)

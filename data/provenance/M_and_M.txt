@@ -34,6 +34,7 @@ and protein-atlas-membrane-genenames.tsv
 
 
 -- Gene annotations
+--> we reannotate to match MANE transcripts to their corresponding UniProtID!
 BioMart, Ensembl genes 112, Human genes (GRCh38.p14)
 filters: MANE select:only, Gene Names: [protein-atlas-secreted-genenames.tsv]
 attributes: Gene name, Transcript stable ID, UniProtKB/Swiss-Prot ID
@@ -155,7 +156,19 @@ Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
 194 from "The landscape of molecular chaperones across human tissues reveals a layered architecture of core and variable chaperones"
 https://www.nature.com/articles/s41467-021-22369-9#MOESM1
 supl mat https://static-content.springer.com/esm/art%3A10.1038%2Fs41467-021-22369-9/MediaObjects/41467_2021_22369_MOESM3_ESM.xlsx
-
+--> Ensembl Gene IDs (e.g. ENSG00000170476)
+BioMart, Ensembl genes 112, Human genes (GRCh38.p14)
+Filters: Gene Stable Ids (list of the Ensembl Gene Ids)
+Attributes: attributes: Gene name, UniProtKB/Swiss-Prot ID
+export as TSV, name chaperones-uniprot-genename.txt
+remove lines without UniProt ID: replace ".+\t\t.+\r" with ""
+remote duplicate lines
+remove PPIAL4A (omitted from analysis by original paper)
+missing: AHSA2, DYX1C1, HSPA7
+manual add:
+AHSA2	Q719I0	ENSG00000173209
+HSPA7	P48741	ENSG00000225217
+DNAJB3	Q8WWF6	ENSG00000227802
 
 
 --- protein interactions:
@@ -169,4 +182,12 @@ bioGRID
 https://downloads.thebiogrid.org/BioGRID
 BIOGRID-ORGANISM-4.4.234.tab3.zip
 BIOGRID-ORGANISM-Homo_sapiens-4.4.234.tab3.txt
+--> contains obsolete uniprot IDs, e.g. P08107 should be P0DMV8, though gene symbol matches (HSPA1A)
+--> also obsolete gene symbols, e.g. TOMM70A should be TOMM70, though uniprot match (O94826)
+therefore, match on either of these
+run Chaperones.java
+-> interacting-with-chaperones-uniprot.txt -> into BioMart, map to UniProt to Gene Names, remove duplicates
+-> add to interacting-with-chaperones-genenames.txt, remove duplicates, final result:
+interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt
+
 
