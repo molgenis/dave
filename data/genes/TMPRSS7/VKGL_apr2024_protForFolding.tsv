@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	3	111797598	G	C	TMPRSS7	GA745A	745	LB
+GRCh37	3	111765830	G	A	TMPRSS7	RA234Q	234	LB

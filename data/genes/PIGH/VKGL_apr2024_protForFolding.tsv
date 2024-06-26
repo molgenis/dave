@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	14	68056880	G	C	PIGH	PA162A	162	VUS
+GRCh37	14	68060533	G	A	PIGH	SA106L	106	LB

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	6	109700847	T	C	CD164	NA65S	65	LB
+GRCh37	6	109690073	C	T	CD164	RA192Q	192	LB

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	X	99887525	A	G	TSPAN6	MA209T	209	VUS
+GRCh37	X	99890243	T	C	TSPAN6	MA95V	95	LB

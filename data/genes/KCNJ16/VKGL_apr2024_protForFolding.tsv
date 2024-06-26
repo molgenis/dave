@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	17	68128332	G	A	KCNJ16	RA35Q	35	VUS
+GRCh37	17	68128419	C	T	KCNJ16	TA64I	64	VUS

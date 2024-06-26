@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	17	78195427	G	A	SLC26A11	CA23Y	23	VUS
+GRCh37	17	78222462	G	A	SLC26A11	RA504Q	504	LB

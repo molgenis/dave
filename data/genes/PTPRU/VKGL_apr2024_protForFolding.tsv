@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	1	29641960	G	A	PTPRU	DA1102N	1102	VUS
+GRCh37	1	29652123	T	G	PTPRU	FA1421V	1421	VUS

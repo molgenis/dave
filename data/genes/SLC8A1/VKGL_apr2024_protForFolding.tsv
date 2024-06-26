@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	2	40392088	T	A	SLC8A1	EA692V	692	LB
+GRCh37	2	40655875	A	T	SLC8A1	SA516T	516	LB

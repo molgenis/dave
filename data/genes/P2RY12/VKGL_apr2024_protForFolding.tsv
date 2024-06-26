@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	3	151055862	G	T	P2RY12	PA258T	258	LP
+GRCh37	3	151055966	G	A	P2RY12	TA223M	223	LB

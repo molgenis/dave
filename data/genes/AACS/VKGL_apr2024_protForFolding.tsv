@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	12	125613992	T	G	AACS	FA512C	512	VUS
+GRCh37	12	125591743	A	G	AACS	SA282G	282	LB

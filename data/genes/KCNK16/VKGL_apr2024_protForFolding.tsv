@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	6	39285581	T	G	KCNK16	DA159A	159	VUS
+GRCh37	6	39284597	T	G	KCNK16	IA208L	208	LB

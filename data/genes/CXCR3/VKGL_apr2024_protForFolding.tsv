@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	X	70836763	A	T	CXCR3	FA187I	187	LB
+GRCh37	X	70837226	G	T	CXCR3	NA32K	32	LB

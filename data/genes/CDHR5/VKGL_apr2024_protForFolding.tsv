@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	11	624877	G	C	CDHR5	PA9R	9	LB
+GRCh37	11	624851	C	T	CDHR5	VA18I	18	LB

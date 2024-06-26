@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	1	171303818	G	C	FMO4	AA366P	366	VUS
+GRCh37	1	171303686	G	A	FMO4	DA322N	322	VUS
