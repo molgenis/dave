@@ -1,0 +1,9 @@
+Multiple PDB and/or fragments found for uniprotID Q9NR48 : AF-Q9NR48-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9NR48 : AF-Q9NR48-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9NR48 : AF-Q9NR48-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9NR48 : AF-Q9NR48-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9NR48 : AF-Q9NR48-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9NR48 : AF-Q9NR48-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9NR48 : AF-Q9NR48-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9NR48 : AF-Q9NR48-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9NR48 : AF-Q9NR48-F9-model_v4.pdb.gz

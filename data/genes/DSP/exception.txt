@@ -1,0 +1,9 @@
+Multiple PDB and/or fragments found for uniprotID P15924 : AF-P15924-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15924 : AF-P15924-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15924 : AF-P15924-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15924 : AF-P15924-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15924 : AF-P15924-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15924 : AF-P15924-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15924 : AF-P15924-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15924 : AF-P15924-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15924 : AF-P15924-F9-model_v4.pdb.gz
