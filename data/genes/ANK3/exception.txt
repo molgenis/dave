@@ -1,0 +1,16 @@
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F10-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F11-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F12-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F13-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F14-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F15-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F16-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q12955 : AF-Q12955-F9-model_v4.pdb.gz
