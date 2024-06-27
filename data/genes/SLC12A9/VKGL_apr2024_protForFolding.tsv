@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	7	100463619	C	T	SLC12A9	RA713W	713	VUS
+GRCh37	7	100463839	G	A	SLC12A9	RA786Q	786	LB

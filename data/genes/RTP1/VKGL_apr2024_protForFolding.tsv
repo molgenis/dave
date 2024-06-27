@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	3	186917644	C	A	RTP1	AA193D	193	VUS
+GRCh37	3	186917764	G	T	RTP1	GA233V	233	VUS

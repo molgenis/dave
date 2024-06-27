@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	15	22382480	T	C	OR4N4	IA3T	3	LB
+GRCh37	15	22383318	G	T	OR4N4	MA282I	282	VUS

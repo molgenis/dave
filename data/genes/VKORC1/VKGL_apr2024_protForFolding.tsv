@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	16	31105945	C	A	VKORC1	DA36Y	36	VUS
+GRCh37	16	31104720	C	T	VKORC1	VA66M	66	VUS

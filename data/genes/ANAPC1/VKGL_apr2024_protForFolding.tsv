@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	2	112550054	G	C	ANAPC1	LA1533V	1533	VUS
+GRCh37	2	112588975	G	A	ANAPC1	TA838M	838	LB

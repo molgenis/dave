@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	1	172411433	C	A	PIGC	KA110N	110	LB
+GRCh37	1	172411206	G	C	PIGC	SA186C	186	VUS

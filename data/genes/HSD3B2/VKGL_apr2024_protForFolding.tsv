@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	1	119964624	C	T	HSD3B2	AA167V	167	LB
+GRCh37	1	119962142	G	A	HSD3B2	AA82T	82	LP

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	2	11809867	C	T	NTSR2	SA130N	130	VUS
+GRCh37	2	11798804	G	A	NTSR2	TA345I	345	LB

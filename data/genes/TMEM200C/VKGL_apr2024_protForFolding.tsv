@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	18	5890729	G	A	TMEM200C	AA445V	445	LB
+GRCh37	18	5891809	C	A	TMEM200C	GA85V	85	VUS

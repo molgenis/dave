@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh37	6	86195016	G	A	NT5E	GA272E	272	VUS
+GRCh37	6	86199233	A	G	NT5E	TA376A	376	LB
