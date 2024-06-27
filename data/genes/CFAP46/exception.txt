@@ -1,0 +1,8 @@
+Multiple PDB and/or fragments found for uniprotID Q8IYW2 : AF-Q8IYW2-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q8IYW2 : AF-Q8IYW2-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q8IYW2 : AF-Q8IYW2-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q8IYW2 : AF-Q8IYW2-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q8IYW2 : AF-Q8IYW2-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q8IYW2 : AF-Q8IYW2-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q8IYW2 : AF-Q8IYW2-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q8IYW2 : AF-Q8IYW2-F8-model_v4.pdb.gz
