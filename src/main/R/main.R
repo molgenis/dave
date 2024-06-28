@@ -20,26 +20,26 @@ vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv"
 foldxExec <- "C:/\"Program Files\"/FoldX/foldx_20241231.exe"
 alphaFoldLoc <- "D:/mane_overlap_v4.tar"
 UP000005640_9606_HUMAN_v4Loc <- "D:/UP000005640_9606_HUMAN_v4.tar"
-# Select which lists to work on
-secretedProteins <- "protein-atlas-secreted-genenames-mane-uniprot-withvariants.txt"
-intracellularProteins <- "protein-atlas-intracellular-genenames-mane-uniprot-random2000-withvariants.txt"
-membraneProteins <- "todo"
-geneListsToProcess <- secretedProteins
+# Possible gene lists to work on
+secr <- read.table(file=paste(rootDir, "data", "protein-atlas-secreted-genenames-mane-uniprot-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+intr <- read.table(file=paste(rootDir, "data", "protein-atlas-intracellular-genenames-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+memb <- read.table(file=paste(rootDir, "data", "protein-atlas-membrane-genenames-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+allg <- rbind(secr, intr, memb)
+# Selected gene list to work on
+selectedGenes <- secr
 
 
 ##########################################
 # Derived paths of directories and files #
 ##########################################
 dataGenesDir <- paste(rootDir, "data", "genes", sep="/")
-geneToUniprotLoc <- paste(rootDir, "data", geneListsToProcess, sep="/")
 
 
 #################################################
-# Retrieve mapping of HGNC symbol to UniProt ID #
+# Sort the mapping of HGNC symbol to UniProt ID #
 #################################################
-geneToUniprot <- read.table(file=geneToUniprotLoc, sep = '\t',header = TRUE)
-head(geneToUniprot)
-geneNames <- sort(geneToUniprot$Gene.name)
+head(selectedGenes)
+geneNames <- sort(selectedGenes$Gene.name)
 head(geneNames)
 
 
@@ -58,7 +58,7 @@ for(i in seq_along(geneNames))
     cat("  gene already tried before but failed, continuing...\n")
     next
   }
-  uniProtID <- geneToUniprot$UniProtKB.Swiss.Prot.ID[geneToUniprot$Gene.name==geneName]
+  uniProtID <- selectedGenes$UniProtKB.Swiss.Prot.ID[selectedGenes$Gene.name==geneName]
   # first cleanup repair fxout if present
   file.remove(list.files(specificGeneDir, pattern="*.fxout"))
   file.remove(list.files(specificGeneDir, pattern="molecules", include.dirs=TRUE))
