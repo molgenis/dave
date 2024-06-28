@@ -22,11 +22,14 @@ alphaFoldLoc <- "D:/mane_overlap_v4.tar"
 UP000005640_9606_HUMAN_v4Loc <- "D:/UP000005640_9606_HUMAN_v4.tar"
 # Possible gene lists to work on
 secr <- read.table(file=paste(rootDir, "data", "protein-atlas-secreted-genenames-mane-uniprot-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+secr$protType <- "secreted"
 intr <- read.table(file=paste(rootDir, "data", "protein-atlas-intracellular-genenames-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+intr$protType <- "intracellular"
 memb <- read.table(file=paste(rootDir, "data", "protein-atlas-membrane-genenames-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+memb$protType <- "membrane"
 allg <- rbind(secr, intr, memb)
 # Selected gene list to work on
-selectedGenes <- secr
+selectedGenes <- allg
 
 
 ##########################################
@@ -149,6 +152,7 @@ results <- data.frame()
 for(i in seq_along(geneNames))
 {
   geneName <- geneNames[i]
+  geneInfo <- selectedGenes[selectedGenes$Gene.name==geneName, ]
   cat(paste("Loading data for ", geneName, " (gene ", i, " of ", length(geneNames), ")\n", sep=""))
   specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
   setwd(specificGeneDir)
@@ -174,6 +178,9 @@ for(i in seq_along(geneNames))
     result$gene <- variants[j, "Gene"]
     result$protChange <- variants[j, "ProtChange"]
     result$classificationVKGL <- variants[j, "Classification"]
+    result$transcript <- geneInfo$Transcript.stable.ID
+    result$uniprot <- geneInfo$UniProtKB.Swiss.Prot.ID
+    result$protType <- geneInfo$protType
     results <- rbind(results, result)
   }
 }
@@ -185,7 +192,8 @@ for(i in seq_along(geneNames))
 chapInteractingGenesLoc <- paste(rootDir, "data", "chaperones", "interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt", sep="/")
 chapInteractingGenes <- read.table(file=chapInteractingGenesLoc, sep = '\t',header = TRUE)
 results$chaparoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name)
-
+#alternative way to add annotation? something like
+#result$aaa <- as.factor(selectedGenes[selectedGenes$Gene.name==results$gene, "protType"])
 
 # some quick checks, replace later
 a <- subset(results, classificationVKGL == "LP")
@@ -195,6 +203,7 @@ median(b$total.energy)
 c <- subset(results, classificationVKGL == "LP" | classificationVKGL == "LB"| classificationVKGL == "VUS"  )
 
 # by clsf
+theme_set(theme_classic()) #or theme_bw()
 ggplot(c, aes(x=total.energy, color=classificationVKGL, fill=classificationVKGL)) +
   theme_bw() +
   geom_boxplot(outlier.colour="black", outlier.shape=16, outlier.size=2, notch=T) +
@@ -217,3 +226,6 @@ ppv <- 100 *tp/(tp+fp)
 npv <- 100 *tn/(tn+fn)
 ppv
 npv
+
+ggplot(c, aes(x=protType, y=total.energy, fill=classificationVKGL)) +
+  geom_violin()
