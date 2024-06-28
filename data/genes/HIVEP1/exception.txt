@@ -1,0 +1,8 @@
+Multiple PDB and/or fragments found for uniprotID P15822 : AF-P15822-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15822 : AF-P15822-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15822 : AF-P15822-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15822 : AF-P15822-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15822 : AF-P15822-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15822 : AF-P15822-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15822 : AF-P15822-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P15822 : AF-P15822-F8-model_v4.pdb.gz
