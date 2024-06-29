@@ -5,6 +5,7 @@ library(R.utils)   # for 'gunzip', 'mkdirs'
 library(ggplot2)   # for plotting
 library(Rpdb)      # to load PDB files
 library(dplyr)     # to remove duplicate rows
+library(scales)    # for big values with commas in plots
 
 
 #######################
@@ -170,6 +171,47 @@ for(i in seq_along(geneNames))
   }
 }
 
+###############################
+# Add wild type info for gene #
+###############################
+setwd(dataGenesDir)
+for(i in seq_along(geneNames))
+{
+  geneName <- geneNames[i]
+  specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
+  setwd(specificGeneDir)
+  pdbFile <- list.files(pattern="*_Repair.pdb")
+  if(length(list.files(pattern="wt.txt")) == 0 & length(pdbFile) > 0){
+    vkgl <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE)
+    mutationToCheck <- vkgl[1,]$ProtChange
+    mutationResultsDir <- paste(specificGeneDir, "folding-results", mutationToCheck, sep="/")
+    avgEnergy <- list.files(mutationResultsDir, pattern="Average")
+    if(length(avgEnergy) > 0){
+      cat(paste("Gene", geneName, "has at least 1 successful mutation:", mutationToCheck,"so doing quick refold to get WT DG...\n", sep=" "))
+      tmpDir <- paste(specificGeneDir, "tmp", sep="/")
+      mkdirs(tmpDir)
+      setwd(tmpDir)
+      file.copy(from = paste(specificGeneDir, pdbFile, sep="/"), to = tmpDir)
+      write(paste(mutationToCheck, ";", sep=""), file = "individual_list.txt")
+      state <- system(paste(foldxExec, " --command=BuildModel --mutant-file=individual_list.txt --numberOfRuns=1 --pdb=", pdbFile, sep=""), intern = TRUE)
+      rawEnergy <- list.files(pattern="Raw")
+      rawResult <- read.table(file = rawEnergy, header = TRUE, skip = 8, sep="\t")
+      WTrow <- rawResult[2,]
+      if(grepl("WT_AF-", WTrow$Pdb, fixed=TRUE)){
+        write.csv(WTrow, file = paste(specificGeneDir, "wt.txt", sep="/"), row.names = FALSE, quote = FALSE)
+        file.remove(list.files(pattern="*"), include.dirs=TRUE)
+        setwd(specificGeneDir)
+        file.remove(list.files(pattern="tmp"), include.dirs=TRUE)
+        cat(paste("Done! Added wild type info for gene", geneName, "\n", sep=" "))
+      }else{
+        stop(paste0("Something went wrong with gene ", geneName, ", mutation ", + mutationToCheck))
+      }
+    }
+  }else{
+    cat(paste("No PDB file or wild type info already present for gene", geneName, "\n", sep=" "))
+  }
+}
+
 
 ##################
 # Gather results #
@@ -183,6 +225,19 @@ for(i in seq_along(geneNames))
   cat(paste("Loading data for ", geneName, " (gene ", i, " of ", length(geneNames), ")\n", sep=""))
   specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
   setwd(specificGeneDir)
+  mwDa <- list.files(pattern="mwDa.txt")
+  if(length(mwDa) > 0){
+    geneInfo$mwDa <- read.table(file = mwDa, header = FALSE)$V1
+  }else{
+    geneInfo$mwDa <- NA
+  }
+  wtInfoFile <- list.files(pattern="wt.txt")
+  if(length(wtInfo) > 0){
+    wtInfo <- read.csv(file = wtInfoFile, header = TRUE)
+    geneInfo$wtDG <- wtInfo[1,]$total.energy
+  }else{
+    geneInfo$wtDG <- NA
+  }
   variants <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE)
   foldingResultsDir <- paste(specificGeneDir, "folding-results", sep="/")
   for(j in seq_along(variants))
@@ -208,6 +263,7 @@ for(i in seq_along(geneNames))
     result$transcript <- geneInfo$Transcript.stable.ID
     result$uniprot <- geneInfo$UniProtKB.Swiss.Prot.ID
     result$protType <- geneInfo$protType
+    result$mwDa <- geneInfo$mwDa
     results <- rbind(results, result)
   }
 }
@@ -256,3 +312,9 @@ npv
 
 ggplot(c, aes(x=protType, y=total.energy, fill=classificationVKGL)) +
   geom_violin()
+
+ggplot(c %>% arrange(match(classificationVKGL, c("LB", "VUS", "LP"))), aes(x=mwDa, y=total.energy, color=classificationVKGL)) +
+  theme_classic() +
+  geom_point(size=1) +
+  scale_color_manual(values=c("green", "red", "grey")) +
+  scale_x_continuous(labels = label_comma())
