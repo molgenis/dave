@@ -3,6 +3,8 @@
 ######################
 library(R.utils)   # for 'gunzip', 'mkdirs'
 library(ggplot2)   # for plotting
+library(Rpdb)      # to load PDB files
+library(dplyr)     # to remove duplicate rows
 
 
 #######################
@@ -29,13 +31,14 @@ memb <- read.table(file=paste(rootDir, "data", "protein-atlas-membrane-genenames
 memb$protType <- "membrane"
 allg <- rbind(secr, intr, memb)
 # Selected gene list to work on
-selectedGenes <- allg
+selectedGenes <- secr
 
 
 ##########################################
 # Derived paths of directories and files #
 ##########################################
 dataGenesDir <- paste(rootDir, "data", "genes", sep="/")
+source(paste(rootDir, "src", "main", "R", "addMolWeight.R", sep="/"))
 
 
 #################################################
@@ -140,6 +143,28 @@ for(i in seq_along(geneNames))
     }
      file.remove(repPDB_fileName)
      cat("...done!\n")
+  }
+}
+
+#################################################
+# Add molecular weight in Daltons for each gene #
+#################################################
+setwd(dataGenesDir)
+for(i in seq_along(geneNames))
+{
+  geneName <- geneNames[i]
+  specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
+  setwd(specificGeneDir)
+  pdbFile <- list.files(pattern="*_Repair.pdb")
+  if(length(list.files(mutationDir, pattern="mwDa.txt")) == 0 & length(pdbFile) > 0){
+    x <- read.pdb(pdbFile)
+    #neat: visualize(x, mode = NULL)
+    collapsePDB <- data.frame(resid=x$atoms$resid, resname=x$atoms$resname)
+    collapsePDB <- collapsePDB %>% distinct()
+    collapsePDB <- addMolWeight(collapsePDB)
+    mwDa <- sum(collapsePDB$resDa)
+    cat(paste("Adding a molecular weight of", mwDa, " Da for gene", geneName, sep=" "))
+    write(mwDa, file = "mwDa.txt")
   }
 }
 
