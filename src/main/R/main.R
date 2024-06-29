@@ -206,6 +206,8 @@ for(i in seq_along(geneNames))
       }else{
         stop(paste0("Something went wrong with gene ", geneName, ", mutation ", + mutationToCheck))
       }
+    }else{
+      cat(paste("No average energy file, mutation failed ? Skipping", geneName, "\n", sep=" "))
     }
   }else{
     cat(paste("No PDB file or wild type info already present for gene", geneName, "\n", sep=" "))
