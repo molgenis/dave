@@ -316,7 +316,7 @@ npv
 ggplot(c, aes(x=protType, y=total.energy, fill=classificationVKGL)) +
   geom_violin()
 
-ggplot(c %>% arrange(match(classificationVKGL, c("LB", "VUS", "LP"))), aes(x=mwDa, y=wtDG, color=classificationVKGL)) +
+ggplot(c %>% arrange(match(classificationVKGL, c("LB", "VUS", "LP"))), aes(x=total.energy, y=wtDG, color=classificationVKGL)) +
   theme_classic() +
   geom_point(size=1) +
   scale_color_manual(values=c("green", "red", "grey")) +
