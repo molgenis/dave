@@ -234,7 +234,7 @@ for(i in seq_along(geneNames))
     geneInfo$mwDa <- NA
   }
   wtInfoFile <- list.files(pattern="wt.txt")
-  if(length(wtInfo) > 0){
+  if(length(wtInfoFile) > 0){
     wtInfo <- read.csv(file = wtInfoFile, header = TRUE)
     geneInfo$wtDG <- wtInfo[1,]$total.energy
   }else{
@@ -266,6 +266,7 @@ for(i in seq_along(geneNames))
     result$uniprot <- geneInfo$UniProtKB.Swiss.Prot.ID
     result$protType <- geneInfo$protType
     result$mwDa <- geneInfo$mwDa
+    result$wtDG <- geneInfo$wtDG
     results <- rbind(results, result)
   }
 }
@@ -315,7 +316,7 @@ npv
 ggplot(c, aes(x=protType, y=total.energy, fill=classificationVKGL)) +
   geom_violin()
 
-ggplot(c %>% arrange(match(classificationVKGL, c("LB", "VUS", "LP"))), aes(x=mwDa, y=total.energy, color=classificationVKGL)) +
+ggplot(c %>% arrange(match(classificationVKGL, c("LB", "VUS", "LP"))), aes(x=mwDa, y=wtDG, color=classificationVKGL)) +
   theme_classic() +
   geom_point(size=1) +
   scale_color_manual(values=c("green", "red", "grey")) +
