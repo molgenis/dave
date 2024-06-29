@@ -156,15 +156,17 @@ for(i in seq_along(geneNames))
   specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
   setwd(specificGeneDir)
   pdbFile <- list.files(pattern="*_Repair.pdb")
-  if(length(list.files(mutationDir, pattern="mwDa.txt")) == 0 & length(pdbFile) > 0){
+  if(length(list.files(pattern="mwDa.txt")) == 0 & length(pdbFile) > 0){
     x <- read.pdb(pdbFile)
     #neat: visualize(x, mode = NULL)
     collapsePDB <- data.frame(resid=x$atoms$resid, resname=x$atoms$resname)
     collapsePDB <- collapsePDB %>% distinct()
     collapsePDB <- addMolWeight(collapsePDB)
     mwDa <- sum(collapsePDB$resDa)
-    cat(paste("Adding a molecular weight of", mwDa, " Da for gene", geneName, sep=" "))
+    cat(paste("Adding a molecular weight of", mwDa, "Da for gene", geneName, "\n", sep=" "))
     write(mwDa, file = "mwDa.txt")
+  }else{
+    cat(paste("No PDB file or molecular weight already present for gene", geneName, "\n", sep=" "))
   }
 }
 
