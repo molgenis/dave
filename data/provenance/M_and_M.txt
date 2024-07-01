@@ -190,4 +190,6 @@ run Chaperones.java
 -> add to interacting-with-chaperones-genenames.txt, remove duplicates, final result:
 interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt
 
-
+--- known issues to be fixed
+TP53, multi-AA change blocking analysis: HHA178-179HY
+does this happen more? filter for this and rerun?

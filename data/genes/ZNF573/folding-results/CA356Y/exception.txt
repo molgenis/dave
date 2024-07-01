@@ -1,0 +1,70 @@
+   ********************************************
+   ***                                      ***
+   ***             FoldX 5 (c)            ***
+   ***                                      ***
+   ***     code by the FoldX Consortium     ***
+   ***                                      ***
+   ***     Jesper Borg, Frederic Rousseau   ***
+   ***    Joost Schymkowitz, Luis Serrano   ***
+   ***    Peter Vanhee, Erik Verschueren    ***
+   ***     Lies Baeten, Javier Delgado      ***
+   ***       and Francois Stricher          ***
+   *** and any other of the 9! permutations ***
+   ***   based on an original concept by    ***
+   ***   Raphael Guerois and Luis Serrano   ***
+   ********************************************
+
+1 models read: AF-Q86YE8-F1-model_v4_Repair.pdb
+1 models read: AF-Q86YE8-F1-model_v4_Repair.pdb
+
+BackHbond       =               -348.53
+SideHbond       =               -170.76
+Energy_VdW      =               -647.30
+Electro         =               -4.70
+Energy_SolvP    =               886.59
+Energy_SolvH    =               -817.71
+Energy_vdwclash =               12.19
+energy_torsion  =               8.52
+backbone_vdwclash=              446.52
+Entropy_sidec   =               394.92
+Entropy_mainc   =               996.54
+water bonds     =               0.00
+helix dipole    =               -1.97
+loop_entropy    =               0.00
+cis_bond        =               0.00
+disulfide       =               0.00
+kn electrostatic=               0.00
+partial covalent interactions = 0.00
+Energy_Ionisation =             5.90
+Entropy Complex =               0.00
+-----------------------------------------------------------
+Total          = 				  313.67
+
+
+BackHbond       =               -348.53
+SideHbond       =               -170.76
+Energy_VdW      =               -647.30
+Electro         =               -4.70
+Energy_SolvP    =               886.59
+Energy_SolvH    =               -817.71
+Energy_vdwclash =               12.19
+energy_torsion  =               8.52
+backbone_vdwclash=              446.52
+Entropy_sidec   =               394.92
+Entropy_mainc   =               996.54
+water bonds     =               0.00
+helix dipole    =               -1.97
+loop_entropy    =               0.00
+cis_bond        =               0.00
+disulfide       =               0.00
+kn electrostatic=               0.00
+partial covalent interactions = 0.00
+Energy_Ionisation =             5.90
+Entropy Complex =               0.00
+-----------------------------------------------------------
+Total          = 				  313.67
+
+Starting BuildModel
+Reading CA356Y;
+CA356Y	Specified residue not found.
+no mutations performed.
