@@ -344,8 +344,19 @@ npv
 ggplot(c, aes(x=protType, y=total.energy, fill=classificationVKGL)) +
   geom_violin()
 
-ggplot(c %>% arrange(match(classificationVKGL, c("LB", "VUS", "LP"))), aes(x=total.energy, y=wtDG, color=classificationVKGL)) +
+d <- subset(results, classificationVKGL == "LP" | classificationVKGL == "LB")
+ggplot(d %>% arrange(match(classificationVKGL, c("LB", "LP"))), aes(y=total.energy, x=wtDG, color=classificationVKGL)) +
   theme_classic() +
   geom_point(size=1) +
   scale_color_manual(values=c("green", "red", "grey")) +
-  scale_x_continuous(labels = label_comma())
+  scale_x_continuous(labels = label_comma()) +
+  xlab("Gibbs free energy change of wild-type protein folding (ΔG, in Joules)") +
+  ylab(paste("Difference in Gibbs free energy change between wild-type and variant protein (ΔΔG, in Joules) ", sep=" "))
+  
+ggplot(d %>% arrange(match(classificationVKGL, c("LB", "LP"))), aes(y=total.energy, x=mwDa, color=classificationVKGL)) +
+  theme_classic() +
+  geom_point(size=1) +
+  scale_color_manual(values=c("green", "red", "grey")) +
+  scale_x_continuous(labels = label_comma()) +
+  xlab("Protein molecular weight (in Daltons)") +
+  ylab(paste("Difference in Gibbs free energy change between wild-type and variant protein (ΔΔG, in Joules)", sep=" "))
