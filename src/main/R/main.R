@@ -32,7 +32,7 @@ memb <- read.table(file=paste(rootDir, "data", "protein-atlas-membrane-genenames
 memb$protType <- "membrane"
 allg <- rbind(secr, intr, memb)
 # Selected gene list to work on
-selectedGenes <- secr
+selectedGenes <- allg
 
 
 ##########################################
@@ -280,6 +280,34 @@ chapInteractingGenes <- read.table(file=chapInteractingGenesLoc, sep = '\t',head
 results$chaparoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name)
 #alternative way to add annotation? something like
 #result$aaa <- as.factor(selectedGenes[selectedGenes$Gene.name==results$gene, "protType"])
+
+
+################################################################################
+# Collapse variant-level results into gene-level and make scatterplot
+#######################################################################################
+resGeneColl <- data.frame(gene=results$gene, mwDa=results$mwDa, wtDG=results$wtDG, transcript=results$transcript, uniprot=results$uniprot, protType=results$protType, chaparoned=results$chaparoned)
+resGeneColl <- resGeneColl %>% distinct()
+kruskal.test(wtDG ~ protType, data = resGeneColl)
+kruskal.test(mwDa ~ protType, data = resGeneColl)
+ic <- subset(resGeneColl, protType == "intracellular")
+mb <- subset(resGeneColl, protType == "membrane")
+sc <- subset(resGeneColl, protType == "secreted")
+mean(ic$wtDG)
+mean(mb$wtDG)
+mean(sc$wtDG)
+mean(ic$mwDa)
+mean(mb$mwDa)
+mean(sc$mwDa)
+ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaparoned,label=gene)) +
+  theme_classic() +
+  geom_point() +
+  geom_text(size = 3, hjust=-0.1, vjust=-0.1, check_overlap = TRUE)+
+  scale_shape_manual(values=c(1,3)) +
+  scale_color_manual(values=c("purple", "blue", "black")) +
+  scale_y_continuous(labels = label_comma()) +
+  xlab("Gibbs free energy change to fold wild type protein") +
+  ylab("Protein molecular weight (Daltons)")
+
 
 # some quick checks, replace later
 a <- subset(results, classificationVKGL == "LP")
