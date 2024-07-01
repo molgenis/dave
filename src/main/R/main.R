@@ -305,8 +305,8 @@ ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaparoned,label=g
   scale_shape_manual(values=c(1,3)) +
   scale_color_manual(values=c("purple", "blue", "black")) +
   scale_y_continuous(labels = label_comma()) +
-  xlab("Gibbs free energy change to fold wild type protein") +
-  ylab("Protein molecular weight (Daltons)")
+  xlab("Gibbs free energy change of wild-type protein folding (in Joules)") +
+  ylab("Protein molecular weight (in Daltons)")
 
 
 # some quick checks, replace later
