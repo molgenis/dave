@@ -3,7 +3,7 @@
 ######################
 library(R.utils)   # for 'gunzip', 'mkdirs'
 library(ggplot2)   # for plotting
-library(Rpdb)      # to load PDB files
+#library(Rpdb)      # to load PDB files
 library(dplyr)     # to remove duplicate rows
 library(scales)    # for big values with commas in plots
 
@@ -282,11 +282,20 @@ results$chaparoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name
 #result$aaa <- as.factor(selectedGenes[selectedGenes$Gene.name==results$gene, "protType"])
 
 
+############################################################################################################
+# Write/read data freeze1 based on all secreted and a random selection of membrane and intracellular genes #
+############################################################################################################
+freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
+#write.csv(results, freeze1, row.names = FALSE, quote = FALSE)
+results <- read.csv(freeze1)
+
+
 ################################################################################
 # Collapse variant-level results into gene-level and make scatterplot
 #######################################################################################
 resGeneColl <- data.frame(gene=results$gene, mwDa=results$mwDa, wtDG=results$wtDG, transcript=results$transcript, uniprot=results$uniprot, protType=results$protType, chaparoned=results$chaparoned)
 resGeneColl <- resGeneColl %>% distinct()
+resGeneColl$energyPerKDa <- resGeneColl$wtDG/(resGeneColl$mwDa/1000)
 kruskal.test(wtDG ~ protType, data = resGeneColl)
 kruskal.test(mwDa ~ protType, data = resGeneColl)
 ic <- subset(resGeneColl, protType == "intracellular")
@@ -305,7 +314,7 @@ ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaparoned,label=g
   scale_shape_manual(values=c(1,3)) +
   scale_color_manual(values=c("purple", "blue", "black")) +
   scale_y_continuous(labels = label_comma()) +
-  xlab("Gibbs free energy change of wild-type protein folding (in Joules)") +
+  xlab("Gibbs free energy change of wild-type protein folding (in kcal/mol)") +
   ylab("Protein molecular weight (in Daltons)")
 
 
@@ -350,8 +359,8 @@ ggplot(d %>% arrange(match(classificationVKGL, c("LB", "LP"))), aes(y=total.ener
   geom_point(size=1) +
   scale_color_manual(values=c("green", "red", "grey")) +
   scale_x_continuous(labels = label_comma()) +
-  xlab("Gibbs free energy change of wild-type protein folding (ΔG, in Joules)") +
-  ylab(paste("Difference in Gibbs free energy change between wild-type and variant protein (ΔΔG, in Joules) ", sep=" "))
+  xlab("Gibbs free energy change of wild-type protein folding (ΔG, in kcal/mol)") +
+  ylab(paste("Difference in Gibbs free energy change between wild-type and variant protein (ΔΔG, in kcal/mol) ", sep=" "))
   
 ggplot(d %>% arrange(match(classificationVKGL, c("LB", "LP"))), aes(y=total.energy, x=mwDa, color=classificationVKGL)) +
   theme_classic() +
@@ -359,4 +368,4 @@ ggplot(d %>% arrange(match(classificationVKGL, c("LB", "LP"))), aes(y=total.ener
   scale_color_manual(values=c("green", "red", "grey")) +
   scale_x_continuous(labels = label_comma()) +
   xlab("Protein molecular weight (in Daltons)") +
-  ylab(paste("Difference in Gibbs free energy change between wild-type and variant protein (ΔΔG, in Joules)", sep=" "))
+  ylab(paste("Difference in Gibbs free energy change between wild-type and variant protein (ΔΔG, in kcal/mol)", sep=" "))
