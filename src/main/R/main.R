@@ -3,7 +3,7 @@
 ######################
 library(R.utils)   # for 'gunzip', 'mkdirs'
 library(ggplot2)   # for plotting
-#library(Rpdb)      # to load PDB files
+library(Rpdb)      # to load PDB files
 library(dplyr)     # to remove duplicate rows
 library(scales)    # for big values with commas in plots
 
@@ -277,7 +277,7 @@ for(i in seq_along(geneNames))
 ################################################
 chapInteractingGenesLoc <- paste(rootDir, "data", "chaperones", "interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt", sep="/")
 chapInteractingGenes <- read.table(file=chapInteractingGenesLoc, sep = '\t',header = TRUE)
-results$chaparoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name)
+results$chaperoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name)
 #alternative way to add annotation? something like
 #result$aaa <- as.factor(selectedGenes[selectedGenes$Gene.name==results$gene, "protType"])
 
