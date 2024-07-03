@@ -1,19 +1,98 @@
 library(ggplot2)   # for plotting
 library(ggpubr)    # for boxplots with pvalues
+library(ggbeeswarm)# for adding dots to plots
 library(dplyr)     # to remove duplicate rows
 library(scales)    # for big values with commas in plots
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
 results <- read.csv(freeze1)
+imgDir <- paste(rootDir, "img", sep="/")
+setwd(imgDir)
 
 
-################################################################################
-# Collapse variant-level results into gene-level and make scatterplot
-#######################################################################################
+##################################################
+# Collapse variant-level results into gene-level #
+##################################################
 resGeneColl <- data.frame(gene=results$gene, mwDa=results$mwDa, wtDG=results$wtDG, transcript=results$transcript, uniprot=results$uniprot, protType=results$protType, chaperoned=results$chaperoned)
 resGeneColl <- resGeneColl %>% distinct()
 resGeneColl$energyPerKDa <- resGeneColl$wtDG/(resGeneColl$mwDa/1000)
+
+#############################################################################
+# Colorblind palette, see https://derekogle.com/NCGraphing/resources/colors #
+#############################################################################
+LBe <- "#009E73"; VUS <- "#999999"; LPa <- "#D55E00"
+sec <- "#E69F00"; int <- "#56B4E9"; mem <- "#CC79A7"
+ex1 <- "#F0E442"; ex2 <- "#0072B2"; ex3 <- "#000000"
+
+
+####################################################
+# Difference in mass between protein localizations #
+####################################################
+compare <- list( c("intracellular", "membrane"), c("intracellular", "secreted"), c("secreted", "membrane") )
+ggviolin(resGeneColl, x = "protType", y = "mwDa", color = "protType", fill= "protType")+ 
+  geom_quasirandom(size=0.5)+
+  scale_fill_manual(values = c(sec, mem, int)) +
+  stat_kruskal_test(label.y = 470000, label = "Kruskal-Wallis p = {p} {p.signif}") +
+  geom_pwc(method = "wilcox_test", label = "Wilcoxon adj. p = {p.adj} {p.adj.signif}") +
+  scale_x_discrete(name="Protein localization", labels=c(
+    paste0("Secreted",
+           "\nmedian = ", prettyNum(median(resGeneColl[which(resGeneColl$protType=="secreted"),]$mwDa), big.mark = ","),
+           "\nmean = ", prettyNum(round(mean(resGeneColl[which(resGeneColl$protType=="secreted"),]$mwDa)), big.mark = ",")
+    ),
+    paste0("Membrane",
+           "\nmedian = ", prettyNum(median(resGeneColl[which(resGeneColl$protType=="membrane"),]$mwDa), big.mark = ","),
+           "\nmean = ", prettyNum(round(mean(resGeneColl[which(resGeneColl$protType=="membrane"),]$mwDa)), big.mark = ",")
+    ),
+    paste0("Intracellular",
+           "\nmedian = ", prettyNum(median(resGeneColl[which(resGeneColl$protType=="intracellular"),]$mwDa), big.mark = ","),
+           "\nmean = ", prettyNum(round(mean(resGeneColl[which(resGeneColl$protType=="intracellular"),]$mwDa)), big.mark = ",")
+    )
+  ))+
+  scale_color_manual(values=c(sec, mem, int)) +
+  theme(axis.text=element_text(size=10)) +
+  scale_y_continuous(labels = label_comma()) +
+  ylab("Protein molecular mass (in Daltons)") +
+  theme(legend.position = "none")
+ggsave("mwDa_difference_test.png", width = 8, height = 4.5)
+
+
+########################################################################
+# Difference in wild-type folding energy between protein localizations #
+########################################################################
+ggviolin(resGeneColl, x = "protType", y = "wtDG", color = "protType", fill= "protType")+ 
+  geom_quasirandom(size=0.01, width=0.23)+
+  scale_fill_manual(values = c(sec, mem, int)) +
+  stat_kruskal_test(label.y = 7950, label = "Kruskal-Wallis p = {p} {p.signif}") +
+  geom_pwc(method = "wilcox_test", label = "Wilcoxon adj. p = {p.adj} {p.adj.signif}") +
+  scale_x_discrete(name="Protein localization", labels=c(
+    paste0("Secreted",
+           "\nmedian = ", round(median(resGeneColl[which(resGeneColl$protType=="secreted"),]$wtDG),2),
+           "\nmean = ", round(mean(resGeneColl[which(resGeneColl$protType=="secreted"),]$wtDG),2)
+          ),
+    paste0("Membrane",
+          "\nmedian = ", round(median(resGeneColl[which(resGeneColl$protType=="membrane"),]$wtDG),2),
+          "\nmean = ", round(mean(resGeneColl[which(resGeneColl$protType=="membrane"),]$wtDG),2)
+          ),
+    paste0("Intracellular",
+          "\nmedian = ", round(median(resGeneColl[which(resGeneColl$protType=="intracellular"),]$wtDG),2),
+          "\nmean = ", round(mean(resGeneColl[which(resGeneColl$protType=="intracellular"),]$wtDG),2)
+          )
+    ))+
+  scale_color_manual(values=c(sec, mem, int)) +
+  theme(axis.text=element_text(size=10)) +
+  scale_y_continuous(labels = label_comma()) +
+  ylab("Gibbs free energy change of wild-type\nprotein folding (in kcal/mol)") +
+  theme(legend.position = "none")
+ggsave("wtDG_difference_test.png", width = 8, height = 4.5)
+
+
+
+
+
+
+
+
 kruskal.test(wtDG ~ protType, data = resGeneColl)
 kruskal.test(mwDa ~ protType, data = resGeneColl)
 ic <- subset(resGeneColl, protType == "intracellular")
@@ -39,11 +118,7 @@ ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaperoned,label=g
 
 
 # Boxplot to gene groups - WORKS - keep as reference for now...
-my_comparisons <- list( c("intracellular", "membrane"), c("intracellular", "secreted"), c("secreted", "membrane") )
-ggboxplot(resGeneColl, x = "protType", y = "mwDa", color = "protType")+ 
-  scale_color_manual(values=c("purple", "blue", "black")) +
-  stat_compare_means(comparisons = my_comparisons)+ # Add pairwise comparisons p-value
-  stat_compare_means(label.y = 6000)     # Add global p-value
+
 
 my_comparisons <- list( c("intracellular", "membrane"), c("intracellular", "secreted"), c("secreted", "membrane") )
 ggboxplot(resGeneColl, x = "protType", y = "wtDG", color = "protType")+ 
