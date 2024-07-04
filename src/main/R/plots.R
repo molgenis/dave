@@ -4,6 +4,10 @@ library(ggbeeswarm)# for adding dots to plots
 library(dplyr)     # to remove duplicate rows
 library(scales)    # for big values with commas in plots
 
+
+##################################
+# Directories and data locations #
+##################################
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
 results <- read.csv(freeze1)
@@ -18,12 +22,13 @@ resGeneColl <- data.frame(gene=results$gene, mwDa=results$mwDa, wtDG=results$wtD
 resGeneColl <- resGeneColl %>% distinct()
 resGeneColl$energyPerKDa <- resGeneColl$wtDG/(resGeneColl$mwDa/1000)
 
+
 #############################################################################
 # Colorblind palette, see https://derekogle.com/NCGraphing/resources/colors #
 #############################################################################
 LBe <- "#009E73"; VUS <- "#999999"; LPa <- "#D55E00"
 sec <- "#E69F00"; int <- "#56B4E9"; mem <- "#CC79A7"
-ex1 <- "#F0E442"; ex2 <- "#0072B2"; ex3 <- "#000000"
+chp <- "#F0E442"; unc <- "#0072B2"; blk <- "#000000"
 
 
 ####################################################
@@ -54,7 +59,7 @@ ggviolin(resGeneColl, x = "protType", y = "mwDa", color = "protType", fill= "pro
   scale_y_continuous(labels = label_comma()) +
   ylab("Protein molecular mass (in Daltons)") +
   theme(legend.position = "none")
-ggsave("mwDa_difference_test.png", width = 8, height = 4.5)
+ggsave("localization_mwDa_difference_test.png", width = 8, height = 4.5)
 
 
 ########################################################################
@@ -84,35 +89,113 @@ ggviolin(resGeneColl, x = "protType", y = "wtDG", color = "protType", fill= "pro
   scale_y_continuous(labels = label_comma()) +
   ylab("Gibbs free energy change of wild-type\nprotein folding (in kcal/mol)") +
   theme(legend.position = "none")
-ggsave("wtDG_difference_test.png", width = 8, height = 4.5)
+ggsave("localization_wtDG_difference_test.png", width = 8, height = 4.5)
 
 
+###################################################
+# Mass difference in chaperoned vs non-chaperoned #
+###################################################
+ggviolin(resGeneColl, x = "chaperoned", y = "mwDa", color = "chaperoned", fill= "chaperoned")+ 
+  geom_quasirandom(size=0.1)+
+  scale_fill_manual(values = c(chp, unc)) +
+  stat_kruskal_test(label.y = 390000, label = "Kruskal-Wallis p = {p} {p.signif}") +
+  scale_x_discrete(name="Protein interacts with one or more 194 known chaperone proteins", labels=c(
+    paste0("Yes",
+           "\nmedian = ", round(median(resGeneColl[which(resGeneColl$chaperoned==TRUE),]$wtDG),2),
+           "\nmean = ", round(mean(resGeneColl[which(resGeneColl$chaperoned==TRUE),]$wtDG),2)
+    ),
+    paste0("No",
+           "\nmedian = ", round(median(resGeneColl[which(resGeneColl$chaperoned==FALSE),]$wtDG),2),
+           "\nmean = ", round(mean(resGeneColl[which(resGeneColl$chaperoned==FALSE),]$wtDG),2)
+    )
+  ))+
+  scale_color_manual(values=c(chp, unc)) +
+  theme(axis.text=element_text(size=10)) +
+  scale_y_continuous(labels = label_comma()) +
+  ylab("Protein molecular mass (in Daltons)") +
+  theme(legend.position = "none")
+ggsave("chaperoned_mwDa_difference_test.png", width = 8, height = 4.5)
 
 
+#######################################################################
+# Wild-type folding energy difference in chaperoned vs non-chaperoned #
+#######################################################################
+ggviolin(resGeneColl, x = "chaperoned", y = "wtDG", color = "chaperoned", fill= "chaperoned")+ 
+  geom_quasirandom(size=0.1)+
+  scale_fill_manual(values = c(chp, unc)) +
+  stat_kruskal_test(label.y = 6300, label = "Kruskal-Wallis p = {p} {p.signif}") +
+  scale_x_discrete(name="Protein interacts with one or more 194 known chaperone proteins", labels=c(
+    paste0("Yes",
+           "\nmedian = ", round(median(resGeneColl[which(resGeneColl$chaperoned==TRUE),]$wtDG),2),
+           "\nmean = ", round(mean(resGeneColl[which(resGeneColl$chaperoned==TRUE),]$wtDG),2)
+    ),
+    paste0("No",
+           "\nmedian = ", round(median(resGeneColl[which(resGeneColl$chaperoned==FALSE),]$wtDG),2),
+           "\nmean = ", round(mean(resGeneColl[which(resGeneColl$chaperoned==FALSE),]$wtDG),2)
+    )
+  ))+
+  scale_color_manual(values=c(chp, unc)) +
+  theme(axis.text=element_text(size=10)) +
+  scale_y_continuous(labels = label_comma()) +
+  ylab("Gibbs free energy change of wild-type\nprotein folding (in kcal/mol)") +
+  theme(legend.position = "none")
+ggsave("chaperoned_wtDG_difference_test.png", width = 8, height = 4.5)
 
 
-
-
-kruskal.test(wtDG ~ protType, data = resGeneColl)
-kruskal.test(mwDa ~ protType, data = resGeneColl)
-ic <- subset(resGeneColl, protType == "intracellular")
-mb <- subset(resGeneColl, protType == "membrane")
-sc <- subset(resGeneColl, protType == "secreted")
-mean(ic$wtDG)
-mean(mb$wtDG)
-mean(sc$wtDG)
-mean(ic$mwDa)
-mean(mb$mwDa)
-mean(sc$mwDa)
-ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaperoned,label=gene)) +
+######################################################################
+# Wild-type folding energy vs. mass with localization and chaperoned #
+######################################################################
+ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaperoned, label=gene)) +
   theme_classic() +
   geom_point() +
-  geom_text(size = 3, hjust=-0.1, vjust=-0.1, check_overlap = TRUE)+
-  scale_shape_manual(values=c(1,3)) +
-  scale_color_manual(values=c("purple", "blue", "black")) +
+  geom_text(size = 2, hjust=-0.1, vjust=-0.3, check_overlap = TRUE)+
+  scale_shape_manual(name="Chaperoned", values=c(1,3), labels=c("No", "Yes")) +
+  scale_color_manual(name="Protein localization", labels=c("Intracellular", "Membrane", "Secreted"), values=c(int, mem, sec)) +
   scale_y_continuous(labels = label_comma()) +
+  scale_x_continuous(labels = label_comma()) +
   xlab("Gibbs free energy change of wild-type protein folding (in kcal/mol)") +
   ylab("Protein molecular weight (in Daltons)")
+ggsave("wtDG_vs_mwDa_scatterplot.png", width = 8, height = 4.5)
+
+
+
+
+
+#####
+# TEST: chap + localiz vs wtDG
+#####
+resGeneColl$cat <- paste0(resGeneColl$protType,"-",resGeneColl$chaperoned);
+ggviolin(resGeneColl, x = "protType", y = "wtDG", color = "chaperoned", fill="protType") + 
+  geom_pwc(method = "wilcox_test", aes(group = chaperoned), label = "Wilcoxon adj. p = {p.adj} {p.adj.signif}")
+ # scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+ggsave("localization_chaperoned_wtDG_difference_test.png", width = 8, height = 4.5)
+
+
+#####
+# TEST: chap + localiz vs mwDa
+#####
+resGeneColl$cat <- paste0(resGeneColl$protType,"-",resGeneColl$chaperoned);
+ggviolin(resGeneColl, x = "protType", y = "mwDa", color = "chaperoned", fill="protType") + 
+  geom_pwc(method = "wilcox_test", aes(group = chaperoned), label = "Wilcoxon adj. p = {p.adj} {p.adj.signif}")
+# scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+ggsave("localization_chaperoned_mwDa_difference_test.png", width = 8, height = 4.5)
+
+
+
+
+
+
+
+
+###
+# by clsf
+#####
+resultsNoCF <- subset(results, classificationVKGL != "CF")
+ggplot(resultsNoCF, aes(x=total.energy, color=classificationVKGL, fill=classificationVKGL)) +
+  theme_classic() +
+  geom_boxplot(outlier.colour="black", outlier.shape=16, outlier.size=2, notch=T) +
+  scale_color_manual(values=c("black", "black", "black")) +
+  scale_fill_manual(values=c(LBe, LPa, VUS))
 
 
 
@@ -136,13 +219,7 @@ median(a$total.energy)
 median(b$total.energy)
 c <- subset(results, classificationVKGL == "LP" | classificationVKGL == "LB"| classificationVKGL == "VUS"  )
 
-# by clsf
-theme_set(theme_classic()) #or theme_bw()
-ggplot(c, aes(x=total.energy, color=classificationVKGL, fill=classificationVKGL)) +
-  theme_bw() +
-  geom_boxplot(outlier.colour="black", outlier.shape=16, outlier.size=2, notch=T) +
-  scale_color_manual(values=c("black", "black", "black")) +
-  scale_fill_manual(values=c("green", "red", "grey"))
+
 
 # by chap
 ggplot(c, aes(x=total.energy, color=chaperoned, fill=chaperoned)) +
