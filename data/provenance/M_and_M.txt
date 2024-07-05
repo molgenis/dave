@@ -192,4 +192,5 @@ interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt
 
 --- known issues to be fixed
 TP53, multi-AA change blocking analysis: HHA178-179HY
+also DSG2: NVA287-288NI, TRPM4:CCA758-759WG
 does this happen more? filter for this and rerun?
