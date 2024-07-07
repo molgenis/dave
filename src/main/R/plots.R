@@ -116,16 +116,16 @@ stats
 ####################################################
 # Panel of things
 ####################################################
-axisTextSize <- 6
-axisTitleSize <- 8
-titleSize <- 10
+axisTextSize <- 7
+axisTitleSize <- 9
+titleSize <- 9
 memb_intr_unc <- rbind(memb_unc, intr_unc)
 p1 <- ggplot(data = memb_intr_unc, aes(x = protType, y = wtDG, fill = protType)) +
   theme_classic() +
   geom_violin() +
   ggtitle(paste0("Adj. p-value = ", format.pval(stats[1,]$adjPvalue, 3), " ", stats[1,]$adjPstars)) +
   scale_fill_manual(values = c("intracellular" = int, "membrane" = mem)) +
-  scale_x_discrete(name="Unchaperoned protein localization", labels=c(
+  scale_x_discrete(name="Protein localization, unchaperoned", labels=c(
   "membrane" = paste0("Membrane",
          "\nmedian = ", prettyNum(median(memb_intr_unc[which(memb_intr_unc$protType=="membrane"),]$mwDa), big.mark = ","),
          "\nmean = ", prettyNum(round(mean(memb_intr_unc[which(memb_intr_unc$protType=="membrane"),]$mwDa)), big.mark = ",")
@@ -182,7 +182,7 @@ p4 <- ggplot(data = secr_memb_chp, aes(x = protType, y = mwDa, fill = protType))
   geom_violin() +
   ggtitle(paste0("Adj. p-value = ", format.pval(stats[4,]$adjPvalue, 3), " ", stats[4,]$adjPstars)) +
   scale_fill_manual(values = c("secreted" = sec, "membrane" = mem)) +
-  scale_x_discrete(name="Chaperoned protein localization", labels=c(
+  scale_x_discrete(name="Protein localization, chaperoned", labels=c(
     "membrane" = paste0("Membrane",
                       "\nmedian = ", prettyNum(median(secr_memb_chp[which(secr_memb_chp$protType=="membrane"),]$mwDa), big.mark = ","),
                       "\nmean = ", prettyNum(round(mean(secr_memb_chp[which(secr_memb_chp$protType=="membrane"),]$mwDa)), big.mark = ",")
@@ -220,7 +220,7 @@ p6 <- ggplot(data = secr_intr_unc, aes(x = protType, y = wtDG, fill = protType))
   geom_violin() +
   ggtitle(paste0("Adj. p-value = ", format.pval(stats[6,]$adjPvalue, 3), " ", stats[6,]$adjPstars)) +
   scale_fill_manual(values = c("secreted" = sec, "intracellular" = int)) +
-  scale_x_discrete(name="Unchaperoned protein localization", labels=c(
+  scale_x_discrete(name="Protein localization, unchaperoned", labels=c(
     "intracellular" = paste0("Intracellular",
                              "\nmedian = ", prettyNum(median(secr_intr_unc[which(secr_intr_unc$protType=="intracellular"),]$wtDG), big.mark = ","),
                              "\nmean = ", prettyNum(round(mean(secr_intr_unc[which(secr_intr_unc$protType=="intracellular"),]$wtDG)), big.mark = ",")
@@ -231,12 +231,12 @@ p6 <- ggplot(data = secr_intr_unc, aes(x = protType, y = wtDG, fill = protType))
     )))+
   theme(axis.text=element_text(size=axisTextSize, color="black"), axis.title=element_text(size=axisTitleSize), plot.title = element_text(size = titleSize), legend.position = "none") +
   scale_y_continuous(labels = label_comma()) +
-  ylab("Mass")
+  ylab("Wild-type ΔG")
 
 
 patchwork <- (p1 + p2 + p3) / (p4 + p5 + p6)
 patchwork + plot_annotation(tag_levels = 'A', 
-                            title = 'title',
+                            title = 'Top 6 most significant differences in protein properties',
                             subtitle = 'Axis labels: \'Mass\' = protein molecular mass in Daltons. \'Wild-type ΔG\' = Gibbs free energy change of wild-type protein folding in kcal/mol.',
                             theme = theme(plot.subtitle = element_text(size = 8)))
 ggsave("patchwork.png", width = 8, height = 4.5)
