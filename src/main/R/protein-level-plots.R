@@ -53,12 +53,18 @@ ggsave("protein_wtDG_vs_mwDa_scatterplot.png", width = 8, height = 4.5)
 # Groupwise comparisons with significance #
 ###########################################
 secr_all <- subset(resGeneColl, protType == "secreted")
+memb_all <- subset(resGeneColl, protType == "membrane")
+intr_all <- subset(resGeneColl, protType == "intracellular")
+
+chap_all <- subset(resGeneColl, chaperoned == TRUE)
+uncp_all <- subset(resGeneColl, chaperoned == FALSE)
+
 secr_chp <- subset(secr_all, chaperoned == TRUE)
 secr_unc <- subset(secr_all, chaperoned == FALSE)
-memb_all <- subset(resGeneColl, protType == "membrane")
+
 memb_chp <- subset(memb_all, chaperoned == TRUE)
 memb_unc <- subset(memb_all, chaperoned == FALSE)
-intr_all <- subset(resGeneColl, protType == "intracellular")
+
 intr_chp <- subset(intr_all, chaperoned == TRUE)
 intr_unc <- subset(intr_all, chaperoned == FALSE)
 
@@ -68,6 +74,9 @@ secr_all_mwDa_VS_intr_all_mwDa <- wilcox.test(secr_all$mwDa, intr_all$mwDa)
 secr_all_wtDG_VS_intr_all_wtDG <- wilcox.test(secr_all$wtDG, intr_all$wtDG)
 memb_all_mwDa_VS_intr_all_mwDa <- wilcox.test(memb_all$mwDa, intr_all$mwDa)
 memb_all_wtDG_VS_intr_all_wtDG <- wilcox.test(memb_all$wtDG, intr_all$wtDG)
+
+chap_all_wtDG_VS_uncp_all_wtWG <- wilcox.test(chap_all$wtDG, uncp_all$wtDG)
+chap_all_mwDa_VS_uncp_all_mwDa <- wilcox.test(chap_all$mwDa, uncp_all$mwDa)
 
 secr_chp_mwDa_VS_memb_chp_mwDa <- wilcox.test(secr_chp$mwDa, memb_chp$mwDa)
 secr_unc_mwDa_VS_memb_unc_mwDa <- wilcox.test(secr_unc$mwDa, memb_unc$mwDa)
@@ -91,6 +100,9 @@ stats <- rbind(stats, data.frame(Comparison="Secreted vs intracellular", Variabl
 stats <- rbind(stats, data.frame(Comparison="Secreted vs intracellular", Variable="Folding energy", pValue=secr_all_wtDG_VS_intr_all_wtDG$p.value, pStars=stars.pval(secr_all_wtDG_VS_intr_all_wtDG$p.value)))
 stats <- rbind(stats, data.frame(Comparison="Membrane vs intracellular", Variable="Molecular mass", pValue=memb_all_mwDa_VS_intr_all_mwDa$p.value, pStars=stars.pval(memb_all_mwDa_VS_intr_all_mwDa$p.value)))
 stats <- rbind(stats, data.frame(Comparison="Membrane vs intracellular", Variable="Folding energy", pValue=memb_all_wtDG_VS_intr_all_wtDG$p.value, pStars=stars.pval(memb_all_wtDG_VS_intr_all_wtDG$p.value)))
+
+stats <- rbind(stats, data.frame(Comparison="Chaperoned vs unchaperoned", Variable="Molecular mass", pValue=chap_all_wtDG_VS_uncp_all_wtWG$p.value, pStars=stars.pval(chap_all_wtDG_VS_uncp_all_wtWG$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Chaperoned vs unchaperoned", Variable="Folding energy", pValue=chap_all_mwDa_VS_uncp_all_mwDa$p.value, pStars=stars.pval(chap_all_mwDa_VS_uncp_all_mwDa$p.value)))
 
 stats <- rbind(stats, data.frame(Comparison="Secreted chaperoned vs membrane chaperoned", Variable="Molecular mass", pValue=secr_chp_mwDa_VS_memb_chp_mwDa$p.value, pStars=stars.pval(secr_chp_mwDa_VS_memb_chp_mwDa$p.value)))
 stats <- rbind(stats, data.frame(Comparison="Secreted unchaperoned vs membrane unchaperoned", Variable="Molecular mass", pValue=secr_unc_mwDa_VS_memb_unc_mwDa$p.value, pStars=stars.pval(secr_unc_mwDa_VS_memb_unc_mwDa$p.value)))
