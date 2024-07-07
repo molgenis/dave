@@ -233,7 +233,6 @@ p6 <- ggplot(data = secr_intr_unc, aes(x = protType, y = wtDG, fill = protType))
   scale_y_continuous(labels = label_comma()) +
   ylab("Wild-type ΔG")
 
-
 patchwork <- (p1 + p2 + p3) / (p4 + p5 + p6)
 patchwork + plot_annotation(tag_levels = 'A', 
                             title = 'Top 6 most significant differences in protein properties',
