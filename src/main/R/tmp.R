@@ -110,20 +110,6 @@ ggviolin(resGeneColl, x = "chaperoned", y = "wtDG", color = "chaperoned", fill= 
 ggsave("chaperoned_wtDG_difference_test.png", width = 8, height = 4.5)
 
 
-######################################################################
-# Wild-type folding energy vs. mass with localization and chaperoned #
-######################################################################
-ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaperoned, label=gene)) +
-  theme_classic() +
-  geom_point() +
-  geom_text(size = 2, hjust=-0.1, vjust=-0.3, check_overlap = TRUE)+
-  scale_shape_manual(name="Chaperoned", values=c(1,3), labels=c("No", "Yes")) +
-  scale_color_manual(name="Protein localization", labels=c("Intracellular", "Membrane", "Secreted"), values=c(int, mem, sec)) +
-  scale_y_continuous(labels = label_comma()) +
-  scale_x_continuous(labels = label_comma()) +
-  xlab("Gibbs free energy change of wild-type protein folding (in kcal/mol)") +
-  ylab("Protein molecular weight (in Daltons)")
-ggsave("wtDG_vs_mwDa_scatterplot.png", width = 8, height = 4.5)
 
 
 
