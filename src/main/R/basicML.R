@@ -17,3 +17,6 @@ rf
 
 pred <- predict(rf, test)
 confusionMatrix(pred, test$classificationVKGL)
+
+# PCA?
+# affinity-prop clustering?

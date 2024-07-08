@@ -104,20 +104,20 @@ stats <- rbind(stats, data.frame(Comparison="Membrane vs intracellular", Variabl
 stats <- rbind(stats, data.frame(Comparison="Chaperoned vs unchaperoned", Variable="Molecular mass", pValue=chap_all_wtDG_VS_uncp_all_wtWG$p.value, pStars=stars.pval(chap_all_wtDG_VS_uncp_all_wtWG$p.value)))
 stats <- rbind(stats, data.frame(Comparison="Chaperoned vs unchaperoned", Variable="Folding energy", pValue=chap_all_mwDa_VS_uncp_all_mwDa$p.value, pStars=stars.pval(chap_all_mwDa_VS_uncp_all_mwDa$p.value)))
 
-stats <- rbind(stats, data.frame(Comparison="Secreted chaperoned vs membrane chaperoned", Variable="Molecular mass", pValue=secr_chp_mwDa_VS_memb_chp_mwDa$p.value, pStars=stars.pval(secr_chp_mwDa_VS_memb_chp_mwDa$p.value)))
-stats <- rbind(stats, data.frame(Comparison="Secreted unchaperoned vs membrane unchaperoned", Variable="Molecular mass", pValue=secr_unc_mwDa_VS_memb_unc_mwDa$p.value, pStars=stars.pval(secr_unc_mwDa_VS_memb_unc_mwDa$p.value)))
-stats <- rbind(stats, data.frame(Comparison="Secreted chaperoned vs membrane chaperoned", Variable="Folding energy", pValue=secr_chp_wtDG_VS_memb_chp_wtDG$p.value, pStars=stars.pval(secr_chp_wtDG_VS_memb_chp_wtDG$p.value)))
-stats <- rbind(stats, data.frame(Comparison="Secreted unchaperoned vs membrane unchaperoned", Variable="Folding energy", pValue=secr_unc_wtDG_VS_memb_unc_wtDG$p.value, pStars=stars.pval(secr_unc_wtDG_VS_memb_unc_wtDG$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Chaperoned, secreted  vs membrane", Variable="Molecular mass", pValue=secr_chp_mwDa_VS_memb_chp_mwDa$p.value, pStars=stars.pval(secr_chp_mwDa_VS_memb_chp_mwDa$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Unchaperoned, secreted vs membrane", Variable="Molecular mass", pValue=secr_unc_mwDa_VS_memb_unc_mwDa$p.value, pStars=stars.pval(secr_unc_mwDa_VS_memb_unc_mwDa$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Chaperoned, secreted  vs membrane", Variable="Folding energy", pValue=secr_chp_wtDG_VS_memb_chp_wtDG$p.value, pStars=stars.pval(secr_chp_wtDG_VS_memb_chp_wtDG$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Unchaperoned, secreted vs membrane", Variable="Folding energy", pValue=secr_unc_wtDG_VS_memb_unc_wtDG$p.value, pStars=stars.pval(secr_unc_wtDG_VS_memb_unc_wtDG$p.value)))
 
-stats <- rbind(stats, data.frame(Comparison="Secreted chaperoned vs intracellular chaperoned", Variable="Molecular mass", pValue=secr_chp_mwDa_VS_intr_chp_mwDa$p.value, pStars=stars.pval(secr_chp_mwDa_VS_intr_chp_mwDa$p.value)))
-stats <- rbind(stats, data.frame(Comparison="Secreted unchaperoned vs intracellular unchaperoned", Variable="Molecular mass", pValue=secr_unc_mwDa_VS_intr_unc_mwDa$p.value, pStars=stars.pval(secr_unc_mwDa_VS_intr_unc_mwDa$p.value)))
-stats <- rbind(stats, data.frame(Comparison="Secreted chaperoned vs intracellular chaperoned", Variable="Folding energy", pValue=secr_chp_wtDG_VS_intr_chp_wtDG$p.value, pStars=stars.pval(secr_chp_wtDG_VS_intr_chp_wtDG$p.value)))
-stats <- rbind(stats, data.frame(Comparison="Secreted unchaperoned vs intracellular unchaperoned", Variable="Folding energy", pValue=secr_unc_wtDG_VS_intr_unc_wtDG$p.value, pStars=stars.pval(secr_unc_wtDG_VS_intr_unc_wtDG$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Chaperoned, secreted vs intracellular", Variable="Molecular mass", pValue=secr_chp_mwDa_VS_intr_chp_mwDa$p.value, pStars=stars.pval(secr_chp_mwDa_VS_intr_chp_mwDa$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Unchaperoned, secreted vs intracellular", Variable="Molecular mass", pValue=secr_unc_mwDa_VS_intr_unc_mwDa$p.value, pStars=stars.pval(secr_unc_mwDa_VS_intr_unc_mwDa$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Chaperoned, secreted vs intracellular", Variable="Folding energy", pValue=secr_chp_wtDG_VS_intr_chp_wtDG$p.value, pStars=stars.pval(secr_chp_wtDG_VS_intr_chp_wtDG$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Unchaperoned, secreted vs intracellular", Variable="Folding energy", pValue=secr_unc_wtDG_VS_intr_unc_wtDG$p.value, pStars=stars.pval(secr_unc_wtDG_VS_intr_unc_wtDG$p.value)))
 
-stats <- rbind(stats, data.frame(Comparison="Membrane chaperoned vs intracellular chaperoned", Variable="Molecular mass", pValue=memb_chp_mwDa_VS_intr_chp_mwDa$p.value, pStars=stars.pval(memb_chp_mwDa_VS_intr_chp_mwDa$p.value)))
-stats <- rbind(stats, data.frame(Comparison="Membrane unchaperoned vs intracellular unchaperoned", Variable="Molecular mass", pValue=memb_unc_mwDa_VS_intr_unc_mwDa$p.value, pStars=stars.pval(memb_unc_mwDa_VS_intr_unc_mwDa$p.value)))
-stats <- rbind(stats, data.frame(Comparison="Membrane chaperoned vs intracellular chaperoned", Variable="Folding energy", pValue=memb_chp_wtDG_VS_intr_chp_wtDG$p.value, pStars=stars.pval(memb_chp_wtDG_VS_intr_chp_wtDG$p.value)))
-stats <- rbind(stats, data.frame(Comparison="Membrane unchaperoned vs intracellular unchaperoned", Variable="Folding energy", pValue=memb_unc_wtDG_VS_intr_unc_wtDG$p.value, pStars=stars.pval(memb_unc_wtDG_VS_intr_unc_wtDG$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Chaperoned, membrane vs intracellular", Variable="Molecular mass", pValue=memb_chp_mwDa_VS_intr_chp_mwDa$p.value, pStars=stars.pval(memb_chp_mwDa_VS_intr_chp_mwDa$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Unchaperoned, membrane vs intracellular", Variable="Molecular mass", pValue=memb_unc_mwDa_VS_intr_unc_mwDa$p.value, pStars=stars.pval(memb_unc_mwDa_VS_intr_unc_mwDa$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Chaperoned, membrane vs intracellular", Variable="Folding energy", pValue=memb_chp_wtDG_VS_intr_chp_wtDG$p.value, pStars=stars.pval(memb_chp_wtDG_VS_intr_chp_wtDG$p.value)))
+stats <- rbind(stats, data.frame(Comparison="Unchaperoned, membrane vs intracellular", Variable="Folding energy", pValue=memb_unc_wtDG_VS_intr_unc_wtDG$p.value, pStars=stars.pval(memb_unc_wtDG_VS_intr_unc_wtDG$p.value)))
 
 stats$adjPvalue <- ifelse(stats$pValue*nrow(stats) < 1, stats$pValue*nrow(stats), 1)
 stats$adjPstars <- stars.pval(stats$adjPvalue)
@@ -250,6 +250,6 @@ patchwork + plot_annotation(tag_levels = 'A',
                             title = 'Top 6 most significant differences in protein properties',
                             subtitle = 'Axis labels: \'Mass\' = protein molecular mass in Daltons. \'Wild-type ΔG\' = Gibbs free energy change of wild-type protein folding in kcal/mol.',
                             theme = theme(plot.subtitle = element_text(size = 8)))
-ggsave("patchwork.png", width = 8, height = 4.5)
+ggsave("protein-lvl-plot-patchwork.png", width = 8, height = 4.5)
 
 
