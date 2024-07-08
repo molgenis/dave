@@ -7,6 +7,7 @@ library(ggrepel)   # alternative for geom_text: geom_text_repel
 library(patchwork) # multiple plots in one
 library(gtools)    # pvals to stars
 
+
 ##################################
 # Directories and data locations #
 ##################################
@@ -15,6 +16,15 @@ freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
 results <- read.csv(freeze1)
 imgDir <- paste(rootDir, "img", sep="/")
 setwd(imgDir)
+
+
+#############################################################################
+# Colorblind palette, see https://derekogle.com/NCGraphing/resources/colors #
+#############################################################################
+LBe <- "#009E73"; VUS <- "#999999"; LPa <- "#D55E00"
+sec <- "#E69F00"; int <- "#56B4E9"; mem <- "#CC79A7"
+chp <- "#F0E442"; unc <- "#0072B2"; blk <- "#000000"
+
 
 #########################################################
 # Groupwise comparisons LP/LB, chaperoned, localization #
@@ -192,6 +202,41 @@ stats <- stats[order(stats$pValue, decreasing = FALSE), ]
 stats
 
 
+####
+# Panel
+###
+axisTextSize <- 7
+axisTitleSize <- 9
+titleSize <- 9
+
+makeBenignVsPathogenicPlot <- function(theData, title){
+  plot <- ggplot(data = theData, aes(x = classificationVKGL, y = total.energy, fill = classificationVKGL)) +
+    theme_classic() +
+    geom_violin() +
+    ggtitle(paste0("Adj. p-value = ", format.pval(stats[1,]$adjPvalue, 3), " ", stats[1,]$adjPstars)) +
+    scale_fill_manual(values = c("LP" = LPa, "LB" = LBe)) +
+    scale_x_discrete(name=title, labels=c(
+      "LP" = paste0("Pathogenic or likely pathogenic",
+                    "\nmedian = ", round(median(theData[which(theData$classificationVKGL=="LP"),]$total.energy), 2),
+                    "\nmean = ", round(mean(theData[which(theData$classificationVKGL=="LP"),]$total.energy), 2)
+      ),
+      "LB" = paste0("Benign or likely benign",
+                    "\nmedian = ", round(median(theData[which(theData$classificationVKGL=="LB"),]$total.energy), 2),
+                    "\nmean = ", round(mean(theData[which(theData$classificationVKGL=="LB"),]$total.energy), 2)
+      )))+
+    theme(axis.text=element_text(size=axisTextSize, color="black"), axis.title=element_text(size=axisTitleSize), plot.title = element_text(size = titleSize), legend.position = "none") +
+    scale_y_continuous(labels = label_comma()) +
+    ylab("ΔΔG")
+  return(plot)
+}
+
+p1 <- makeBenignVsPathogenicPlot(rbind(LB_all, LP_all), "Consensus variant classification VKGL release April 2024")
+p2 <- makeBenignVsPathogenicPlot(rbind(chap_LB, chap_LP), "Chaperoned proteins, variant classification")
+p3 <- makeBenignVsPathogenicPlot(rbind(unch_LB, unch_LP), "Unchaperoned proteins, variant classification")
+p4 <- makeBenignVsPathogenicPlot(rbind(secr_LB, secr_LP), "Secreted proteins, variant classification")
+p5 <- makeBenignVsPathogenicPlot(rbind(memb_LB, memb_LP), "Membrane proteins, variant classification")
+p6 <- makeBenignVsPathogenicPlot(rbind(intr_LB, intr_LP), "Intracellular proteins, variant classification")
+p1 / (p2 + p3) / (p4 + p5 + p6)
 
 
 #####
