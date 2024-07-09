@@ -4,6 +4,7 @@
 library(R.utils)   # for 'gunzip', 'mkdirs'
 library(Rpdb)      # to load PDB files
 library(dplyr)     # to remove duplicate rows
+library(Peptides)  # protein annotations
 
 
 #######################
@@ -38,6 +39,7 @@ selectedGenes <- allg
 ##########################################
 dataGenesDir <- paste(rootDir, "data", "genes", sep="/")
 source(paste(rootDir, "src", "main", "R", "addMolWeight.R", sep="/"))
+source(paste(rootDir, "src", "main", "R", "aa3to1.R", sep="/"))
 
 
 #################################################
@@ -148,6 +150,7 @@ for(i in seq_along(geneNames))
 
 #################################################
 # Add molecular weight in Daltons for each gene #
+# TODO replace with 'Peptides' function?
 #################################################
 setwd(dataGenesDir)
 for(i in seq_along(geneNames))
@@ -259,7 +262,8 @@ for(i in seq_along(geneNames))
     result$pos <- variants[j, "Pos"]
     result$ref <- variants[j, "Ref"]
     result$alt <- variants[j, "Alt"]
-    result$gene <- variants[j, "Gene"]
+    #result$vkglGeneNameAnnotation <- variants[j, "Gene"]
+    result$gene <- geneName
     result$protChange <- variants[j, "ProtChange"]
     result$classificationVKGL <- variants[j, "Classification"]
     result$transcript <- geneInfo$Transcript.stable.ID
@@ -281,10 +285,53 @@ results$chaperoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name
 #alternative way to add annotation? something like
 #result$aaa <- as.factor(selectedGenes[selectedGenes$Gene.name==results$gene, "protType"])
 
+#####################################################################################
+# Get and store all AA sequences for each gene with 1+ succesfully folded mutations #
+#####################################################################################
+setwd(dataGenesDir)
+succesfulGenes <- unique(results$gene)
+aaPerGene <- data.frame(gene=character(), aaSeq=character(), mwOld=numeric(), mwNew=numeric())
+for(i in seq_along(succesfulGenes))
+{
+  geneName <- succesfulGenes[i]
+  cat(paste("calc for gene: ", geneName, "\n", sep=" "))
+  
+  specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
+  setwd(specificGeneDir)
+  pdbFile <- list.files(pattern="*_Repair.pdb")
+  if(length(pdbFile) > 0){
+    x <- read.pdb(pdbFile)
+    collapsePDB <- data.frame(resid=x$atoms$resid, resname=x$atoms$resname)
+    collapsePDB <- collapsePDB %>% distinct()
+    
+    #1
+    aa1seq <- aa3to1(collapsePDB$resname)
+    mwNew <- mw(aa1seq)
+    
+    #2
+    collapsePDB <- addMolWeight(collapsePDB)
+    mwOld <- sum(collapsePDB$resDa)
+    
+    aaPerGene <- rbind(aaPerGene, data.frame(gene=geneName, aaSeq=aa1seq, mwOld=mwOld, mwNew=mwNew))
+    
+    cat(paste("done\n", sep=" "))
+
+  }else{
+    cat(paste("No PDB file for gene", geneName, "\n", sep=" "))
+  }
+}
+
+######3
+# For all succesfully folded mutations, introduce AA change in AA sequence and calculate additional properties
+#######
+for(i in seq_along(results))
+{
+ # todo
+}
 
 ############################################################################################################
 # Write/read data freeze1 based on all secreted and a random selection of membrane and intracellular genes #
 ############################################################################################################
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
-#write.csv(results, freeze1, row.names = FALSE, quote = FALSE)
+write.csv(results, freeze1, row.names = FALSE, quote = FALSE)
 results <- read.csv(freeze1)

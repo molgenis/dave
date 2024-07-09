@@ -1,4 +1,5 @@
 # Function to sum all combinations of a matrix diagonal and output results in a new matrix
+# TODO: replace with functionality from 'Peptides' package?
 addMolWeight <- function(collapsePDB) {
   weights <- c()
   for (i in 1:nrow(collapsePDB)) {
