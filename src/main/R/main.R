@@ -38,7 +38,6 @@ selectedGenes <- allg
 # Derived paths of directories and files #
 ##########################################
 dataGenesDir <- paste(rootDir, "data", "genes", sep="/")
-source(paste(rootDir, "src", "main", "R", "addMolWeight.R", sep="/"))
 source(paste(rootDir, "src", "main", "R", "aa3to1.R", sep="/"))
 
 
@@ -148,32 +147,6 @@ for(i in seq_along(geneNames))
 }
 
 
-#################################################
-# Add molecular weight in Daltons for each gene #
-# TODO replace with 'Peptides' function?
-#################################################
-setwd(dataGenesDir)
-for(i in seq_along(geneNames))
-{
-  geneName <- geneNames[i]
-  specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
-  setwd(specificGeneDir)
-  pdbFile <- list.files(pattern="*_Repair.pdb")
-  if(length(list.files(pattern="mwDa.txt")) == 0 & length(pdbFile) > 0){
-    x <- read.pdb(pdbFile)
-    #neat: visualize(x, mode = NULL)
-    collapsePDB <- data.frame(resid=x$atoms$resid, resname=x$atoms$resname)
-    collapsePDB <- collapsePDB %>% distinct()
-    collapsePDB <- addMolWeight(collapsePDB)
-    mwDa <- sum(collapsePDB$resDa)
-    cat(paste("Adding a molecular weight of", mwDa, "Da for gene", geneName, "\n", sep=" "))
-    write(mwDa, file = "mwDa.txt")
-  }else{
-    cat(paste("No PDB file or molecular weight already present for gene", geneName, "\n", sep=" "))
-  }
-}
-
-
 ###############################
 # Add wild type info for gene #
 ###############################
@@ -230,12 +203,6 @@ for(i in seq_along(geneNames))
   cat(paste("Loading data for ", geneName, " (gene ", i, " of ", length(geneNames), ")\n", sep=""))
   specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
   setwd(specificGeneDir)
-  mwDa <- list.files(pattern="mwDa.txt")
-  if(length(mwDa) > 0){
-    geneInfo$mwDa <- read.table(file = mwDa, header = FALSE)$V1
-  }else{
-    geneInfo$mwDa <- NA
-  }
   wtInfoFile <- list.files(pattern="wt.txt")
   if(length(wtInfoFile) > 0){
     wtInfo <- read.csv(file = wtInfoFile, header = TRUE)
@@ -269,7 +236,6 @@ for(i in seq_along(geneNames))
     result$transcript <- geneInfo$Transcript.stable.ID
     result$uniprot <- geneInfo$UniProtKB.Swiss.Prot.ID
     result$protType <- geneInfo$protType
-    result$mwDa <- geneInfo$mwDa
     result$wtDG <- geneInfo$wtDG
     results <- rbind(results, result)
   }
