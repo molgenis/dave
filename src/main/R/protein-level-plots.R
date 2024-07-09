@@ -30,7 +30,7 @@ resGeneColl$energyPerKDa <- resGeneColl$wtDG/(resGeneColl$mwDa/1000)
 #############################################################################
 LBe <- "#009E73"; VUS <- "#999999"; LPa <- "#D55E00"
 sec <- "#E69F00"; int <- "#56B4E9"; mem <- "#CC79A7"
-chp <- "#F0E442"; unc <- "#0072B2"; blk <- "#000000"
+yel <- "#F0E442"; unc <- "#0072B2"; chp <- "#000000"
 
 
 ######################################################################
@@ -47,6 +47,32 @@ ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaperoned, label=
   xlab("Gibbs free energy change of wild-type protein folding (in kcal/mol)") +
   ylab("Protein molecular weight (in Daltons)")
 ggsave("protein_wtDG_vs_mwDa_scatterplot.png", width = 8, height = 4.5)
+
+# Only localization with regression
+ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType)) +
+  theme_classic() +
+  geom_point(size = 1) +
+  geom_text(aes(label=gene), size = 2, hjust=-0.1, vjust=-0.3, check_overlap = TRUE)+
+  scale_color_manual(name="Protein localization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec)) +
+  scale_y_continuous(labels = label_comma()) +
+  scale_x_continuous(labels = label_comma()) +
+  geom_smooth(formula = 'y ~ x', method='lm', fullrange = TRUE) +
+  xlab("Gibbs free energy change of wild-type protein folding (in kcal/mol)") +
+  ylab("Protein molecular weight (in Daltons)")
+ggsave("protein_localization_wtDG_vs_mwDa_scatterplot.png", width = 8, height = 4.5)
+
+# Only chaperoned with regression
+ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=chaperoned)) +
+  theme_classic() +
+  geom_point(size = 1) +
+  geom_text(aes(label=gene), size = 2, hjust=-0.1, vjust=-0.3, check_overlap = TRUE)+
+  scale_color_manual(name="Chaperoned", values=c("FALSE" = unc, "TRUE" = chp), labels=c("FALSE" = "No", "TRUE" = "Yes")) +
+  scale_y_continuous(labels = label_comma()) +
+  scale_x_continuous(labels = label_comma()) +
+  geom_smooth(formula = 'y ~ x', method='lm', fullrange = TRUE) +
+  xlab("Gibbs free energy change of wild-type protein folding (in kcal/mol)") +
+  ylab("Protein molecular weight (in Daltons)")
+ggsave("protein_chaperoned_wtDG_vs_mwDa_scatterplot.png", width = 8, height = 4.5)
 
 
 ###########################################
