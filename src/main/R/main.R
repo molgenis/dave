@@ -212,7 +212,7 @@ for(i in seq_along(geneNames))
   }
   variants <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE, colClasses = c("character", "character", "numeric", "character", "character", "character", "character", "numeric", "character"))
   foldingResultsDir <- paste(specificGeneDir, "folding-results", sep="/")
-  for(j in seq_along(variants))
+  for(j in 1:nrow(variants))
   {
     mutationDir <- paste(foldingResultsDir, variants$ProtChange[j], sep="/")
     if(!dir.exists(mutationDir))
