@@ -14,12 +14,18 @@ public class VKGLProcessIntoProteinChanges {
         System.out.println("Starting...");
 
         // input files
+        // here:
+        // * protein-atlas-secreted-genenames-mane-uniprot.txt
+        // * protein-atlas-intracellular-genenames-mane-uniprot-random2000.txt
+        // * protein-atlas-membrane-genenames-mane-uniprot-random2000.txt
         File proteinSetWithMane = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/protein-atlas-secreted-genenames-mane-uniprot.txt");
         String vkglMissenseFileName = "VKGL_apr2024_annot_missense_nodup.vcf";
         File vkglMissenseLocation = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + vkglMissenseFileName + ".zip");
 
         // output files
+        // directory to write all separate variants files to, creating 1 folder per gene:
         File outputBaseDir = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/genes/");
+        // genes with 1+ variants, file name same as proteinSetWithMane + "-withvariants"
         File genesWithVariants = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/protein-atlas-secreted-genenames-mane-uniprot-withvariants.txt");
 
         System.out.println("Loading gene/transcript file...");
@@ -140,17 +146,22 @@ public class VKGLProcessIntoProteinChanges {
 
                     String geneSymbol = csqParts[3];
                     // as per FoldX notation: WT residue, chain, residue number, mutant residue (e.g. "CA1490Y;")
-                    String geneProt = geneSymbol + "\t" + proteinChangeSplit[0] + "A" + proteinPos + proteinChangeSplit[1];
+                    String proteinChange = proteinChangeSplit[0] + "A" + proteinPos + proteinChangeSplit[1];
+                    if (proteinChange.contains("=")) {
+                        System.out.println("Synonymous variant, skipping " + proteinChange);
+                        continue;
+                    }
+                    if (proteinChange.contains("*")) {
+                        System.out.println("Stop gain, skipping " + proteinChange);
+                        continue;
+                    }
+                    if(proteinChange.contains("-"))
+                    {
+                        System.out.println("Double notation (e.g. NVA287-288NI), skipping " + proteinChange);
+                        continue;
+                    }
+                    String geneProt = geneSymbol + "\t" + proteinChange;
                     String clf = infoSplit[0].replace("VKGL=", "");
-
-                    if (geneProt.contains("=")) {
-                        System.out.println("Synonymous variant, skipping " + geneProt);
-                        continue;
-                    }
-                    if (geneProt.contains("*")) {
-                        System.out.println("Stop gain, skipping " + geneProt);
-                        continue;
-                    }
 
                     // unless there is a different protein notation for a transcript, the notation is duplicate
                     // filter here by checking if gene-prot combination is already present
