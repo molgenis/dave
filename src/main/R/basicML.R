@@ -2,6 +2,7 @@ library(randomForest)
 library(caret)
 library(pROC)
 library(ROCR)
+library(randomForestExplainer)
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
@@ -26,6 +27,8 @@ plot(rf.perf,main=paste0("Variant classification on basic protein properties, RF
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
 
 
+# feature importance?
+measure_importance(rf)
 
 # PCA?
 # affinity-prop clustering?
