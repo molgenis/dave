@@ -289,6 +289,8 @@ for(i in seq_along(succesfulGenes))
     cat(paste("No PDB file for gene", geneName, "\n", sep=" "))
   }
 }
+# Merge with transcript/uniprot/localization data
+peptidePropPerGene <- merge(peptidePropPerGene, selectedGenes, by.x = "gene", by.y = "Gene.name")
 # Persist these results for quick loading later
 peptidePropPerGeneFile <- paste(rootDir, "data", "peptidePropPerGene.csv", sep="/")
 #write.csv(peptidePropPerGene, peptidePropPerGeneFile, row.names = FALSE, quote = FALSE)
