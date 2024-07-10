@@ -256,12 +256,11 @@ results$chaperoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name
 #####################################################################################
 setwd(dataGenesDir)
 succesfulGenes <- unique(results$gene)
-aaPerGene <- data.frame(gene=character(), aaSeq=character(), mwOld=numeric(), mwNew=numeric())
+peptidePropPerGene <- data.frame(gene=character(), aliphaticIndex=numeric(), bomanIndex=numeric(), charge=numeric(), hydrophobicMoment=numeric(), hydrophobicity=numeric(), instabilityIndex=numeric(), molWeight=numeric(), massOverCharge=numeric(), isoElecPoint=numeric(),  aaSeq=character())
 for(i in seq_along(succesfulGenes))
 {
   geneName <- succesfulGenes[i]
-  cat(paste("calc for gene: ", geneName, "\n", sep=" "))
-  
+  cat(paste("retrieving AA seq for gene: ", geneName, "\n", sep=" "))
   specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
   setwd(specificGeneDir)
   pdbFile <- list.files(pattern="*_Repair.pdb")
@@ -269,23 +268,31 @@ for(i in seq_along(succesfulGenes))
     x <- read.pdb(pdbFile)
     collapsePDB <- data.frame(resid=x$atoms$resid, resname=x$atoms$resname)
     collapsePDB <- collapsePDB %>% distinct()
+    aaSeq <- aa3to1(collapsePDB$resname)
+    peptidePropPerGene <- rbind(peptidePropPerGene, data.frame(gene = geneName,
+                                             aliphaticIndex = aIndex(aaSeq),
+                                             bomanIndex = boman(aaSeq),
+                                             charge = charge(aaSeq),
+                                             hydrophobicMoment = hmoment(aaSeq),
+                                             hydrophobicity = hydrophobicity(aaSeq),
+                                             instabilityIndex = instaIndex(aaSeq),
+                                             molWeight = mw(aaSeq),
+                                             massOverCharge = mz(aaSeq),
+                                             isoElecPoint = pI(aaSeq),
+                                             aaSeq = aaSeq
+                                             ))
     
-    #1
-    aa1seq <- aa3to1(collapsePDB$resname)
-    mwNew <- mw(aa1seq)
-    
-    #2
-    collapsePDB <- addMolWeight(collapsePDB)
-    mwOld <- sum(collapsePDB$resDa)
-    
-    aaPerGene <- rbind(aaPerGene, data.frame(gene=geneName, aaSeq=aa1seq, mwOld=mwOld, mwNew=mwNew))
-    
-    cat(paste("done\n", sep=" "))
+    cat(paste("calculations done\n", sep=" "))
 
   }else{
     cat(paste("No PDB file for gene", geneName, "\n", sep=" "))
   }
 }
+# Persist these results for quick loading later
+peptidePropPerGeneFile <- paste(rootDir, "data", "peptidePropPerGene.csv", sep="/")
+#write.csv(peptidePropPerGene, peptidePropPerGeneFile, row.names = FALSE, quote = FALSE)
+peptidePropPerGene <- read.csv(peptidePropPerGeneFile)
+
 
 ######3
 # For all succesfully folded mutations, introduce AA change in AA sequence and calculate additional properties
