@@ -1,5 +1,7 @@
 library(randomForest)
 library(caret)
+library(pROC)
+library(ROCR)
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
@@ -12,11 +14,18 @@ draw <- sample(c(TRUE, FALSE), nrow(data), replace=TRUE, prob=c(0.8, 0.2))
 train <- data[draw, ]
 test <- data[!draw, ]
 
-rf <- randomForest(classificationVKGL~., data=train, proximity=TRUE)
-rf
+bestmtry <- tuneRF(train,train$classificationVKGL,stepFactor = 1.2, improve = 0.01, trace=T, plot= T) 
 
-pred <- predict(rf, test)
-confusionMatrix(pred, test$classificationVKGL)
+rf <-randomForest(classificationVKGL~., data=train, mtry=7, ntree=1000, keep.forest=TRUE, importance=TRUE, xtest=subset(test, select=-classificationVKGL))
+rf.pred = prediction(rf.pr, test$classificationVKGL)
+rf.perf = performance(rf.pred,"tpr","fpr")
+auc <- performance(rf.pred,"auc")
+auc <-unlist(slot(auc, "y.values"))
+auc <- round(auc,2)
+plot(rf.perf,main=paste0("Variant classification on basic protein properties, RF ROC curve (AUC ",auc,")"),col=2,lwd=2)
+abline(a=0,b=1,lwd=2,lty=2,col="gray")
+
+
 
 # PCA?
 # affinity-prop clustering?
