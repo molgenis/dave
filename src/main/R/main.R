@@ -242,14 +242,15 @@ for(i in seq_along(geneNames))
 }
 
 
-################################################
-# Retrieve genes that interact with chaperones #
-################################################
+###################################################################
+# Retrieve genes that interact with chaperones and add to results #
+###################################################################
 chapInteractingGenesLoc <- paste(rootDir, "data", "chaperones", "interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt", sep="/")
 chapInteractingGenes <- read.table(file=chapInteractingGenesLoc, sep = '\t',header = TRUE)
 results$chaperoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name)
 #alternative way to add annotation? something like
 #result$aaa <- as.factor(selectedGenes[selectedGenes$Gene.name==results$gene, "protType"])
+
 
 #####################################################################################
 # Get and store all AA sequences for each gene with 1+ succesfully folded mutations #
@@ -294,17 +295,69 @@ peptidePropPerGeneFile <- paste(rootDir, "data", "peptidePropPerGene.csv", sep="
 peptidePropPerGene <- read.csv(peptidePropPerGeneFile)
 
 
-######3
-# For all succesfully folded mutations, introduce AA change in AA sequence and calculate additional properties
-#######
-for(i in seq_along(results))
+###############################################################################
+# For all succesfully folded mutations, mutate AA-seq and calculate properties #
+################################################################################
+setwd(dataGenesDir)
+succesfulGenes <- unique(peptidePropPerGene$gene)
+results[,"aliphaticIndex"] <- NA
+results[,"bomanIndex"] <- NA
+results[,"charge"] <- NA
+results[,"hydrophobicMoment"] <- NA
+results[,"hydrophobicity"] <- NA
+results[,"instabilityIndex"] <- NA
+results[,"molWeight"] <- NA
+results[,"massOverCharge"] <- NA
+results[,"isoElecPoint"] <- NA
+results[,"delta_aliphaticIndex"] <- NA
+results[,"delta_bomanIndex"] <- NA
+results[,"delta_charge"] <- NA
+results[,"delta_hydrophobicMoment"] <- NA
+results[,"delta_hydrophobicity"] <- NA
+results[,"delta_instabilityIndex"] <- NA
+results[,"delta_molWeight"] <- NA
+results[,"delta_massOverCharge"] <- NA
+results[,"delta_isoElecPoint"] <- NA
+results[,"mutatedAAseq"] <- NA
+for(i in 1:nrow(results))
 {
- # todo
+  variant <- results[i,]
+  cat(paste0("Calculating variant peptide properties for ", variant$gene, ":", variant$protChange,"\n"))
+  genePeptideProp <- peptidePropPerGene[peptidePropPerGene$gene==variant$gene, ]
+  aaToReplace <- substr(variant$protChange, 1, 1)
+  aaReplacement <- substr(variant$protChange, nchar(variant$protChange), nchar(variant$protChange))
+  aaReplacePos <- as.numeric(substr(variant$protChange, 3, (nchar(variant$protChange)-1)))
+  aaSeqToMutate <- genePeptideProp$aaSeq
+  originalAAatPos <- substr(aaSeqToMutate, aaReplacePos, aaReplacePos)
+  if(originalAAatPos != aaToReplace){
+    stop("AA to mutate different from original")
+  }
+  substr(aaSeqToMutate, aaReplacePos, aaReplacePos) <- aaReplacement
+  results[i,]$aliphaticIndex <- aIndex(aaSeqToMutate)
+  results[i,]$bomanIndex <- boman(aaSeqToMutate)
+  results[i,]$charge <- charge(aaSeqToMutate)
+  results[i,]$hydrophobicMoment <- hmoment(aaSeqToMutate)
+  results[i,]$hydrophobicity <- hydrophobicity(aaSeqToMutate)
+  results[i,]$instabilityIndex <- instaIndex(aaSeqToMutate)
+  results[i,]$molWeight <- mw(aaSeqToMutate)
+  results[i,]$massOverCharge <- mz(aaSeqToMutate)
+  results[i,]$isoElecPoint <- pI(aaSeqToMutate)
+  results[i,]$delta_aliphaticIndex <- results[i,]$aliphaticIndex - genePeptideProp$aliphaticIndex
+  results[i,]$delta_bomanIndex <- results[i,]$bomanIndex - genePeptideProp$bomanIndex
+  results[i,]$delta_charge <- results[i,]$charge - genePeptideProp$charge
+  results[i,]$delta_hydrophobicMoment <- results[i,]$hydrophobicMoment - genePeptideProp$hydrophobicMoment
+  results[i,]$delta_hydrophobicity <-  results[i,]$hydrophobicity - genePeptideProp$hydrophobicity
+  results[i,]$delta_instabilityIndex <- results[i,]$instabilityIndex - genePeptideProp$instabilityIndex
+  results[i,]$delta_molWeight <- results[i,]$molWeight - genePeptideProp$molWeight
+  results[i,]$delta_massOverCharge <- results[i,]$massOverCharge - genePeptideProp$massOverCharge
+  results[i,]$delta_isoElecPoint <- results[i,]$isoElecPoint - genePeptideProp$isoElecPoint
+  results[i,]$mutatedAAseq <- aaSeqToMutate
 }
 
-############################################################################################################
-# Write/read data freeze1 based on all secreted and a random selection of membrane and intracellular genes #
-############################################################################################################
+
+#######################################################
+# Write/read complete collation of variant level data #
+#######################################################
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
-write.csv(results, freeze1, row.names = FALSE, quote = FALSE)
+#write.csv(results, freeze1, row.names = FALSE, quote = FALSE)
 results <- read.csv(freeze1)
