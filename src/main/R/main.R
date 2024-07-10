@@ -291,6 +291,13 @@ for(i in seq_along(succesfulGenes))
 }
 # Merge with transcript/uniprot/localization data
 peptidePropPerGene <- merge(peptidePropPerGene, selectedGenes, by.x = "gene", by.y = "Gene.name")
+# Merge with chaperone data
+peptidePropPerGene$chaperoned <- as.factor(peptidePropPerGene$gene %in% chapInteractingGenes$Gene.name)
+# Add wtDG from variant-level results
+wtDGperGene <- data.frame(gene=results$gene, wtDG=results$wtDG)
+wtDGperGene <- wtDGperGene %>% distinct()
+peptidePropPerGene <- merge(peptidePropPerGene, wtDGperGene, by.x = "gene", by.y = "gene")
+peptidePropPerGene$energyPerKDa <- peptidePropPerGene$wtDG/(peptidePropPerGene$molWeight/1000)
 # Persist these results for quick loading later
 peptidePropPerGeneFile <- paste(rootDir, "data", "peptidePropPerGene.csv", sep="/")
 #write.csv(peptidePropPerGene, peptidePropPerGeneFile, row.names = FALSE, quote = FALSE)

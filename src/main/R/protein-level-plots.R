@@ -11,18 +11,10 @@ library(gtools)    # pvals to stars
 # Directories and data locations #
 ##################################
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
-freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
-results <- read.csv(freeze1)
+peptidePropPerGeneFile <- paste(rootDir, "data", "peptidePropPerGene.csv", sep="/")
+peptidePropPerGene <- read.csv(peptidePropPerGeneFile)
 imgDir <- paste(rootDir, "img", sep="/")
 setwd(imgDir)
-
-
-##################################################
-# Collapse variant-level results into gene-level #
-##################################################
-resGeneColl <- data.frame(gene=results$gene, mwDa=results$mwDa, wtDG=results$wtDG, transcript=results$transcript, uniprot=results$uniprot, protType=results$protType, chaperoned=results$chaperoned)
-resGeneColl <- resGeneColl %>% distinct()
-resGeneColl$energyPerKDa <- resGeneColl$wtDG/(resGeneColl$mwDa/1000)
 
 
 #############################################################################
@@ -36,7 +28,7 @@ yel <- "#F0E442"; unc <- "#0072B2"; chp <- "#000000"
 ######################################################################
 # Wild-type folding energy vs. mass with localization and chaperoned #
 ######################################################################
-ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaperoned, label=gene)) +
+ggplot(peptidePropPerGene, aes(x=wtDG, y=molWeight, color=protType, shape=chaperoned, label=gene)) +
   theme_classic() +
   geom_point() +
   geom_text(size = 2, hjust=-0.1, vjust=-0.3, check_overlap = TRUE)+
@@ -49,7 +41,7 @@ ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType, shape=chaperoned, label=
 ggsave("protein_wtDG_vs_mwDa_scatterplot.png", width = 8, height = 4.5)
 
 # Only localization with regression
-ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType)) +
+ggplot(peptidePropPerGene, aes(x=wtDG, y=molWeight, color=protType)) +
   theme_classic() +
   geom_point(size = 1) +
   geom_text(aes(label=gene), size = 2, hjust=-0.1, vjust=-0.3, check_overlap = TRUE)+
@@ -62,7 +54,7 @@ ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=protType)) +
 ggsave("protein_localization_wtDG_vs_mwDa_scatterplot.png", width = 8, height = 4.5)
 
 # Only chaperoned with regression
-ggplot(resGeneColl, aes(x=wtDG, y=mwDa, color=chaperoned)) +
+ggplot(peptidePropPerGene, aes(x=wtDG, y=molWeight, color=chaperoned)) +
   theme_classic() +
   geom_point(size = 1) +
   geom_text(aes(label=gene), size = 2, hjust=-0.1, vjust=-0.3, check_overlap = TRUE)+
@@ -78,12 +70,12 @@ ggsave("protein_chaperoned_wtDG_vs_mwDa_scatterplot.png", width = 8, height = 4.
 ###########################################
 # Groupwise comparisons with significance #
 ###########################################
-secr_all <- subset(resGeneColl, protType == "secreted")
-memb_all <- subset(resGeneColl, protType == "membrane")
-intr_all <- subset(resGeneColl, protType == "intracellular")
+secr_all <- subset(peptidePropPerGene, protType == "secreted")
+memb_all <- subset(peptidePropPerGene, protType == "membrane")
+intr_all <- subset(peptidePropPerGene, protType == "intracellular")
 
-chap_all <- subset(resGeneColl, chaperoned == TRUE)
-uncp_all <- subset(resGeneColl, chaperoned == FALSE)
+chap_all <- subset(peptidePropPerGene, chaperoned == TRUE)
+uncp_all <- subset(peptidePropPerGene, chaperoned == FALSE)
 
 secr_chp <- subset(secr_all, chaperoned == TRUE)
 secr_unc <- subset(secr_all, chaperoned == FALSE)
@@ -94,28 +86,28 @@ memb_unc <- subset(memb_all, chaperoned == FALSE)
 intr_chp <- subset(intr_all, chaperoned == TRUE)
 intr_unc <- subset(intr_all, chaperoned == FALSE)
 
-secr_all_mwDa_VS_memb_all_mwDa <- wilcox.test(secr_all$mwDa, memb_all$mwDa)
+secr_all_mwDa_VS_memb_all_mwDa <- wilcox.test(secr_all$molWeight, memb_all$molWeight)
 secr_all_wtDG_VS_memb_all_wtDG <- wilcox.test(secr_all$wtDG, memb_all$wtDG)
-secr_all_mwDa_VS_intr_all_mwDa <- wilcox.test(secr_all$mwDa, intr_all$mwDa)
+secr_all_mwDa_VS_intr_all_mwDa <- wilcox.test(secr_all$molWeight, intr_all$molWeight)
 secr_all_wtDG_VS_intr_all_wtDG <- wilcox.test(secr_all$wtDG, intr_all$wtDG)
-memb_all_mwDa_VS_intr_all_mwDa <- wilcox.test(memb_all$mwDa, intr_all$mwDa)
+memb_all_mwDa_VS_intr_all_mwDa <- wilcox.test(memb_all$molWeight, intr_all$molWeight)
 memb_all_wtDG_VS_intr_all_wtDG <- wilcox.test(memb_all$wtDG, intr_all$wtDG)
 
 chap_all_wtDG_VS_uncp_all_wtWG <- wilcox.test(chap_all$wtDG, uncp_all$wtDG)
-chap_all_mwDa_VS_uncp_all_mwDa <- wilcox.test(chap_all$mwDa, uncp_all$mwDa)
+chap_all_mwDa_VS_uncp_all_mwDa <- wilcox.test(chap_all$molWeight, uncp_all$molWeight)
 
-secr_chp_mwDa_VS_memb_chp_mwDa <- wilcox.test(secr_chp$mwDa, memb_chp$mwDa)
-secr_unc_mwDa_VS_memb_unc_mwDa <- wilcox.test(secr_unc$mwDa, memb_unc$mwDa)
+secr_chp_mwDa_VS_memb_chp_mwDa <- wilcox.test(secr_chp$molWeight, memb_chp$molWeight)
+secr_unc_mwDa_VS_memb_unc_mwDa <- wilcox.test(secr_unc$molWeight, memb_unc$molWeight)
 secr_chp_wtDG_VS_memb_chp_wtDG <- wilcox.test(secr_chp$wtDG, memb_chp$wtDG)
 secr_unc_wtDG_VS_memb_unc_wtDG <- wilcox.test(secr_unc$wtDG, memb_unc$wtDG)
 
-secr_chp_mwDa_VS_intr_chp_mwDa <- wilcox.test(secr_chp$mwDa, intr_chp$mwDa)
-secr_unc_mwDa_VS_intr_unc_mwDa <- wilcox.test(secr_unc$mwDa, intr_unc$mwDa)
+secr_chp_mwDa_VS_intr_chp_mwDa <- wilcox.test(secr_chp$molWeight, intr_chp$molWeight)
+secr_unc_mwDa_VS_intr_unc_mwDa <- wilcox.test(secr_unc$molWeight, intr_unc$molWeight)
 secr_chp_wtDG_VS_intr_chp_wtDG <- wilcox.test(secr_chp$wtDG, intr_chp$wtDG)
 secr_unc_wtDG_VS_intr_unc_wtDG <- wilcox.test(secr_unc$wtDG, intr_unc$wtDG)
 
-memb_chp_mwDa_VS_intr_chp_mwDa <- wilcox.test(memb_chp$mwDa, intr_chp$mwDa)
-memb_unc_mwDa_VS_intr_unc_mwDa <- wilcox.test(memb_unc$mwDa, intr_unc$mwDa)
+memb_chp_mwDa_VS_intr_chp_mwDa <- wilcox.test(memb_chp$molWeight, intr_chp$molWeight)
+memb_unc_mwDa_VS_intr_unc_mwDa <- wilcox.test(memb_unc$molWeight, intr_unc$molWeight)
 memb_chp_wtDG_VS_intr_chp_wtDG <- wilcox.test(memb_chp$wtDG, intr_chp$wtDG)
 memb_unc_wtDG_VS_intr_unc_wtDG <- wilcox.test(memb_unc$wtDG, intr_unc$wtDG)
 
@@ -165,12 +157,12 @@ p1 <- ggplot(data = memb_intr_unc, aes(x = protType, y = wtDG, fill = protType))
   scale_fill_manual(values = c("intracellular" = int, "membrane" = mem)) +
   scale_x_discrete(name="Protein localization, unchaperoned", labels=c(
   "membrane" = paste0("Membrane",
-         "\nmedian = ", prettyNum(median(memb_intr_unc[which(memb_intr_unc$protType=="membrane"),]$mwDa), big.mark = ","),
-         "\nmean = ", prettyNum(round(mean(memb_intr_unc[which(memb_intr_unc$protType=="membrane"),]$mwDa)), big.mark = ",")
+         "\nmedian = ", prettyNum(median(memb_intr_unc[which(memb_intr_unc$protType=="membrane"),]$molWeight), big.mark = ","),
+         "\nmean = ", prettyNum(round(mean(memb_intr_unc[which(memb_intr_unc$protType=="membrane"),]$molWeight)), big.mark = ",")
   ),
   "intracellular" = paste0("Intracellular",
-         "\nmedian = ", prettyNum(median(memb_intr_unc[which(memb_intr_unc$protType=="intracellular"),]$mwDa), big.mark = ","),
-         "\nmean = ", prettyNum(round(mean(memb_intr_unc[which(memb_intr_unc$protType=="intracellular"),]$mwDa)), big.mark = ",")
+         "\nmedian = ", prettyNum(median(memb_intr_unc[which(memb_intr_unc$protType=="intracellular"),]$molWeight), big.mark = ","),
+         "\nmean = ", prettyNum(round(mean(memb_intr_unc[which(memb_intr_unc$protType=="intracellular"),]$molWeight)), big.mark = ",")
   )))+
   theme(axis.text=element_text(size=axisTextSize, color="black"), axis.title=element_text(size=axisTitleSize), plot.title = element_text(size = titleSize), legend.position = "none") +
   scale_y_continuous(labels = label_comma()) +
@@ -184,12 +176,12 @@ p2 <- ggplot(data = secr_memb, aes(x = protType, y = mwDa, fill = protType)) +
   scale_fill_manual(values = c("secreted" = sec, "membrane" = mem)) +
   scale_x_discrete(name="Protein localization", labels=c(
     "membrane" = paste0("Membrane",
-           "\nmedian = ", prettyNum(median(secr_memb[which(secr_memb$protType=="membrane"),]$mwDa), big.mark = ","),
-           "\nmean = ", prettyNum(round(mean(secr_memb[which(secr_memb$protType=="membrane"),]$mwDa)), big.mark = ",")
+           "\nmedian = ", prettyNum(median(secr_memb[which(secr_memb$protType=="membrane"),]$molWeight), big.mark = ","),
+           "\nmean = ", prettyNum(round(mean(secr_memb[which(secr_memb$protType=="membrane"),]$molWeight)), big.mark = ",")
     ),
     "secreted" = paste0("Secreted",
-           "\nmedian = ", prettyNum(median(secr_memb[which(secr_memb$protType=="secreted"),]$mwDa), big.mark = ","),
-           "\nmean = ", prettyNum(round(mean(secr_memb[which(secr_memb$protType=="secreted"),]$mwDa)), big.mark = ",")
+           "\nmedian = ", prettyNum(median(secr_memb[which(secr_memb$protType=="secreted"),]$molWeight), big.mark = ","),
+           "\nmean = ", prettyNum(round(mean(secr_memb[which(secr_memb$protType=="secreted"),]$molWeight)), big.mark = ",")
     )))+
   theme(axis.text=element_text(size=axisTextSize, color="black"), axis.title=element_text(size=axisTitleSize), plot.title = element_text(size = titleSize), legend.position = "none") +
   scale_y_continuous(labels = label_comma()) +
@@ -222,12 +214,12 @@ p4 <- ggplot(data = secr_memb_chp, aes(x = protType, y = mwDa, fill = protType))
   scale_fill_manual(values = c("secreted" = sec, "membrane" = mem)) +
   scale_x_discrete(name="Protein localization, chaperoned", labels=c(
     "membrane" = paste0("Membrane",
-                      "\nmedian = ", prettyNum(median(secr_memb_chp[which(secr_memb_chp$protType=="membrane"),]$mwDa), big.mark = ","),
-                      "\nmean = ", prettyNum(round(mean(secr_memb_chp[which(secr_memb_chp$protType=="membrane"),]$mwDa)), big.mark = ",")
+                      "\nmedian = ", prettyNum(median(secr_memb_chp[which(secr_memb_chp$protType=="membrane"),]$molWeight), big.mark = ","),
+                      "\nmean = ", prettyNum(round(mean(secr_memb_chp[which(secr_memb_chp$protType=="membrane"),]$molWeight)), big.mark = ",")
     ),
     "secreted" = paste0("Secreted",
-                           "\nmedian = ", prettyNum(median(secr_memb_chp[which(secr_memb_chp$protType=="secreted"),]$mwDa), big.mark = ","),
-                           "\nmean = ", prettyNum(round(mean(secr_memb_chp[which(secr_memb_chp$protType=="secreted"),]$mwDa)), big.mark = ",")
+                           "\nmedian = ", prettyNum(median(secr_memb_chp[which(secr_memb_chp$protType=="secreted"),]$molWeight), big.mark = ","),
+                           "\nmean = ", prettyNum(round(mean(secr_memb_chp[which(secr_memb_chp$protType=="secreted"),]$molWeight)), big.mark = ",")
     )))+
   theme(axis.text=element_text(size=axisTextSize, color="black"), axis.title=element_text(size=axisTitleSize), plot.title = element_text(size = titleSize), legend.position = "none") +
   scale_y_continuous(labels = label_comma()) +
@@ -241,12 +233,12 @@ p5 <- ggplot(data = secr_intr, aes(x = protType, y = mwDa, fill = protType)) +
   scale_fill_manual(values = c("secreted" = sec, "intracellular" = mem)) +
   scale_x_discrete(name="Protein localization", labels=c(
     "intracellular" = paste0("Intracellular",
-                        "\nmedian = ", prettyNum(median(secr_intr[which(secr_intr$protType=="intracellular"),]$mwDa), big.mark = ","),
-                        "\nmean = ", prettyNum(round(mean(secr_intr[which(secr_intr$protType=="intracellular"),]$mwDa)), big.mark = ",")
+                        "\nmedian = ", prettyNum(median(secr_intr[which(secr_intr$protType=="intracellular"),]$molWeight), big.mark = ","),
+                        "\nmean = ", prettyNum(round(mean(secr_intr[which(secr_intr$protType=="intracellular"),]$molWeight)), big.mark = ",")
     ),
     "secreted" = paste0("Secreted",
-                        "\nmedian = ", prettyNum(median(secr_intr[which(secr_intr$protType=="secreted"),]$mwDa), big.mark = ","),
-                        "\nmean = ", prettyNum(round(mean(secr_intr[which(secr_intr$protType=="secreted"),]$mwDa)), big.mark = ",")
+                        "\nmedian = ", prettyNum(median(secr_intr[which(secr_intr$protType=="secreted"),]$molWeight), big.mark = ","),
+                        "\nmean = ", prettyNum(round(mean(secr_intr[which(secr_intr$protType=="secreted"),]$molWeight)), big.mark = ",")
     )))+
   theme(axis.text=element_text(size=axisTextSize, color="black"), axis.title=element_text(size=axisTitleSize), plot.title = element_text(size = titleSize), legend.position = "none") +
   scale_y_continuous(labels = label_comma()) +
