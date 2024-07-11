@@ -196,6 +196,7 @@ for(i in seq_along(geneNames))
 ##################
 setwd(dataGenesDir)
 results <- data.frame()
+geneLvlData <- data.frame()
 for(i in seq_along(geneNames))
 {
   geneName <- geneNames[i]
@@ -206,9 +207,8 @@ for(i in seq_along(geneNames))
   wtInfoFile <- list.files(pattern="wt.txt")
   if(length(wtInfoFile) > 0){
     wtInfo <- read.csv(file = wtInfoFile, header = TRUE)
-    geneInfo$wtDG <- wtInfo[1,]$total.energy
-  }else{
-    geneInfo$wtDG <- NA
+    geneInfo <- cbind(geneInfo, wtInfo[1,])
+    geneLvlData <- rbind(geneLvlData, geneInfo)
   }
   variants <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE, colClasses = c("character", "character", "numeric", "character", "character", "character", "character", "numeric", "character"))
   foldingResultsDir <- paste(specificGeneDir, "folding-results", sep="/")
@@ -229,14 +229,13 @@ for(i in seq_along(geneNames))
     result$pos <- variants[j, "Pos"]
     result$ref <- variants[j, "Ref"]
     result$alt <- variants[j, "Alt"]
-    #result$vkglGeneNameAnnotation <- variants[j, "Gene"]
     result$gene <- geneName
     result$protChange <- variants[j, "ProtChange"]
     result$classificationVKGL <- variants[j, "Classification"]
     result$transcript <- geneInfo$Transcript.stable.ID
     result$uniprot <- geneInfo$UniProtKB.Swiss.Prot.ID
     result$protType <- geneInfo$protType
-    result$wtDG <- geneInfo$wtDG
+    result$wtDG <- geneInfo$total.energy
     results <- rbind(results, result)
   }
 }
@@ -289,15 +288,11 @@ for(i in seq_along(succesfulGenes))
     cat(paste("No PDB file for gene", geneName, "\n", sep=" "))
   }
 }
-# Merge with transcript/uniprot/localization data
-peptidePropPerGene <- merge(peptidePropPerGene, selectedGenes, by.x = "gene", by.y = "Gene.name")
 # Merge with chaperone data
 peptidePropPerGene$chaperoned <- as.factor(peptidePropPerGene$gene %in% chapInteractingGenes$Gene.name)
-# Add wtDG from variant-level results
-wtDGperGene <- data.frame(gene=results$gene, wtDG=results$wtDG)
-wtDGperGene <- wtDGperGene %>% distinct()
-peptidePropPerGene <- merge(peptidePropPerGene, wtDGperGene, by.x = "gene", by.y = "gene")
-peptidePropPerGene$energyPerKDa <- peptidePropPerGene$wtDG/(peptidePropPerGene$molWeight/1000)
+# Add wild-type folding data including transcript/uniprot/localization 
+peptidePropPerGene <- merge(peptidePropPerGene, geneLvlData, by.x = "gene", by.y = "Gene.name")
+peptidePropPerGene$energyPerKDa <- peptidePropPerGene$total.energy/(peptidePropPerGene$molWeight/1000)
 # Persist these results for quick loading later
 peptidePropPerGeneFile <- paste(rootDir, "data", "peptidePropPerGene.csv", sep="/")
 #write.csv(peptidePropPerGene, peptidePropPerGeneFile, row.names = FALSE, quote = FALSE)
