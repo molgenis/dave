@@ -15,10 +15,10 @@ public class VKGLProcessIntoProteinChanges {
 
         // Input files
         // ** FOR ALL GENES, NEED TO RUN THREE TIMES, FOR EACH OF THESE FILES: **
-        // --> protein-atlas-secreted-genenames-mane-uniprot (+.txt / +-withvariants.txt)
-        // --> protein-atlas-intracellular-genenames-mane-uniprot-random2000 (+.txt / +-withvariants.txt)
-        // --> protein-atlas-membrane-genenames-mane-uniprot-random2000 (+.txt / +-withvariants.txt)
-        String inputGenes = "protein-atlas-secreted-genenames-mane-uniprot";
+        // --> protein-atlas-secreted-geneIDs-mane-uniprot (+.txt / +-withvariants.txt)
+        // --> protein-atlas-intracellular-geneIDs-mane-uniprot-random2000 (+.txt / +-withvariants.txt)
+        // --> protein-atlas-membrane-geneIDs-mane-uniprot-random2000 (+.txt / +-withvariants.txt)
+        String inputGenes = "protein-atlas-membrane-geneIDs-mane-uniprot-random2000";
         File proteinSetWithMane = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + inputGenes + ".txt");
         String vkglMissenseFileName = "VKGL_apr2024_annot_missense_nodup_b38.vcf";
         File vkglMissenseLocation = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + vkglMissenseFileName + ".zip");
@@ -33,14 +33,18 @@ public class VKGLProcessIntoProteinChanges {
         HashMap<String, String> geneNameToTranscript = new HashMap<>();
         HashMap<String, String> geneNameToUniprot = new HashMap<>();
         Set<String> geneNamesWithVariants = new TreeSet<>();
+        Set<String> geneStableIdUniqueCheck = new TreeSet<>();
+        Set<String> transcriptUniqueCheck = new TreeSet<>();
         Scanner sc = new Scanner(proteinSetWithMane);
+        System.out.println("Skipping header: " + sc.nextLine());
         while (sc.hasNextLine()) {
             String line = sc.nextLine();
             String[] split = line.split("\t", -1);
-            String transcript = split[0];
-            String geneName = split[1];
+            String geneStableID = split[0];
+            String transcript = split[1];
             String uniprot = split[2];
-            if (split.length != 3) {
+            String geneName = split[3];
+            if (split.length != 4) {
                 throw new Exception("Expected split 3 in line " + line);
             }
             if (geneNameToTranscript.containsKey(geneName)) {
@@ -48,6 +52,16 @@ public class VKGLProcessIntoProteinChanges {
             }
             geneNameToTranscript.put(geneName, transcript);
             geneNameToUniprot.put(geneName, uniprot);
+            if(geneStableIdUniqueCheck.contains(geneStableID))
+            {
+                throw new Exception("Duplicate gene stable ID: " + geneStableID);
+            }
+            geneStableIdUniqueCheck.add(geneStableID);
+            if(transcriptUniqueCheck.contains(transcript))
+            {
+                throw new Exception("Duplicate transcript stable ID: " + transcript);
+            }
+            transcriptUniqueCheck.add(transcript);
         }
         sc.close();
         System.out.println("...done");
