@@ -1,2 +1,2 @@
 Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
-GRCh37	15	73735591	C	T	C15orf60	PA22L	22	VUS
+GRCh38	15	73443250	C	T	REC114	PA22L	22	VUS

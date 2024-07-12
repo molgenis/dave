@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	X	77902746	C	G	COX7B	FA48L	48	VUS
+GRCh38	X	77899572	A	C	COX7B	SA7R	7	LB

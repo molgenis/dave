@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	3	12140656	A	G	SYN2	KA128R	128	VUS
+GRCh38	3	12004634	G	A	SYN2	RA28Q	28	LB

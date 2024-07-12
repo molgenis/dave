@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	15	34527759	T	C	GOLGA8B	NA562S	562	LB
+GRCh38	15	34531537	G	A	GOLGA8B	TA132I	132	LB

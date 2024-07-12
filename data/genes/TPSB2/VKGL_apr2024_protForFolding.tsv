@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	16	1228902	G	T	TPSB2	QA221K	221	LB
+GRCh38	16	1228919	G	C	TPSB2	TA215S	215	LB

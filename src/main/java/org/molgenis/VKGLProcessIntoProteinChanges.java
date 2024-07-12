@@ -13,20 +13,21 @@ public class VKGLProcessIntoProteinChanges {
     public static void main(String args[]) throws Exception {
         System.out.println("Starting...");
 
-        // input files
-        // here:
-        // * protein-atlas-secreted-genenames-mane-uniprot.txt
-        // * protein-atlas-intracellular-genenames-mane-uniprot-random2000.txt
-        // * protein-atlas-membrane-genenames-mane-uniprot-random2000.txt
-        File proteinSetWithMane = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/protein-atlas-secreted-genenames-mane-uniprot.txt");
-        String vkglMissenseFileName = "VKGL_apr2024_annot_missense_nodup.vcf";
+        // Input files
+        // ** FOR ALL GENES, NEED TO RUN THREE TIMES, FOR EACH OF THESE FILES: **
+        // --> protein-atlas-secreted-genenames-mane-uniprot (+.txt / +-withvariants.txt)
+        // --> protein-atlas-intracellular-genenames-mane-uniprot-random2000 (+.txt / +-withvariants.txt)
+        // --> protein-atlas-membrane-genenames-mane-uniprot-random2000 (+.txt / +-withvariants.txt)
+        String inputGenes = "protein-atlas-secreted-genenames-mane-uniprot";
+        File proteinSetWithMane = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + inputGenes + ".txt");
+        String vkglMissenseFileName = "VKGL_apr2024_annot_missense_nodup_b38.vcf";
         File vkglMissenseLocation = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + vkglMissenseFileName + ".zip");
 
-        // output files
-        // directory to write all separate variants files to, creating 1 folder per gene:
+        // Output files
+        // Directory to write all separate variants files to, creating 1 additional directory per gene:
         File outputBaseDir = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/genes/");
-        // genes with 1+ variants, file name same as proteinSetWithMane + "-withvariants"
-        File genesWithVariants = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/protein-atlas-secreted-genenames-mane-uniprot-withvariants.txt");
+        // File with genes having 1+ variants
+        File genesWithVariants = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + inputGenes + "-withvariants.txt");
 
         System.out.println("Loading gene/transcript file...");
         HashMap<String, String> geneNameToTranscript = new HashMap<>();
@@ -175,7 +176,7 @@ public class VKGLProcessIntoProteinChanges {
                     } else {
                         // first time add, also store genome coordinates
                         protChangesToClsf.put(geneProt, clf);
-                        protChangesToChromPosRefAlt.put(geneProt, (lineSplit[0] + "\t" + lineSplit[1] + "\t" + lineSplit[3] + "\t" + lineSplit[4]));
+                        protChangesToChromPosRefAlt.put(geneProt, (lineSplit[0].replace("chr", "") + "\t" + lineSplit[1] + "\t" + lineSplit[3] + "\t" + lineSplit[4]));
                         protChangesToAALoc.put(geneProt, proteinPos);
                     }
                 }
@@ -195,7 +196,7 @@ public class VKGLProcessIntoProteinChanges {
             PrintWriter writer = new PrintWriter(outputBaseDir + "/" + geneName + "/VKGL_apr2024_protForFolding.tsv", "UTF-8");
             writer.write("Assembly" + "\t" + "Chrom" + "\t" + "Pos" + "\t" + "Ref" + "\t" + "Alt" + "\t" + "Gene" + "\t" + "ProtChange" + "\t" + "AALoc" + "\t" + "Classification" + System.lineSeparator());
             for (String key : protChangesToClsf.keySet()) {
-                writer.write("GRCh37" + "\t" + protChangesToChromPosRefAlt.get(key) + "\t" + key + "\t" + protChangesToAALoc.get(key) + "\t" + protChangesToClsf.get(key) + System.lineSeparator());
+                writer.write("GRCh38" + "\t" + protChangesToChromPosRefAlt.get(key) + "\t" + key + "\t" + protChangesToAALoc.get(key) + "\t" + protChangesToClsf.get(key) + System.lineSeparator());
             }
             writer.flush();
             writer.close();

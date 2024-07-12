@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	17	19702643	G	A	SLC47A2	PA376S	376	LB
+GRCh38	17	19681564	G	A	SLC47A2	TA424I	424	VUS

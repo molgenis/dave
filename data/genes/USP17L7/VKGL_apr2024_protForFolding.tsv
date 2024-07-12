@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	8	12133013	C	T	USP17L7	GA333R	333	LB
+GRCh38	8	12133597	C	T	USP17L7	SA138N	138	LB

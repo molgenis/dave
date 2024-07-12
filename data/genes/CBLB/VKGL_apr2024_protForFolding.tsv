@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	3	105720103	C	T	CBLB	DA451N	451	VUS
+GRCh38	3	105720058	T	C	CBLB	NA466D	466	LB

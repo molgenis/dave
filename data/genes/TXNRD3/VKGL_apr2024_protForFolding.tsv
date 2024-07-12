@@ -1,2 +1,2 @@
 Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
-GRCh37	3	126363181	T	A	TXNRD3	IA215F	215	VUS
+GRCh38	3	126644338	T	A	TXNRD3	IA160F	160	VUS

@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	3	47248034	G	A	KIF9	AA371V	371	VUS
+GRCh38	3	47243186	A	C	KIF9	VA525G	525	LB

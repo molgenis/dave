@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	1	153775603	G	A	SLC27A3	AA36T	36	LB
+GRCh38	1	153779848	C	G	SLC27A3	TA633S	633	VUS

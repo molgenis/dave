@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	22	41910486	G	T	SHISA8	QA245K	245	VUS
+GRCh38	22	41909797	T	C	SHISA8	RA388G	388	LB

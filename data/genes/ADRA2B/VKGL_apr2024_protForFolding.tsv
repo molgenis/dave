@@ -1,0 +1,3 @@
+Assembly	Chrom	Pos	Ref	Alt	Gene	ProtChange	AALoc	Classification
+GRCh38	2	96115674	C	A	ADRA2B	RA159L	159	LB
+GRCh38	2	96115015	C	T	ADRA2B	VA379I	379	LB
