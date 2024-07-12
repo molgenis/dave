@@ -16,49 +16,49 @@ academic license
 -- Secretome:
 https://www.proteinatlas.org/humanproteome/tissue/secretome
 --> select '1665 secreted' --> download TSV
-rename protein_class_Predicted.tsv to protein-atlas-secreted.tsv
-replace: (.+?)\t.+
-by: \1
-save as protein-atlas-secreted-genenames.tsv
+take 3rd column ('Ensembl')
+save as protein-atlas-secreted-EnsemblGeneIDs.tsv
 
 
 
 -- comparison to non-secretome:
 also download membrane (5,354) and intracellular (12,917) genes from
 https://www.proteinatlas.org/humanproteome/tissue/secretome
-rename protein_class_Predicted.tsv to protein-atlas-secreted.tsv
-replace: (.+?)\t.+
-by: \1
-save as protein-atlas-intracellular-genenames.tsv
-and protein-atlas-membrane-genenames.tsv
+take 3rd column ('Ensembl')
+save as protein-atlas-intracellular-EnsemblGeneIDs.tsv
+and protein-atlas-membrane-EnsemblGeneIDs.tsv
 
 
 -- Gene annotations
 --> we reannotate to match MANE transcripts to their corresponding UniProtID!
 BioMart, Ensembl genes 112, Human genes (GRCh38.p14)
-filters: MANE select:only, Gene Names: [protein-atlas-secreted-genenames.tsv]
-attributes: Gene name, Transcript stable ID, UniProtKB/Swiss-Prot ID
-export TSV, rename to protein-atlas-secreted-genenames-mane-uniprot.txt
-remove 2 lines with duplicate genes:
-ENST00000428956	C4A	P0C0L4
-ENST00000634014	CCL4L2
-remove lines without uniprot:
-replace ".+\t\r" with ""
+filters: MANE select:only, Gene stable ID(s): [protein-atlas-secreted-EnsemblGeneIDs.tsv]
+attributes: Gene stable ID, Gene name, Transcript stable ID, UniProtKB/Swiss-Prot ID
+export TSV, rename to protein-atlas-secreted-geneIDs-mane-uniprot.txt
 
-filters: MANE select:only, Gene Names: [protein-atlas-membrane-genenames.tsv]
-same attrb
-remove lines without uniprot: replace ".+\t\r" by ""
-delete duplicate lines (1)
+filters: MANE select:only, Gene Names: [protein-atlas-membrane-EnsemblGeneIDs.tsv]
+same attributes
+export TSV, rename to protein-atlas-membrane-geneIDs-mane-uniprot.txt
 
-filters: MANE select:only, Gene Names: [protein-atlas-intracellular-genenames.tsv]
-same attrb
-remove lines without uniprot: replace ".+\t\r" by ""
-delete duplicate lines (2)
-also remove dup gene IDs with other uniprots:
-ENST00000289373	TMSB15A	P0DX04
---> then select 2000 random genes:
-shuf -n 2000 protein-atlas-intracellular-genenames-mane-uniprot.txt > protein-atlas-intracellular-genenames-mane-uniprot-random2000.txt
-and run the Java prog to get all variants etc
+filters: MANE select:only, Gene Names: [protein-atlas-intracellular-EnsemblGeneIDs.tsv]
+same attributes
+export TSV, rename to protein-atlas-intracellular-geneIDs-mane-uniprot.txt
+
+all 3 files treated to remove duplicates and lines without uniprot ID
+for membrane and intracellular, select 2000 random genes using
+shuf -n 2000 A.txt > B.txt
+
+followed by post-treatment to remove duplicate gene/transcripts such as
+
+ENSG00000285620	ENST00000648174	P0DV73	FAM90A16
+ENSG00000285620	ENST00000648174	P0DV74	FAM90A16
+ENSG00000236362	ENST00000440137	O76087	GAGE12F
+ENSG00000236362	ENST00000440137	P0CL82	GAGE12F
+ENSG00000215269	ENST00000445148	O76087	GAGE12G
+ENSG00000215269	ENST00000445148	P0CL82	GAGE12G
+
+and replace with additional random genes until 2000 was reached again.
+these files are used together with VKGL variants to prepare the data for folding
 
 
 
