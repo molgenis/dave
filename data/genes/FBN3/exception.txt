@@ -1,9 +1,0 @@
-Multiple PDB and/or fragments found for uniprotID Q75N90 : AF-Q75N90-F1-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q75N90 : AF-Q75N90-F2-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q75N90 : AF-Q75N90-F3-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q75N90 : AF-Q75N90-F4-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q75N90 : AF-Q75N90-F5-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q75N90 : AF-Q75N90-F6-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q75N90 : AF-Q75N90-F7-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q75N90 : AF-Q75N90-F8-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q75N90 : AF-Q75N90-F9-model_v4.pdb.gz

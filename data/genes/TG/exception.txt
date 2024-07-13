@@ -1,8 +1,0 @@
-Multiple PDB and/or fragments found for uniprotID P01266 : AF-P01266-F1-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID P01266 : AF-P01266-F2-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID P01266 : AF-P01266-F3-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID P01266 : AF-P01266-F4-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID P01266 : AF-P01266-F5-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID P01266 : AF-P01266-F6-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID P01266 : AF-P01266-F7-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID P01266 : AF-P01266-F8-model_v4.pdb.gz

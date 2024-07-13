@@ -1,8 +1,0 @@
-Multiple PDB and/or fragments found for uniprotID Q6ZNJ1 : AF-Q6ZNJ1-F1-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q6ZNJ1 : AF-Q6ZNJ1-F2-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q6ZNJ1 : AF-Q6ZNJ1-F3-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q6ZNJ1 : AF-Q6ZNJ1-F4-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q6ZNJ1 : AF-Q6ZNJ1-F5-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q6ZNJ1 : AF-Q6ZNJ1-F6-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q6ZNJ1 : AF-Q6ZNJ1-F7-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q6ZNJ1 : AF-Q6ZNJ1-F8-model_v4.pdb.gz

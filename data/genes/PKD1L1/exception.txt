@@ -1,9 +1,0 @@
-Multiple PDB and/or fragments found for uniprotID Q8TDX9 : AF-Q8TDX9-F1-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q8TDX9 : AF-Q8TDX9-F2-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q8TDX9 : AF-Q8TDX9-F3-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q8TDX9 : AF-Q8TDX9-F4-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q8TDX9 : AF-Q8TDX9-F5-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q8TDX9 : AF-Q8TDX9-F6-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q8TDX9 : AF-Q8TDX9-F7-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q8TDX9 : AF-Q8TDX9-F8-model_v4.pdb.gz
-Multiple PDB and/or fragments found for uniprotID Q8TDX9 : AF-Q8TDX9-F9-model_v4.pdb.gz
