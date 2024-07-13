@@ -1,0 +1,13 @@
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F10-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F11-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F12-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F13-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID O15230 : AF-O15230-F9-model_v4.pdb.gz

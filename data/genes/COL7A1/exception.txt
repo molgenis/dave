@@ -1,0 +1,9 @@
+Multiple PDB and/or fragments found for uniprotID Q02388 : AF-Q02388-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q02388 : AF-Q02388-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q02388 : AF-Q02388-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q02388 : AF-Q02388-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q02388 : AF-Q02388-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q02388 : AF-Q02388-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q02388 : AF-Q02388-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q02388 : AF-Q02388-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q02388 : AF-Q02388-F9-model_v4.pdb.gz

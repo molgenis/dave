@@ -1,0 +1,9 @@
+Multiple PDB and/or fragments found for uniprotID P35556 : AF-P35556-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P35556 : AF-P35556-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P35556 : AF-P35556-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P35556 : AF-P35556-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P35556 : AF-P35556-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P35556 : AF-P35556-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P35556 : AF-P35556-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P35556 : AF-P35556-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P35556 : AF-P35556-F9-model_v4.pdb.gz

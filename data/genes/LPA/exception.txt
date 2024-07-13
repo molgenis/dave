@@ -1,0 +1,17 @@
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F10-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F11-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F12-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F13-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F14-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F15-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F16-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F17-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID P08519 : AF-P08519-F9-model_v4.pdb.gz
