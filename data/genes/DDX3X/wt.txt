@@ -1,0 +1,2 @@
+Pdb,total.energy,Backbone.Hbond,Sidechain.Hbond,Van.der.Waals,Electrostatics,Solvation.Polar,Solvation.Hydrophobic,Van.der.Waals.clashes,entropy.sidechain,entropy.mainchain,sloop_entropy,mloop_entropy,cis_bond,torsional.clash,backbone.clash,helix.dipole,water.bridge,disulfide,electrostatic.kon,partial.covalent.bonds,energy.Ionisation,Entropy.Complex
+WT_AF-O00571-F1-model_v4_Repair_1.pdb,308.724,-376.83,-183.741,-568.041,-26.3839,747.202,-752.799,26.5897,354.089,1059.28,0,0,0.498472,37.582,310.435,-10.4287,0,0,0,0,1.70809,0
