@@ -1,0 +1,11 @@
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F10-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F11-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q15772 : AF-Q15772-F9-model_v4.pdb.gz
