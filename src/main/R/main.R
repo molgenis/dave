@@ -23,11 +23,11 @@ foldxExec <- "C:/\"Program Files\"/FoldX/foldx_20241231.exe"
 alphaFoldLoc <- "D:/mane_overlap_v4.tar"
 UP000005640_9606_HUMAN_v4Loc <- "D:/UP000005640_9606_HUMAN_v4.tar"
 # Possible gene lists to work on
-secr <- read.table(file=paste(rootDir, "data", "protein-atlas-secreted-genenames-mane-uniprot-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+secr <- read.table(file=paste(rootDir, "data", "protein-atlas-secreted-geneIDs-mane-uniprot-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
 secr$protType <- "secreted"
-intr <- read.table(file=paste(rootDir, "data", "protein-atlas-intracellular-genenames-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+intr <- read.table(file=paste(rootDir, "data", "protein-atlas-intracellular-geneIDs-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
 intr$protType <- "intracellular"
-memb <- read.table(file=paste(rootDir, "data", "protein-atlas-membrane-genenames-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+memb <- read.table(file=paste(rootDir, "data", "protein-atlas-membrane-geneIDs-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
 memb$protType <- "membrane"
 allg <- rbind(secr, intr, memb)
 # Selected gene list to work on
