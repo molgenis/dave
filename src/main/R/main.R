@@ -143,7 +143,7 @@ for(i in seq_along(geneNames))
     if(any(grepl("Specified residue not found", state)))
       {
         write(state, file = "exception.txt")
-        break
+        #break
     }
      file.remove(repPDB_fileName)
      cat("...done!\n")
