@@ -1,0 +1,9 @@
+Multiple PDB and/or fragments found for uniprotID Q9Y493 : AF-Q9Y493-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9Y493 : AF-Q9Y493-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9Y493 : AF-Q9Y493-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9Y493 : AF-Q9Y493-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9Y493 : AF-Q9Y493-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9Y493 : AF-Q9Y493-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9Y493 : AF-Q9Y493-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9Y493 : AF-Q9Y493-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q9Y493 : AF-Q9Y493-F9-model_v4.pdb.gz

@@ -1,0 +1,12 @@
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F10-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F11-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F12-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q7Z408 : AF-Q7Z408-F9-model_v4.pdb.gz
