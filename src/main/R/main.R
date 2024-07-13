@@ -134,8 +134,8 @@ for(i in seq_along(geneNames))
     }
     if(length(list.files(mutationDir, pattern="exception.txt")) > 0)
     {
-      cat("  already tried before but failed, breaking...\n")
-      break
+      cat("  already tried before but failed, skipping......\n")
+      next
     }
     file.copy(from = repPDB_fullLoc, to = mutationDir)
     write(paste(vkgl[j, "ProtChange"], ";", sep=""), file = "individual_list.txt")
