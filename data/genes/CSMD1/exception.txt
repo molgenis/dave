@@ -1,0 +1,12 @@
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F1-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F10-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F11-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F12-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F2-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F3-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F4-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F5-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F6-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F7-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F8-model_v4.pdb.gz
+Multiple PDB and/or fragments found for uniprotID Q96PZ7 : AF-Q96PZ7-F9-model_v4.pdb.gz
