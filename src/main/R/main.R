@@ -96,6 +96,10 @@ for(i in seq_along(geneNames))
     PDBForGene <- gunzip(PDBForGeneGz, overwrite=TRUE)[[1]]
     system(paste(foldxExec, " --command=RepairPDB --pdb=",PDBForGene,sep=""), intern = TRUE)
   } else{
+    # Verify that uniprot ID matched currently repaired protein
+    if(!grepl(uniProtID, list.files(pattern="*_Repair.pdb"), fixed=TRUE)){
+      stop(paste0("Repair file based on ", uniProtID, " expected but found ", list.files(pattern="*_Repair.pdb")))
+    }
     # Cleanup original PDB if a repaired PDB is present
     file.remove(list.files(pattern="*model_v4.pdb"))
   }
