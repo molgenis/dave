@@ -163,16 +163,27 @@ for(i in seq_along(geneNames))
   pdbFile <- list.files(pattern="*_Repair.pdb")
   if(length(list.files(pattern="wt.txt")) == 0 & length(pdbFile) > 0){
     vkgl <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE)
-    mutationToCheck <- vkgl[1,]$ProtChange
-    mutationResultsDir <- paste(specificGeneDir, "folding-results", mutationToCheck, sep="/")
-    avgEnergy <- list.files(mutationResultsDir, pattern="Average")
-    if(length(avgEnergy) > 0){
-      cat(paste("Gene", geneName, "has at least 1 successful mutation:", mutationToCheck,"so doing quick refold to get WT DG...\n", sep=" "))
+    mutationsToCheck <- vkgl$ProtChange
+    successfulMut <- NULL
+    for(mutation in mutationsToCheck){
+      mutationResultDir <- paste(specificGeneDir, "folding-results", mutation, sep="/")
+      avgEnergy <- list.files(mutationResultDir, pattern="Average")
+      if(length(avgEnergy) > 0){
+        successfulMut <- mutation
+        break
+      }
+    }
+    if(is.null(successfulMut))
+    {
+      cat(paste("No average energy file for gene, skipping", geneName, "\n", sep=" "))
+      next
+    }
+      cat(paste("Gene", geneName, "has at least 1 successful mutation:", successfulMut,"so doing quick refold to get WT DG...\n", sep=" "))
       tmpDir <- paste(specificGeneDir, "tmp", sep="/")
       mkdirs(tmpDir)
       setwd(tmpDir)
       file.copy(from = paste(specificGeneDir, pdbFile, sep="/"), to = tmpDir)
-      write(paste(mutationToCheck, ";", sep=""), file = "individual_list.txt")
+      write(paste(successfulMut, ";", sep=""), file = "individual_list.txt")
       state <- system(paste(foldxExec, " --command=BuildModel --mutant-file=individual_list.txt --numberOfRuns=1 --pdb=", pdbFile, sep=""), intern = TRUE)
       rawEnergy <- list.files(pattern="Raw")
       rawResult <- read.table(file = rawEnergy, header = TRUE, skip = 8, sep="\t")
@@ -184,11 +195,8 @@ for(i in seq_along(geneNames))
         file.remove(list.files(pattern="tmp"), include.dirs=TRUE)
         cat(paste("Done! Added wild type info for gene", geneName, "\n", sep=" "))
       }else{
-        stop(paste0("Something went wrong with gene ", geneName, ", mutation ", + mutationToCheck))
+        stop(paste0("Something went wrong with gene ", geneName, ", mutation ", + successfulMut))
       }
-    }else{
-      cat(paste("No average energy file, mutation failed ? Skipping", geneName, "\n", sep=" "))
-    }
   }else{
     cat(paste("No PDB file or wild type info already present for gene", geneName, "\n", sep=" "))
   }
