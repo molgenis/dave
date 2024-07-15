@@ -4,6 +4,8 @@ library(pROC)
 library(ROCR)
 library(randomForestExplainer)
 
+# interesting? https://jtr13.github.io/cc21fall2/introduction-to-xai-explainable-ai-in-r.html
+
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
 data <- read.csv(freeze1)
