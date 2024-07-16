@@ -24,10 +24,10 @@ rf <-randomForest(ann_classificationVKGL~., data=train, mtry=7, ntree=1000, keep
 rf.pr = predict(rf,type="prob",newdata=test)[,2]
 rf.pred = prediction(rf.pr, test$ann_classificationVKGL)
 rf.perf = performance(rf.pred, "tpr", "fpr")
-plot(rf.perf,main=paste0("Variant classification on basic protein properties, RF ROC curve (AUC ",round(auc,2),")"),col=2,lwd=2)
-abline(a=0,b=1,lwd=2,lty=2,col="gray")
 auc <- performance(rf.pred,"auc")
 auc <- unlist(slot(auc, "y.values"))
+plot(rf.perf,main=paste0("Variant classification on basic protein properties, RF ROC curve (AUC ",round(auc,2),")"),col=2,lwd=2)
+abline(a=0,b=1,lwd=2,lty=2,col="gray")
 auc
 
 rf.perf.pnpv = performance(rf.pred, "ppv", "npv")
