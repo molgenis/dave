@@ -26,12 +26,12 @@ rf.pred = prediction(rf.pr, test$ann_classificationVKGL)
 rf.perf = performance(rf.pred, "tpr", "fpr")
 auc <- performance(rf.pred,"auc")
 auc <- unlist(slot(auc, "y.values"))
-plot(rf.perf,main=paste0("Variant classification on basic protein properties, RF ROC curve (AUC ",round(auc,2),")"),col=2,lwd=2)
+plot(rf.perf,main=paste0("Variant classification on peptide and\nfolding properties, RF ROC curve (AUC ",round(auc,2),")"),col=2,lwd=2)
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
 auc
 
-rf.perf.pnpv = performance(rf.pred, "ppv", "npv")
-plot(rf.perf.pnpv,main=paste0("Variant classification on basic protein properties, RF ROC curve (AUC ",round(auc,2),")"),col=2,lwd=2)
+ppvnpv = performance(rf.pred, "ppv", "npv")
+plot(ppvnpv,main="PPV/NPV plot",col=2,lwd=2)
 
 # from https://datasciencechronicle.wordpress.com/2014/03/17/r-tips-part2-rocr-example-with-randomforest/
 
