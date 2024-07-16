@@ -244,23 +244,9 @@ for(i in seq_along(geneNames))
     result$gene <- geneName
     result$protChange <- variants[j, "ProtChange"]
     result$classificationVKGL <- variants[j, "Classification"]
-    result$transcript <- geneInfo$Transcript.stable.ID
-    result$uniprot <- geneInfo$UniProtKB.Swiss.Prot.ID
-    result$protType <- geneInfo$protType
-    result$wtDG <- geneInfo$total.energy
     results <- rbind(results, result)
   }
 }
-
-
-###################################################################
-# Retrieve genes that interact with chaperones and add to results #
-###################################################################
-chapInteractingGenesLoc <- paste(rootDir, "data", "chaperones", "interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt", sep="/")
-chapInteractingGenes <- read.table(file=chapInteractingGenesLoc, sep = '\t',header = TRUE)
-results$chaperoned <- as.factor(results$gene %in% chapInteractingGenes$Gene.name)
-#alternative way to add annotation? something like
-#result$aaa <- as.factor(selectedGenes[selectedGenes$Gene.name==results$gene, "protType"])
 
 
 #####################################################################################
@@ -293,38 +279,41 @@ for(i in seq_along(succesfulGenes))
                                              isoElecPoint = pI(aaSeq),
                                              aaSeq = aaSeq
                                              ))
-    
-    cat(paste("calculations done\n", sep=" "))
-
+    cat(paste0("calculations done\n"))
   }else{
     cat(paste("No PDB file for gene", geneName, "\n", sep=" "))
   }
 }
 # Merge with chaperone data
+chapInteractingGenesLoc <- paste(rootDir, "data", "chaperones", "interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt", sep="/")
+chapInteractingGenes <- read.table(file=chapInteractingGenesLoc, sep = '\t',header = TRUE)
 peptidePropPerGene$chaperoned <- as.factor(peptidePropPerGene$gene %in% chapInteractingGenes$Gene.name)
 # Add wild-type folding data including transcript/uniprot/localization 
 peptidePropPerGene <- merge(peptidePropPerGene, geneLvlData, by.x = "gene", by.y = "Gene.name")
 peptidePropPerGene$energyPerKDa <- peptidePropPerGene$total.energy/(peptidePropPerGene$molWeight/1000)
+# Rename columns to WT ("Wild Type") for clarity
+names(peptidePropPerGene)[names(peptidePropPerGene) == 'protType'] <- 'proteinLocalization'
+colnames(peptidePropPerGene) <- paste('WT', colnames(peptidePropPerGene), sep = '_')
 # Persist these results for quick loading later
 peptidePropPerGeneFile <- paste(rootDir, "data", "peptidePropPerGene.csv", sep="/")
 #write.csv(peptidePropPerGene, peptidePropPerGeneFile, row.names = FALSE, quote = FALSE)
 peptidePropPerGene <- read.csv(peptidePropPerGeneFile)
 
 
-###############################################################################
+################################################################################
 # For all succesfully folded mutations, mutate AA-seq and calculate properties #
 ################################################################################
 setwd(dataGenesDir)
-succesfulGenes <- unique(peptidePropPerGene$gene)
-results[,"aliphaticIndex"] <- NA
-results[,"bomanIndex"] <- NA
-results[,"charge"] <- NA
-results[,"hydrophobicMoment"] <- NA
-results[,"hydrophobicity"] <- NA
-results[,"instabilityIndex"] <- NA
-results[,"molWeight"] <- NA
-results[,"massOverCharge"] <- NA
-results[,"isoElecPoint"] <- NA
+succesfulGenes <- unique(peptidePropPerGene$WT_gene)
+results[,"mutant_aliphaticIndex"] <- NA
+results[,"mutant_bomanIndex"] <- NA
+results[,"mutant_charge"] <- NA
+results[,"mutant_hydrophobicMoment"] <- NA
+results[,"mutant_hydrophobicity"] <- NA
+results[,"mutant_instabilityIndex"] <- NA
+results[,"mutant_molWeight"] <- NA
+results[,"mutant_massOverCharge"] <- NA
+results[,"mutant_isoElecPoint"] <- NA
 results[,"delta_aliphaticIndex"] <- NA
 results[,"delta_bomanIndex"] <- NA
 results[,"delta_charge"] <- NA
@@ -334,41 +323,115 @@ results[,"delta_instabilityIndex"] <- NA
 results[,"delta_molWeight"] <- NA
 results[,"delta_massOverCharge"] <- NA
 results[,"delta_isoElecPoint"] <- NA
-results[,"mutatedAAseq"] <- NA
+results[,"mutant_aaSeq"] <- NA
 for(i in 1:nrow(results))
 {
   variant <- results[i,]
   cat(paste0("Calculating variant peptide properties for ", variant$gene, ":", variant$protChange,"\n"))
-  genePeptideProp <- peptidePropPerGene[peptidePropPerGene$gene==variant$gene, ]
+  genePeptideProp <- peptidePropPerGene[peptidePropPerGene$WT_gene==variant$gene, ]
   aaToReplace <- substr(variant$protChange, 1, 1)
   aaReplacement <- substr(variant$protChange, nchar(variant$protChange), nchar(variant$protChange))
   aaReplacePos <- as.numeric(substr(variant$protChange, 3, (nchar(variant$protChange)-1)))
-  aaSeqToMutate <- genePeptideProp$aaSeq
+  aaSeqToMutate <- genePeptideProp$WT_aaSeq
   originalAAatPos <- substr(aaSeqToMutate, aaReplacePos, aaReplacePos)
   if(originalAAatPos != aaToReplace){
     stop("AA to mutate different from original")
   }
   substr(aaSeqToMutate, aaReplacePos, aaReplacePos) <- aaReplacement
-  results[i,]$aliphaticIndex <- aIndex(aaSeqToMutate)
-  results[i,]$bomanIndex <- boman(aaSeqToMutate)
-  results[i,]$charge <- charge(aaSeqToMutate)
-  results[i,]$hydrophobicMoment <- hmoment(aaSeqToMutate)
-  results[i,]$hydrophobicity <- hydrophobicity(aaSeqToMutate)
-  results[i,]$instabilityIndex <- instaIndex(aaSeqToMutate)
-  results[i,]$molWeight <- mw(aaSeqToMutate)
-  results[i,]$massOverCharge <- mz(aaSeqToMutate)
-  results[i,]$isoElecPoint <- pI(aaSeqToMutate)
-  results[i,]$delta_aliphaticIndex <- results[i,]$aliphaticIndex - genePeptideProp$aliphaticIndex
-  results[i,]$delta_bomanIndex <- results[i,]$bomanIndex - genePeptideProp$bomanIndex
-  results[i,]$delta_charge <- results[i,]$charge - genePeptideProp$charge
-  results[i,]$delta_hydrophobicMoment <- results[i,]$hydrophobicMoment - genePeptideProp$hydrophobicMoment
-  results[i,]$delta_hydrophobicity <-  results[i,]$hydrophobicity - genePeptideProp$hydrophobicity
-  results[i,]$delta_instabilityIndex <- results[i,]$instabilityIndex - genePeptideProp$instabilityIndex
-  results[i,]$delta_molWeight <- results[i,]$molWeight - genePeptideProp$molWeight
-  results[i,]$delta_massOverCharge <- results[i,]$massOverCharge - genePeptideProp$massOverCharge
-  results[i,]$delta_isoElecPoint <- results[i,]$isoElecPoint - genePeptideProp$isoElecPoint
-  results[i,]$mutatedAAseq <- aaSeqToMutate
+  results[i,]$mutant_aliphaticIndex <- aIndex(aaSeqToMutate)
+  results[i,]$mutant_bomanIndex <- boman(aaSeqToMutate)
+  results[i,]$mutant_charge <- charge(aaSeqToMutate)
+  results[i,]$mutant_hydrophobicMoment <- hmoment(aaSeqToMutate)
+  results[i,]$mutant_hydrophobicity <- hydrophobicity(aaSeqToMutate)
+  results[i,]$mutant_instabilityIndex <- instaIndex(aaSeqToMutate)
+  results[i,]$mutant_molWeight <- mw(aaSeqToMutate)
+  results[i,]$mutant_massOverCharge <- mz(aaSeqToMutate)
+  results[i,]$mutant_isoElecPoint <- pI(aaSeqToMutate)
+  results[i,]$delta_aliphaticIndex <- results[i,]$mutant_aliphaticIndex - genePeptideProp$WT_aliphaticIndex
+  results[i,]$delta_bomanIndex <- results[i,]$mutant_bomanIndex - genePeptideProp$WT_bomanIndex
+  results[i,]$delta_charge <- results[i,]$mutant_charge - genePeptideProp$WT_charge
+  results[i,]$delta_hydrophobicMoment <- results[i,]$mutant_hydrophobicMoment - genePeptideProp$WT_hydrophobicMoment
+  results[i,]$delta_hydrophobicity <-  results[i,]$mutant_hydrophobicity - genePeptideProp$WT_hydrophobicity
+  results[i,]$delta_instabilityIndex <- results[i,]$mutant_instabilityIndex - genePeptideProp$WT_instabilityIndex
+  results[i,]$delta_molWeight <- results[i,]$mutant_molWeight - genePeptideProp$WT_molWeight
+  results[i,]$delta_massOverCharge <- results[i,]$mutant_massOverCharge - genePeptideProp$WT_massOverCharge
+  results[i,]$delta_isoElecPoint <- results[i,]$mutant_isoElecPoint - genePeptideProp$WT_isoElecPoint
+  results[i,]$mutant_aaSeq <- aaSeqToMutate
 }
+
+
+###############################################################################
+# Rename and move columns, add WT properties, and calculate mutant properties #
+###############################################################################
+# For clarity, rename mutant folding results to 'delta_x'
+results <- results %>% rename(delta_total.energy = total.energy,
+                              delta_Backbone.Hbond = Backbone.Hbond,
+                              delta_Sidechain.Hbond = Sidechain.Hbond,
+                              delta_Van.der.Waals = Van.der.Waals,
+                              delta_Electrostatics = Electrostatics,
+                              delta_Solvation.Polar = Solvation.Polar,
+                              delta_Solvation.Hydrophobic = Solvation.Hydrophobic,
+                              delta_Van.der.Waals.clashes = Van.der.Waals.clashes,
+                              delta_entropy.sidechain = entropy.sidechain,
+                              delta_entropy.mainchain = entropy.mainchain,
+                              delta_sloop_entropy = sloop_entropy,
+                              delta_mloop_entropy = mloop_entropy,
+                              delta_cis_bond = cis_bond,
+                              delta_torsional.clash = torsional.clash,
+                              delta_backbone.clash = backbone.clash,
+                              delta_helix.dipole = helix.dipole,
+                              delta_water.bridge = water.bridge,
+                              delta_disulfide = disulfide,
+                              delta_electrostatic.kon = electrostatic.kon,
+                              delta_partial.covalent.bonds = partial.covalent.bonds,
+                              delta_energy.Ionisation = energy.Ionisation,
+                              delta_Entropy.Complex = Entropy.Complex
+                              )
+# Add WT gene/protein properties to the variants
+results <- merge(results, peptidePropPerGene, by.x = "gene", by.y = "WT_gene")
+results$mutant_total.energy <- results$WT_total.energy + results$delta_total.energy
+results$mutant_Backbone.Hbond <- results$WT_Backbone.Hbond + results$delta_Backbone.Hbond
+results$mutant_Sidechain.Hbond <- results$WT_Sidechain.Hbond + results$delta_Sidechain.Hbond
+results$mutant_Van.der.Waals <- results$WT_Van.der.Waals + results$delta_Van.der.Waals
+results$mutant_Electrostatics <- results$WT_Electrostatics + results$delta_Electrostatics
+results$mutant_Solvation.Polar <- results$WT_Solvation.Polar + results$delta_Solvation.Polar
+results$mutant_Solvation.Hydrophobic <- results$WT_Solvation.Hydrophobic + results$delta_Solvation.Hydrophobic
+results$mutant_Van.der.Waals.clashes <- results$WT_Van.der.Waals.clashes + results$delta_Van.der.Waals.clashes
+results$mutant_entropy.sidechain <- results$WT_entropy.sidechain + results$delta_entropy.sidechain
+results$mutant_entropy.mainchain <- results$WT_entropy.mainchain + results$delta_entropy.mainchain
+results$mutant_sloop_entropy <- results$WT_sloop_entropy + results$delta_sloop_entropy
+results$mutant_mloop_entropy <- results$WT_mloop_entropy + results$delta_mloop_entropy
+results$mutant_cis_bond <- results$WT_cis_bond + results$delta_cis_bond
+results$mutant_torsional.clash <- results$WT_torsional.clash + results$delta_torsional.clash
+results$mutant_backbone.clash <- results$WT_backbone.clash + results$delta_backbone.clash
+results$mutant_helix.dipole <- results$WT_helix.dipole + results$delta_helix.dipole
+results$mutant_water.bridge <- results$WT_water.bridge + results$delta_water.bridge
+results$mutant_disulfide <- results$WT_disulfide + results$delta_disulfide
+results$mutant_electrostatic.kon <- results$WT_electrostatic.kon + results$delta_electrostatic.kon
+results$mutant_partial.covalent.bonds <- results$WT_partial.covalent.bonds + results$delta_partial.covalent.bonds
+results$mutant_energy.Ionisation <- results$WT_energy.Ionisation + results$delta_energy.Ionisation
+results$mutant_Entropy.Complex <- results$WT_Entropy.Complex + results$delta_Entropy.Complex
+# Remove Pdb file names, they are not useful
+results$Pdb <- NULL
+results$WT_Pdb <- NULL 
+# Rename columns for clarity
+results <- results %>% rename(dna_variant_chrom = chrom,
+                              dna_variant_pos = pos,
+                              dna_variant_ref = ref,
+                              dna_variant_alt = alt,
+                              dna_variant_assembly = assembly,
+                              ann_classificationVKGL = classificationVKGL,
+                              UniProtID = WT_UniProtKB.Swiss.Prot.ID,
+                              TranscriptID = WT_Transcript.stable.ID,
+                              ann_proteinLocalization = WT_proteinLocalization,
+                              ann_proteinIschaperoned = WT_chaperoned,
+                              ann_WT_energyPerKDa = WT_energyPerKDa,
+                              ann_mutant_energy_SD = SD,
+                              delta_aaSeq = protChange)
+# Sort columns alphabetically and move selected ones to the front
+results <- results[,order(colnames(results))]
+results <- results %>% relocate(gene, TranscriptID, UniProtID, dna_variant_chrom, dna_variant_pos, dna_variant_ref, dna_variant_alt, dna_variant_assembly, ann_classificationVKGL)
+colnames(results)
 
 
 #######################################################
