@@ -5,6 +5,12 @@ reminder to cite: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8745595/
 interesting? https://academic.oup.com/nar/article/52/W1/W187/7688983
 relevant: https://www.nature.com/articles/s41597-024-03327-8
 
+Beyond the Loss-of-Function Paradigm
+https://www.annualreviews.org/content/journals/10.1146/annurev-genom-111221-103208
+
+The functional impact of rare variation across the regulatory cascade
+https://www.sciencedirect.com/science/article/pii/S2666979X2300215X
+
 Protein 'charge' and 'Isoelectric point' annotations?
 
 https://rdrr.io/cran/seqinr/man/computePI.html
