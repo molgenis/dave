@@ -9,6 +9,9 @@ https://elifesciences.org/articles/82593
 high-throughput experimental
 https://www.nature.com/articles/s41586-023-06328-6
 
+The delicate balance between secreted protein folding and endoplasmic reticulum-associated degradation in human physiology
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4162396/
+
 reminder to cite: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8745595/
 
 interesting? https://academic.oup.com/nar/article/52/W1/W187/7688983

@@ -11,7 +11,7 @@ setwd(imgDir)
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
 results <- read.csv(freeze1)
 results <- subset(results,  ann_classificationVKGL != "CF")
-rownames(results) <- paste0(results$gene, ":", results$delta_aaSeq)
+rownames(results) <- paste0(results$gene, "/", results$UniProtID, ":", results$delta_aaSeq)
 # Select all relevant columns for plot
 results <- results %>% select(contains(c("ann_classificationVKGL", "ann_proteinIschaperoned", "ann_proteinLocalization", "delta_", "mutant_")))
 results <- results %>% select(-contains(c("_aaSeq", "WT_", "ann_mutant_energy_SD")))
@@ -28,7 +28,7 @@ p <- ggplot(results_scaled_melt,
       color = ann_classificationVKGL)) +
   geom_jitter(size = 0.25) +
   geom_vline(xintercept = 0) +
-  facet_grid(rows=vars(variable)) +
+  facet_grid(rows=vars(variable)) + # cols=vars(ann_proteinLocalization) / ann_proteinIschaperoned
   theme_classic() +
   theme(strip.text.y = element_text(angle = 0), legend.position = "none") +
   scale_colour_manual(name = "Classification", values = c("LB" = "green","LP" = "red", "VUS"="gray"))
@@ -37,4 +37,4 @@ ggsave(filename="all-variables-facet.png", plot=p, width = 8, height = 20) #norm
 
 highDD <- results_scaled[results_scaled$delta_disulfide > 7,]
 table(highDD$ann_classificationVKGL)
-highDD$ann_classificationVKGL
+paste(rownames(highDD), highDD$ann_classificationVKGL)
