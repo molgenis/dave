@@ -1,9 +1,18 @@
 # vkgl-secretome-protein-stability
 
+SIGMA leverages protein structural information to predict the pathogenicity of missense variants
+https://www.cell.com/cell-reports-methods/pdf/S2667-2375(23)00373-9.pdf
+
+popscreen stability
+https://elifesciences.org/articles/82593
+
+high-throughput experimental
+https://www.nature.com/articles/s41586-023-06328-6
+
 reminder to cite: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8745595/
 
 interesting? https://academic.oup.com/nar/article/52/W1/W187/7688983
-relevant: https://www.nature.com/articles/s41597-024-03327-8
+AM paper of course: https://www.nature.com/articles/s41597-024-03327-8
 
 Beyond the Loss-of-Function Paradigm
 https://www.annualreviews.org/content/journals/10.1146/annurev-genom-111221-103208
