@@ -19,6 +19,9 @@ interesting? https://academic.oup.com/nar/article/52/W1/W187/7688983
 Analysis of AlphaMissense data in different protein groups and structural context
 https://www.nature.com/articles/s41597-024-03327-8
 
+Identification of pathogenic missense mutations using protein stability predictors
+https://www.nature.com/articles/s41598-020-72404-w
+
 Beyond the Loss-of-Function Paradigm
 https://www.annualreviews.org/content/journals/10.1146/annurev-genom-111221-103208
 
