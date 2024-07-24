@@ -15,7 +15,9 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4162396/
 reminder to cite: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8745595/
 
 interesting? https://academic.oup.com/nar/article/52/W1/W187/7688983
-AM paper of course: https://www.nature.com/articles/s41597-024-03327-8
+
+Analysis of AlphaMissense data in different protein groups and structural context
+https://www.nature.com/articles/s41597-024-03327-8
 
 Beyond the Loss-of-Function Paradigm
 https://www.annualreviews.org/content/journals/10.1146/annurev-genom-111221-103208
@@ -37,6 +39,9 @@ https://stackoverflow.com/questions/3735286/create-a-matrix-of-scatterplots-pair
 https://ggobi.github.io/ggally/reference/ggpairs.html
 or lattice?
 https://homepage.stat.uiowa.edu/~luke/classes/STAT4580/threenum.html
+
+Accurate proteome-wide missense variant effect prediction with AlphaMissense
+https://www.science.org/doi/10.1126/science.adg7492
 
 also:
 VKGL
