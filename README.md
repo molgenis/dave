@@ -55,3 +55,8 @@ Ensembl
 ..
 
 
+Reactome data: gene-pathway set
+https://reactome.org/download-data
+https://reactome.org/download/current/ReactomePathways.gmt.zip
+
+
