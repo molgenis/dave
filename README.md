@@ -12,6 +12,9 @@ https://www.nature.com/articles/s41586-023-06328-6
 The delicate balance between secreted protein folding and endoplasmic reticulum-associated degradation in human physiology
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4162396/
 
+Pathogenic missense protein variants affect different functional pathways and proteomic features than healthy population variants
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8110273/
+
 reminder to cite: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8745595/
 
 interesting? https://academic.oup.com/nar/article/52/W1/W187/7688983
