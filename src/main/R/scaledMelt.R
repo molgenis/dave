@@ -38,3 +38,10 @@ ggsave(filename="all-variables-facet.png", plot=p, width = 8, height = 20) #norm
 highDD <- results_scaled[results_scaled$delta_disulfide > 7,]
 table(highDD$ann_classificationVKGL)
 paste(rownames(highDD), highDD$ann_classificationVKGL)
+
+# Scatterplot to show localization differences
+agg <- aggregate(results_scaled_melt$value, by=list(Cat=results_scaled_melt$ann_classificationVKGL, Var=results_scaled_melt$variable), FUN=mean)
+aggC <-  reshape2::dcast(agg, Var ~ Cat)
+p <- ggplot(aggC, aes(x = LB, y = LP)) +
+  geom_point()
+ggsave(filename="loc-scatter.png", plot=p, width = 8, height = 4.5) #normally 8x4.5
