@@ -63,7 +63,7 @@ seg_tip_len_y <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP)-min(resu
 p <- ggplot(results_var_means_CI_agg_clsf_loc_cast, aes(x =  x.mean_LB, y = x.mean_LP, color = Localization, label=Variable)) +
   theme_classic() +
   geom_point() +
-  geom_abline(intercept = 0, slope = 1) +
+  #geom_abline(intercept = 0, slope = 1) +
   geom_segment(aes(x = x.lower_LB, y = x.mean_LP, xend = x.upper_LB, yend = x.mean_LP)) +
   geom_segment(aes(x = x.mean_LB, y = x.lower_LP, xend = x.mean_LB, yend = x.upper_LP)) +
   geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.upper_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.upper_LP)) + # top tip
@@ -98,26 +98,28 @@ p <- ggplot(results_var_means_CI_agg_clsf_loc_cast, aes(x =  x.mean_LB, y = x.me
 ggsave(filename="loc-scatter-delta.png", plot=p, width = 8, height = 4.5)
 
 # Same but for chaperoned vs unchaperoned, select mutants/deltas
-results_scaled_melt_sub <- results_scaled_melt[grep("delta_", results_scaled_melt$variable),]
-results_scaled_melt_sub$variable = gsub("delta_", "", results_scaled_melt_sub$variable)
-results_var_means_CI_agg_clsf_chp <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Chaperoned=results_scaled_melt_sub$ann_proteinIschaperoned, Variable=results_scaled_melt_sub$variable), FUN=CI)
-results_var_means_CI_agg_clsf_chp_cast <- data.table::dcast(as.data.table(results_var_means_CI_agg_clsf_chp), Chaperoned+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
-head(results_var_means_CI_agg_clsf_chp_cast)
-seg_tip_len_x <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB))*seg_tip_len_scale
-seg_tip_len_y <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP))*seg_tip_len_scale
-p <- ggplot(results_var_means_CI_agg_clsf_chp_cast, aes(x =  x.mean_LB, y = x.mean_LP, color = Chaperoned, label=Variable)) +
-  theme_classic() +
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1) +
-  geom_segment(aes(x = x.lower_LB, y = x.mean_LP, xend = x.upper_LB, yend = x.mean_LP)) +
-  geom_segment(aes(x = x.mean_LB, y = x.lower_LP, xend = x.mean_LB, yend = x.upper_LP)) +
-  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.upper_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.upper_LP)) + # top tip
-  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.lower_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.lower_LP)) + # bottom tip
-  geom_segment(aes(x = x.lower_LB, y = x.mean_LP-seg_tip_len, xend = x.lower_LB, yend = x.mean_LP+seg_tip_len_y)) + # left tip
-  geom_segment(aes(x = x.upper_LB, y = x.mean_LP-seg_tip_len_y, xend = x.upper_LB, yend = x.mean_LP+seg_tip_len_y)) + # right tip
-  geom_text(size=2, hjust = "left", vjust="top", nudge_x = 0.01, nudge_y = -0.01, check_overlap = TRUE) +
-  scale_color_manual(values = c("TRUE" = chp, "FALSE" = unc))
-ggsave(filename="chp-scatter-del.png", plot=p, width = 8, height = 4.5)
+for(select in c("delta_", "mutant_")){
+  results_scaled_melt_sub <- results_scaled_melt[grep(select, results_scaled_melt$variable),]
+  results_scaled_melt_sub$variable = gsub(select, "", results_scaled_melt_sub$variable)
+  results_var_means_CI_agg_clsf_chp <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Chaperoned=results_scaled_melt_sub$ann_proteinIschaperoned, Variable=results_scaled_melt_sub$variable), FUN=CI)
+  results_var_means_CI_agg_clsf_chp_cast <- data.table::dcast(as.data.table(results_var_means_CI_agg_clsf_chp), Chaperoned+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
+  head(results_var_means_CI_agg_clsf_chp_cast)
+  seg_tip_len_x <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB))*seg_tip_len_scale
+  seg_tip_len_y <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP))*seg_tip_len_scale
+  p <- ggplot(results_var_means_CI_agg_clsf_chp_cast, aes(x =  x.mean_LB, y = x.mean_LP, color = Chaperoned, label=Variable)) +
+    theme_classic() +
+    geom_point() +
+    #geom_abline(intercept = 0, slope = 1) +
+    geom_segment(aes(x = x.lower_LB, y = x.mean_LP, xend = x.upper_LB, yend = x.mean_LP)) +
+    geom_segment(aes(x = x.mean_LB, y = x.lower_LP, xend = x.mean_LB, yend = x.upper_LP)) +
+    geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.upper_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.upper_LP)) + # top tip
+    geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.lower_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.lower_LP)) + # bottom tip
+    geom_segment(aes(x = x.lower_LB, y = x.mean_LP-seg_tip_len, xend = x.lower_LB, yend = x.mean_LP+seg_tip_len_y)) + # left tip
+    geom_segment(aes(x = x.upper_LB, y = x.mean_LP-seg_tip_len_y, xend = x.upper_LB, yend = x.mean_LP+seg_tip_len_y)) + # right tip
+    geom_text(size=2, hjust = "left", vjust="top", nudge_x = 0.01, nudge_y = -0.01, check_overlap = TRUE) +
+    scale_color_manual(values = c("TRUE" = chp, "FALSE" = unc))
+  ggsave(filename=paste0("chp-scatter-",select,".png"), plot=p, width = 8, height = 4.5)
+}
 
 
 ###########################
