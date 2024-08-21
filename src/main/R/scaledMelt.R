@@ -46,9 +46,10 @@ results_scaled_melt <- reshape2::melt(results_scaled, na.rm = FALSE, id = c("ann
 ################################################
 # Scatterplot to show localization differences #
 ################################################
-# Select 'delta_' or 'mutant_' variables to clean up plot (deltas are really close together!)
+seg_tip_len_scale = 0.01
+# Select only 'mutant_' variables to clean up plot
 results_scaled_melt_sub <- results_scaled_melt[grep("mutant_", results_scaled_melt$variable),]
-# Remove the 'delta_' or 'mutant_' tag to clean up plot
+# Remove 'mutant_' tag to clean up plot
 results_scaled_melt_sub$variable = gsub("mutant_", "", results_scaled_melt_sub$variable)
 # Aggregate values on classification, localization and variable
 results_var_means_CI_agg_clsf_loc <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Localization=results_scaled_melt_sub$ann_proteinLocalization, Variable=results_scaled_melt_sub$variable), FUN=CI)
@@ -57,22 +58,66 @@ results_var_means_CI_agg_clsf_loc <- aggregate(results_scaled_melt_sub$value, by
 results_var_means_CI_agg_clsf_loc_cast <- data.table::dcast(as.data.table(results_var_means_CI_agg_clsf_loc), Localization+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
 head(results_var_means_CI_agg_clsf_loc_cast)
 # Plot and save
-seg_tip_len <- .01
+seg_tip_len_x <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB))*seg_tip_len_scale
+seg_tip_len_y <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP))*seg_tip_len_scale
 p <- ggplot(results_var_means_CI_agg_clsf_loc_cast, aes(x =  x.mean_LB, y = x.mean_LP, color = Localization, label=Variable)) +
   theme_classic() +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) +
   geom_segment(aes(x = x.lower_LB, y = x.mean_LP, xend = x.upper_LB, yend = x.mean_LP)) +
   geom_segment(aes(x = x.mean_LB, y = x.lower_LP, xend = x.mean_LB, yend = x.upper_LP)) +
-  geom_segment(aes(x = x.mean_LB-seg_tip_len, y = x.upper_LP, xend = x.mean_LB+seg_tip_len, yend = x.upper_LP)) + # top tip
-  geom_segment(aes(x = x.mean_LB-seg_tip_len, y = x.lower_LP, xend = x.mean_LB+seg_tip_len, yend = x.lower_LP)) + # bottom tip
-  geom_segment(aes(x = x.lower_LB, y = x.mean_LP-seg_tip_len, xend = x.lower_LB, yend = x.mean_LP+seg_tip_len)) + # left tip
-  geom_segment(aes(x = x.upper_LB, y = x.mean_LP-seg_tip_len, xend = x.upper_LB, yend = x.mean_LP+seg_tip_len)) + # right tip
+  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.upper_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.upper_LP)) + # top tip
+  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.lower_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.lower_LP)) + # bottom tip
+  geom_segment(aes(x = x.lower_LB, y = x.mean_LP-seg_tip_len_y, xend = x.lower_LB, yend = x.mean_LP+seg_tip_len_y)) + # left tip
+  geom_segment(aes(x = x.upper_LB, y = x.mean_LP-seg_tip_len_y, xend = x.upper_LB, yend = x.mean_LP+seg_tip_len_y)) + # right tip
   geom_text(size=2, hjust = "left", vjust="top", nudge_x = 0.01, nudge_y = -0.01, check_overlap = TRUE) +
-  scale_fill_manual(values = c("LP" = LPa, "LB" = LBe)) +
+  scale_color_manual(name="Protein localization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec)) +
   xlim(-1.1, 1.1) +
   ylim(-1.1, 1.1)
 ggsave(filename="loc-scatter-mut.png", plot=p, width = 8, height = 4.5)
+
+# Same but for deltas, has no limits
+results_scaled_melt_sub <- results_scaled_melt[grep("delta_", results_scaled_melt$variable),]
+results_scaled_melt_sub$variable = gsub("delta_", "", results_scaled_melt_sub$variable)
+results_var_means_CI_agg_clsf_loc <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Localization=results_scaled_melt_sub$ann_proteinLocalization, Variable=results_scaled_melt_sub$variable), FUN=CI)
+results_var_means_CI_agg_clsf_loc_cast <- data.table::dcast(as.data.table(results_var_means_CI_agg_clsf_loc), Localization+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
+head(results_var_means_CI_agg_clsf_loc_cast)
+seg_tip_len_x <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB))*seg_tip_len_scale
+seg_tip_len_y <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP))*seg_tip_len_scale
+p <- ggplot(results_var_means_CI_agg_clsf_loc_cast, aes(x =  x.mean_LB, y = x.mean_LP, color = Localization, label=Variable)) +
+  theme_classic() +
+  geom_point() +
+  geom_segment(aes(x = x.lower_LB, y = x.mean_LP, xend = x.upper_LB, yend = x.mean_LP)) +
+  geom_segment(aes(x = x.mean_LB, y = x.lower_LP, xend = x.mean_LB, yend = x.upper_LP)) +
+  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.upper_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.upper_LP)) + # top tip
+  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.lower_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.lower_LP)) + # bottom tip
+  geom_segment(aes(x = x.lower_LB, y = x.mean_LP-seg_tip_len_y, xend = x.lower_LB, yend = x.mean_LP+seg_tip_len_y)) + # left tip
+  geom_segment(aes(x = x.upper_LB, y = x.mean_LP-seg_tip_len_y, xend = x.upper_LB, yend = x.mean_LP+seg_tip_len_y)) + # right tip
+  geom_text(size=2, hjust = "left", vjust="top", nudge_x = 0.01, nudge_y = -0.01, check_overlap = TRUE) +
+  scale_color_manual(name="Protein localization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec))
+ggsave(filename="loc-scatter-delta.png", plot=p, width = 8, height = 4.5)
+
+# Same but for chaperoned vs unchaperoned, select mutants/deltas
+results_scaled_melt_sub <- results_scaled_melt[grep("delta_", results_scaled_melt$variable),]
+results_scaled_melt_sub$variable = gsub("delta_", "", results_scaled_melt_sub$variable)
+results_var_means_CI_agg_clsf_chp <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Chaperoned=results_scaled_melt_sub$ann_proteinIschaperoned, Variable=results_scaled_melt_sub$variable), FUN=CI)
+results_var_means_CI_agg_clsf_chp_cast <- data.table::dcast(as.data.table(results_var_means_CI_agg_clsf_chp), Chaperoned+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
+head(results_var_means_CI_agg_clsf_chp_cast)
+seg_tip_len_x <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LB))*seg_tip_len_scale
+seg_tip_len_y <- (max(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP)-min(results_var_means_CI_agg_clsf_loc_cast$x.mean_LP))*seg_tip_len_scale
+p <- ggplot(results_var_means_CI_agg_clsf_chp_cast, aes(x =  x.mean_LB, y = x.mean_LP, color = Chaperoned, label=Variable)) +
+  theme_classic() +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  geom_segment(aes(x = x.lower_LB, y = x.mean_LP, xend = x.upper_LB, yend = x.mean_LP)) +
+  geom_segment(aes(x = x.mean_LB, y = x.lower_LP, xend = x.mean_LB, yend = x.upper_LP)) +
+  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.upper_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.upper_LP)) + # top tip
+  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.lower_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.lower_LP)) + # bottom tip
+  geom_segment(aes(x = x.lower_LB, y = x.mean_LP-seg_tip_len, xend = x.lower_LB, yend = x.mean_LP+seg_tip_len_y)) + # left tip
+  geom_segment(aes(x = x.upper_LB, y = x.mean_LP-seg_tip_len_y, xend = x.upper_LB, yend = x.mean_LP+seg_tip_len_y)) + # right tip
+  geom_text(size=2, hjust = "left", vjust="top", nudge_x = 0.01, nudge_y = -0.01, check_overlap = TRUE) +
+  scale_color_manual(values = c("TRUE" = chp, "FALSE" = unc))
+ggsave(filename="chp-scatter-del.png", plot=p, width = 8, height = 4.5)
 
 
 ###########################
