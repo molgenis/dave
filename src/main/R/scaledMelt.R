@@ -5,6 +5,7 @@ library(dplyr)
 library(ggplot2)
 library(Rmisc) # for CI
 library(data.table) # for casting multiple variables
+library(cutpointr) # optimal PPV calc
 
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
@@ -99,18 +100,22 @@ for(select in c("delta_", "mutant_")){
   ggsave(filename=paste0("scatter-chp-",select,".png"), plot=p, width = 8, height = 4.5)
 }
 
-###################################
-# From this, test specific groups #
-###################################
+#################################################
+# From this, test specific groups?              #
+# Means are meaningless since we split          #
+# into LP/LB which often 'cancel eachother out' #
+#################################################
 chap_all <- subset(results, ann_proteinIschaperoned == TRUE)
 unch_all <- subset(results, ann_proteinIschaperoned == FALSE)
 
-secr_all <- subset(results, protType == "secreted")
-memb_all <- subset(results, protType == "membrane")
-intr_all <- subset(results, protType == "intracellular")
+secr_all <- subset(results, ann_proteinLocalization == "secreted")
+memb_all <- subset(results, ann_proteinLocalization == "membrane")
+intr_all <- subset(results, ann_proteinLocalization == "intracellular")
 
-wilcox.test(chap_all$mutant_to, unch_all$delta_total.energy)
-
+wilcox.test(chap_all$delta_total.energy, unch_all$delta_total.energy)
+wilcox.test(secr_all$delta_total.energy, memb_all$delta_total.energy)
+wilcox.test(secr_all$delta_total.energy, intr_all$delta_total.energy)
+wilcox.test(memb_all$delta_total.energy, intr_all$delta_total.energy)
 
 #################################################################################
 # Followup on molecular weight delta for LP variants in different localizations #
@@ -121,7 +126,68 @@ ggplot(results_LP, aes(delta_molWeight, colour = ann_proteinLocalization, fill =
   geom_density(alpha = 0.25) + #, adjust = 0.1
   scale_fill_manual(name="Protein\nlocalization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec)) +
   scale_color_manual(name="Protein\nlocalization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec))
-  
+
+
+######################################################################
+# Scatterplot total energy split in localization AND chaperonization #
+######################################################################
+# Select only total energy
+results_scaled_melt_sub <- subset(results_scaled_melt, variable == "delta_total.energy" ) #& ann_classificationVKGL != "VUS"
+results_scaled_melt_sub_agg <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Localization=results_scaled_melt_sub$ann_proteinLocalization, Chaperoned=results_scaled_melt_sub$ann_proteinIschaperoned, Variable=results_scaled_melt_sub$variable), FUN=CI)
+results_scaled_melt_sub_cast <- data.table::dcast(as.data.table(results_scaled_melt_sub_agg), Localization+Chaperoned+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
+seg_tip_len_x <- (max(results_scaled_melt_sub_cast$x.mean_LB)-min(results_scaled_melt_sub_cast$x.mean_LB))*seg_tip_len_scale
+seg_tip_len_y <- (max(results_scaled_melt_sub_cast$x.mean_LP)-min(results_scaled_melt_sub_cast$x.mean_LP))*seg_tip_len_scale
+p <- ggplot(results_scaled_melt_sub_cast, aes(x = x.mean_LB, y = x.mean_LP, color = Localization, shape = Chaperoned, label=Variable)) +
+  theme_classic() +
+  geom_point(size=5) +
+  geom_segment(aes(x = x.lower_LB, y = x.mean_LP, xend = x.upper_LB, yend = x.mean_LP)) +
+  geom_segment(aes(x = x.mean_LB, y = x.lower_LP, xend = x.mean_LB, yend = x.upper_LP)) +
+  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.upper_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.upper_LP)) + # top tip
+  geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.lower_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.lower_LP)) + # bottom tip
+  geom_segment(aes(x = x.lower_LB, y = x.mean_LP-seg_tip_len_y, xend = x.lower_LB, yend = x.mean_LP+seg_tip_len_y)) + # left tip
+  geom_segment(aes(x = x.upper_LB, y = x.mean_LP-seg_tip_len_y, xend = x.upper_LB, yend = x.mean_LP+seg_tip_len_y)) + # right tip
+  geom_text(size=2, hjust = "right", vjust="top", nudge_x = -seg_tip_len_x, nudge_y = -seg_tip_len_y, check_overlap = F) +
+  scale_color_manual(name="Protein\nlocalization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec))
+ggsave(filename=paste0("scatter-totalenergy-",select,".png"), plot=p, width = 8, height = 4.5)
+
+
+###############################################
+# Group-specific PPV/NPV thresholds and apply #
+###############################################
+ppvFromCutpoint <- function(data, cutpoint){
+  opt_cut <- cutpointr(data, delta_total.energy, ann_classificationVKGL, direction = ">=", pos_class = "LP", neg_class = "LB", method = cutpointr::oc_manual, cutpoint=cutpoint)
+  tp <- sum(data[data$ann_classificationVKGL=="LP","delta_total.energy"] >= cutpoint)
+  fp <- sum(data[data$ann_classificationVKGL=="LB","delta_total.energy"] >= cutpoint)
+  tn <- sum(data[data$ann_classificationVKGL=="LB","delta_total.energy"] < cutpoint)
+  fn <- sum(data[data$ann_classificationVKGL=="LP","delta_total.energy"] < cutpoint)
+  ppv <- 100 *tp/(tp+fp)
+  npv <- 100 *tn/(tn+fn)
+  sens <- opt_cut$sensitivity*100
+  spec <- opt_cut$specificity*100
+  cat(paste("At cutpoint is ",cutpoint," we get PPV ",round(ppv),"%, NPV ",round(npv),"%, sensitivity ",round(sens),"% and specificity ",round(spec),"%.\n",sep=""))
+  return(ppv)
+}
+
+findCutpointForPPV <- function(data, minRequestedPPV){
+  min <- min(data$delta_total.energy)
+  max <- max(data$delta_total.energy)
+  for(i in seq(from = min, to = max, length.out = 100)){
+    foundPPV <- ppvFromCutpoint(data, i)
+    if(foundPPV >= minRequestedPPV)
+    return(i)
+  }
+}
+
+secr_chp <- subset(chap_all, ann_proteinLocalization == "secreted" & ann_classificationVKGL != "VUS")
+memb_chp <- subset(chap_all, ann_proteinLocalization == "membrane" & ann_classificationVKGL != "VUS")
+intr_chp <- subset(chap_all, ann_proteinLocalization == "intracellular" & ann_classificationVKGL != "VUS")
+
+findCutpointForPPV(secr_chp, 90)
+findCutpointForPPV(memb_chp, 90)
+findCutpointForPPV(intr_chp, 90)
+
+
+
 
 ###########################
 # Jitter to show all data #
