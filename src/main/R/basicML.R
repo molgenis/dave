@@ -10,6 +10,9 @@ rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
 data <- read.csv(freeze1)
 data <- subset(data, ann_classificationVKGL == "LP" | ann_classificationVKGL == "LB")
+# subselect on localization, chaperonization, etc
+#data <- subset(data, ann_proteinLocalization == "membrane")
+#data <- subset(data, ann_proteinIschaperoned == FALSE)
 data$ann_classificationVKGL <- as.factor(data$ann_classificationVKGL)
 
 set.seed(222)
@@ -30,14 +33,14 @@ plot(rf.perf,main=paste0("Variant classification on peptide and\nfolding propert
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
 auc
 
+
+
+# Extra stuff: PPV/NPV, feature importance, etc
 ppvnpv = performance(rf.pred, "ppv", "npv")
 plot(ppvnpv,main="PPV/NPV plot",col=2,lwd=2)
-
 # from https://datasciencechronicle.wordpress.com/2014/03/17/r-tips-part2-rocr-example-with-randomforest/
-
 # feature importance?
 varImpPlot(rf)
 measure_importance(rf)
-
 # PCA?
 # affinity-prop clustering?

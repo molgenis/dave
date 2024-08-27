@@ -240,14 +240,20 @@ p1 / (p2 + p3) / (p4 + p5 + p6)
 
 
 #####
-#
+# Scatterplots
 #####
-lplb <- subset(results, classificationVKGL == "LP" | classificationVKGL == "LB")
-ggplot(lplb %>% arrange(match(classificationVKGL, c("LB", "LP"))), aes(y=total.energy, x=wtDG, color=classificationVKGL)) +
+# ann_classificationVKGL, ann_proteinLocalization, ann_proteinIschaperoned, WT_total.energy, ..
+lplb <- subset(results, ann_classificationVKGL == "LP" | ann_classificationVKGL == "LB")
+ggplot(lplb %>% arrange(match(ann_classificationVKGL, c("LB", "LP"))), aes(y=delta_total.energy, x=WT_total.energy, color=ann_classificationVKGL)) +
   theme_classic() +
   geom_point(size=1) +
-  scale_color_manual(values=c("green", "red", "grey")) +
+  scale_color_manual(name="VKGL classification", values=c("LB" = "green", "LP" = "red")) +
+  #scale_color_manual(name="Protein\nlocalization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec)) +
   scale_x_continuous(labels = label_comma()) +
   xlab("Gibbs free energy change of wild-type protein folding (ΔG, in kcal/mol)") +
   ylab(paste("Difference in Gibbs free energy change between wild-type and variant protein (ΔΔG, in kcal/mol) ", sep=" "))
+# Mol weight?
+ggplot(lplb, aes(y=delta_molWeight, x=WT_total.energy, color=ann_proteinLocalization)) +
+  theme_classic() +
+  geom_point(size=1)
 
