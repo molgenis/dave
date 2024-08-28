@@ -258,15 +258,11 @@ paste(rownames(highDD), highDD$ann_classificationVKGL)
 secr_lp_CI <- npCI(secr_lp$delta_molWeight)
 intr_lp_CI <- npCI(intr_lp$delta_molWeight)
 memb_lp_CI <- npCI(memb_lp$delta_molWeight)
-# Density
+# Density to show differences in localization for LP only
 results_LP <- subset(results, ann_classificationVKGL == "LP")
-results_LB <- subset(results, ann_classificationVKGL == "LB")
 p <- ggplot(results_LP, aes(delta_molWeight, colour = ann_proteinLocalization, fill = ann_proteinLocalization)) +
   theme_classic() +
   geom_density(alpha = 0.25) + #, adjust = 0.1
-  #geom_rect(xmin=secr_lp_m[1], xmax=secr_lp_m[3], ymin=0, ymax=Inf, alpha=.5, color=sec, fill=sec) +
-  #geom_rect(xmin=intr_lp_CI[1], xmax=intr_lp_CI[3], ymin=0, ymax=Inf, alpha=.5, color=int, fill=int) +
-  #geom_rect(xmin=memb_lp_CI[1], xmax=memb_lp_CI[3], ymin=0, ymax=Inf, alpha=.5, color=mem, fill=mem) +
   geom_vline(xintercept = secr_lp_CI[2], color=sec) +
   geom_vline(xintercept = intr_lp_CI[2], color=int) +
   geom_vline(xintercept = memb_lp_CI[2], color=mem) +
@@ -276,6 +272,21 @@ p <- ggplot(results_LP, aes(delta_molWeight, colour = ann_proteinLocalization, f
   scale_fill_manual(name="Protein\nlocalization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec)) +
   scale_color_manual(name="Protein\nlocalization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec))
 ggsave(filename=paste0("density-deltamw-CIs.png"), plot=p, width = 8, height = 4.5)
+# Density for LP-LB within secreted
+secr_lp_CI <- npCI(secr_lp$delta_molWeight)
+secr_lb_CI <- npCI(secr_lb$delta_molWeight)
+p <- ggplot(secr_all, aes(delta_molWeight, colour = ann_classificationVKGL, fill = ann_classificationVKGL)) +
+  theme_classic() +
+  geom_density(alpha = 0.25) + #, adjust = 0.1
+  scale_fill_manual(name = "Classification", values = c("LB" = "green","LP" = "red", "VUS"="gray")) +
+  scale_colour_manual(name = "Classification", values = c("LB" = "green","LP" = "red", "VUS"="gray"))
+ggsave(filename=paste0("density-deltamw-secr-lp-lb.png"), plot=p, width = 8, height = 4.5)
+# Scatter LP-LB within secreted. # x=delta_total.energy
+p <- ggplot(secr_all %>% arrange(match(ann_classificationVKGL, c("VUS", "LB", "LP"))), aes(y=delta_molWeight, x=delta_Solvation.Polar, color=ann_classificationVKGL)) +
+  theme_classic() +
+  geom_point(size=1) +
+  scale_colour_manual(name = "Classification", values = c("LB" = "green","LP" = "red", "VUS"="gray"))
+ggsave(filename=paste0("scatter-deltamw-deltasp-secr-lp-lb.png"), plot=p, width = 8, height = 4.5)
 # Jitter plot: nice but very difficult to see
 ggplot(results, aes(x = delta_molWeight, y = ann_classificationVKGL, color = ann_classificationVKGL)) +
   geom_jitter(size = 0.25) +
@@ -302,6 +313,16 @@ p <- ggplot(results_dmw_agg_cast, aes(x = x.mean_LB, y = x.mean_LP, color = Loca
   scale_color_manual(name="Protein\nlocalization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec))
 ggsave(filename=paste0("scatter-deltamw-rawvals.png"), plot=p, width = 8, height = 4.5)
 
+# Disulfide bridges
+# Jitter plot
+results_nocf <- subset(results, ann_classificationVKGL != "CF")
+p <- ggplot(results_nocf, aes(x = delta_disulfide, y = ann_classificationVKGL, color = ann_classificationVKGL)) +
+  geom_jitter(size = 0.5) +
+  geom_vline(xintercept = 0) +
+  facet_grid(rows=vars(ann_proteinLocalization)) + # cols=vars(ann_proteinLocalization) / ann_proteinIschaperoned
+  theme_classic() +
+  theme(strip.text.y = element_text(angle = 0), legend.position = "none") +
+  scale_colour_manual(name = "Classification", values = c("LB" = "green","LP" = "red", "VUS"="gray"))
+ggsave(filename=paste0("jitter-ddisulf.png"), plot=p, width = 8, height = 4.5)
 
-
-
+subset(results_nocf, delta_disulfide > 2 & ann_classificationVKGL == "LB")

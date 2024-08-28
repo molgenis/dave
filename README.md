@@ -15,6 +15,9 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4162396/
 Pathogenic missense protein variants affect different functional pathways and proteomic features than healthy population variants
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8110273/
 
+"Disulfide bridges can stabilize protein structure and are often present in high abundance in secreted proteins"
+https://microbialcellfactories.biomedcentral.com/articles/10.1186/1475-2859-8-26
+
 reminder to cite: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8745595/
 
 interesting? https://academic.oup.com/nar/article/52/W1/W187/7688983
