@@ -7,13 +7,33 @@ library(randomForestExplainer)
 # interesting? https://jtr13.github.io/cc21fall2/introduction-to-xai-explainable-ai-in-r.html
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
-freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
-data <- read.csv(freeze1)
+freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
+data <- read.csv(freeze2)
+
+####################
+# Data preparation #
+####################
+# Nice row names
+rownames(data) <- paste0(data$gene, "/", data$UniProtID, ":", data$delta_aaSeq)
+# Select only LB and LP
 data <- subset(data, ann_classificationVKGL == "LP" | ann_classificationVKGL == "LB")
-# subselect on localization, chaperonization, etc
+# Remove all columns with only 0 values
+data <- data[, colSums(data != 0) > 0]
+# Select all columns with relevant factors or numerical variables for analysis
+# We drop mutant and WT information here and only focus on the deltas
+data <- data %>% select(contains(c("ann_classificationVKGL", "ann_proteinIschaperoned", "ann_proteinLocalization", "delta_", "mutant_")))
+data <- data %>% select(-contains(c("ann_mutant_energy_SD", "_aaSeq")))
+
+# Factorize categoricals
+data$ann_classificationVKGL <- as.factor(data$ann_classificationVKGL)
+data$ann_proteinLocalization <- as.factor(data$ann_proteinLocalization)
+
+# Check column types
+sapply(data, class)
+
+# Subselect on localization, chaperonization, etc
 #data <- subset(data, ann_proteinLocalization == "membrane")
 #data <- subset(data, ann_proteinIschaperoned == FALSE)
-data$ann_classificationVKGL <- as.factor(data$ann_classificationVKGL)
 
 set.seed(222)
 draw <- sample(c(TRUE, FALSE), nrow(data), replace=TRUE, prob=c(0.8, 0.2))
@@ -22,8 +42,7 @@ test <- data[!draw, ]
 
 # worked before not not now? optimal mtry for RF
 #bestmtry <- tuneRF(train,train$classificationVKGL,stepFactor = 1.2, improve = 0.01, trace=T, plot= T) 
-
-rf <-randomForest(ann_classificationVKGL~., data=train, mtry=7, ntree=1000, keep.forest=TRUE, importance=TRUE, xtest=subset(test, select=-ann_classificationVKGL))
+rf <-randomForest(ann_classificationVKGL~., data=train, mtry=round(sqrt(length(data))), ntree=1000, keep.forest=TRUE, importance=TRUE, xtest=subset(test, select=-ann_classificationVKGL))
 rf.pr = predict(rf,type="prob",newdata=test)[,2]
 rf.pred = prediction(rf.pr, test$ann_classificationVKGL)
 rf.perf = performance(rf.pred, "tpr", "fpr")

@@ -4,31 +4,36 @@ library(dplyr)
 library(caret)
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
-freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
-data <- read.csv(freeze1)
-data <- subset(data, classificationVKGL == "LP" | classificationVKGL == "LB")
-data$classificationVKGL <- as.factor(data$classificationVKGL)
-data$Pdb <- NULL
-data$mutatedAAseq <- NULL
-data$assembly <- NULL
-data$chrom <- NULL
-data$ref <- NULL
-data$alt <- NULL
-data$gene <- NULL
-data$protChange <- NULL
-data$transcript <- NULL
-data$uniprot <- NULL
-data$protType <- NULL
+freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
+data <- read.csv(freeze2)
+
+####################
+# Data preparation #
+####################
+# Nice row names
+rownames(data) <- paste0(data$gene, "/", data$UniProtID, ":", data$delta_aaSeq)
+# Select only LB and LP
+data <- subset(data, ann_classificationVKGL == "LP" | ann_classificationVKGL == "LB")
+# Remove all columns with only 0 values
+data <- data[, colSums(data != 0) > 0]
+# Select all columns with relevant factors or numerical variables for analysis
+# We drop mutant and WT information here and only focus on the deltas
+data <- data %>% select(contains(c("ann_classificationVKGL", "ann_proteinIschaperoned", "delta_", "mutant_")))
+data <- data %>% select(-contains(c("ann_mutant_energy_SD", "_aaSeq")))
+# Factorize categoricals
+data$ann_classificationVKGL <- as.factor(data$ann_classificationVKGL)
+# Check column types
+sapply(data, class)
 
 set.seed(42)
-sample_split <- sample.split(Y = data$classificationVKGL, SplitRatio = 0.7)
+sample_split <- sample.split(Y = data$ann_classificationVKGL, SplitRatio = 0.7)
 train_set <- subset(x = data, sample_split == TRUE)
 test_set <- subset(x = data, sample_split == FALSE)
 
-y_train <- as.integer(train_set$classificationVKGL) - 1
-y_test <- as.integer(test_set$classificationVKGL) - 1
-X_train <- train_set %>% select(-classificationVKGL)
-X_test <- test_set %>% select(-classificationVKGL)
+y_train <- as.integer(train_set$ann_classificationVKGL) - 1
+y_test <- as.integer(test_set$ann_classificationVKGL) - 1
+X_train <- train_set %>% select(-ann_classificationVKGL)
+X_test <- test_set %>% select(-ann_classificationVKGL)
 
 xgb_train <- xgb.DMatrix(data = as.matrix(X_train), label = y_train)
 xgb_test <- xgb.DMatrix(data = as.matrix(X_test), label = y_test)
@@ -41,7 +46,7 @@ xgb_params <- list(
   colsample_bytree = 1,
   objective = "multi:softprob",
   eval_metric = "mlogloss",
-  num_class = length(levels(data$classificationVKGL))
+  num_class = length(levels(data$ann_classificationVKGL))
 )
 
 xgb_model <- xgb.train(

@@ -14,8 +14,8 @@ imgDir <- paste(rootDir, "img", sep="/")
 setwd(imgDir)
 
 # Load the data and assign meaningful row names
-freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
-results <- read.csv(freeze1)
+freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
+results <- read.csv(freeze2)
 rownames(results) <- paste0(results$gene, "/", results$UniProtID, ":", results$delta_aaSeq)
 
 # For non-parametric bootstrapping of means
@@ -58,12 +58,14 @@ results_scaled_melt <- reshape2::melt(results_scaled, na.rm = FALSE, id = c("ann
 # Scatterplot to show localization differences #
 ################################################
 for(select in c("delta_", "mutant_")){
+  #select <- "mutant_"
   # Select only one type of variables to clean up plot
   results_scaled_melt_sub <- results_scaled_melt[grep(select, results_scaled_melt$variable),]
   # Remove variant type tag to clean up plot
   results_scaled_melt_sub$variable = gsub(select, "", results_scaled_melt_sub$variable)
   # Aggregate values on classification, localization and variable
-  results_var_means_CI_agg_clsf_loc <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Localization=results_scaled_melt_sub$ann_proteinLocalization, Variable=results_scaled_melt_sub$variable), FUN=npCI)
+  # NOTE: better to use npCI but that is too slow / memory intensive
+  results_var_means_CI_agg_clsf_loc <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Localization=results_scaled_melt_sub$ann_proteinLocalization, Variable=results_scaled_melt_sub$variable), FUN=CI)
   # Cast back so that we have Classification as columns for plotting on X/Y axis
   #results_var_means_CI_agg_clsf_loc_cast <- reshape2::dcast(as.data.table(results_var_means_CI_agg_clsf_loc), Localization+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
   results_var_means_CI_agg_clsf_loc_cast <- data.table::dcast(as.data.table(results_var_means_CI_agg_clsf_loc), Localization+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
@@ -89,7 +91,8 @@ for(select in c("delta_", "mutant_")){
 for(select in c("delta_", "mutant_")){
   results_scaled_melt_sub <- results_scaled_melt[grep(select, results_scaled_melt$variable),]
   results_scaled_melt_sub$variable = gsub(select, "", results_scaled_melt_sub$variable)
-  results_var_means_CI_agg_clsf_chp <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Chaperoned=results_scaled_melt_sub$ann_proteinIschaperoned, Variable=results_scaled_melt_sub$variable), FUN=npCI)
+  # NOTE: better to use npCI but that is too slow / memory intensive
+  results_var_means_CI_agg_clsf_chp <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Chaperoned=results_scaled_melt_sub$ann_proteinIschaperoned, Variable=results_scaled_melt_sub$variable), FUN=CI)
   results_var_means_CI_agg_clsf_chp_cast <- data.table::dcast(as.data.table(results_var_means_CI_agg_clsf_chp), Chaperoned+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
   seg_tip_len_x <- (max(results_var_means_CI_agg_clsf_chp_cast$x.mean_LB)-min(results_var_means_CI_agg_clsf_chp_cast$x.mean_LB))*seg_tip_len_scale
   seg_tip_len_y <- (max(results_var_means_CI_agg_clsf_chp_cast$x.mean_LP)-min(results_var_means_CI_agg_clsf_chp_cast$x.mean_LP))*seg_tip_len_scale
