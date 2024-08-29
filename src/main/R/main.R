@@ -5,6 +5,8 @@ library(R.utils)   # for 'gunzip', 'mkdirs'
 library(Rpdb)      # to load PDB files
 library(dplyr)     # to remove duplicate rows
 library(Peptides)  # protein annotations
+library(peptoolkit)# QSAR features
+library(crunch)    # Compress results
 
 
 #######################
@@ -434,9 +436,45 @@ results <- results %>% relocate(gene, TranscriptID, UniProtID, dna_variant_chrom
 colnames(results)
 
 
+#####################
+# Add QSAR features #
+#####################
+# Better rownames to results, makes it easier to merge later
+#rownames(results) <- paste0(results$gene, "/", results$UniProtID, ":", results$delta_aaSeq)
+mutant_qsarFt <- data.frame()
+for(i in 1:nrow(results))
+{
+  mutantAAseq <- results[i,'mutant_aaSeq']
+  qsarRes <- peptoolkit::extract_features_QSAR(nchar(mutantAAseq), custom.list = TRUE, PeList = c(mutantAAseq))
+  mutant_qsarFt <- rbind(mutant_qsarFt, qsarRes)
+}
+# repeat for WT
+WT_qsarFt <- data.frame()
+for(i in 1:nrow(results))
+{
+  WTAAseq <- results[i,'WT_aaSeq']
+  qsarRes <- peptoolkit::extract_features_QSAR(nchar(WTAAseq), custom.list = TRUE, PeList = c(WTAAseq))
+  WT_qsarFt <- rbind(WT_qsarFt, qsarRes)
+}
+# Write/read to buffer intermediate data
+#write.csv(mutant_qsarFt, paste(rootDir, "data", "mutant_qsarFt.csv", sep="/"), row.names = FALSE, quote = FALSE)
+#write.csv(WT_qsarFt, paste(rootDir, "data", "WT_qsarFt.csv", sep="/"), row.names = FALSE, quote = FALSE)
+#mutant_qsarFt <- read.csv(paste(rootDir, "data", "mutant_qsarFt.csv", sep="/"))
+#WT_qsarFt <- read.csv(paste(rootDir, "data", "WT_qsarFt.csv", sep="/"))
+mutant_qsarFt$Sequence <- NULL # remove sequence, identical to mutant_aaSeq
+WT_qsarFt$Sequence <- NULL # remove sequence, identical to WT_aaSeq
+delta_qsarFt <- mutant_qsarFt-WT_qsarFt # compute deltas
+# Rename columns
+colnames(mutant_qsarFt) <- paste("mutant", colnames(mutant_qsarFt), sep = "_")
+colnames(WT_qsarFt) <- paste("WT", colnames(WT_qsarFt), sep = "_")
+colnames(delta_qsarFt) <- paste("delta", colnames(delta_qsarFt), sep = "_")
+# Combine with results
+results <- cbind(results, delta_qsarFt, mutant_qsarFt, WT_qsarFt)
+
+
 #######################################################
 # Write/read complete collation of variant level data #
 #######################################################
-freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
-#write.csv(results, freeze1, row.names = FALSE, quote = FALSE)
-results <- read.csv(freeze1)
+freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
+#write.csv.gz(results, freeze2, row.names = FALSE, quote = FALSE)
+results <- read.csv(freeze2)
