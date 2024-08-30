@@ -49,8 +49,9 @@ resultsWithAM <- read.csv(resultsWithAMFile)
 # Determine optimal threshold using Youden's Index #
 ####################################################
 # Read existing results
-resultsForY <- subset(resultsWithAM, ann_classificationVKGL=="LB" | ann_classificationVKGL == "LP")
+resultsForY <- subset(resultsWithAM, (ann_classificationVKGL=="LB" | ann_classificationVKGL == "LP")) #  &  (ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular") / ann_proteinLocalization == "secreted"
 opt_cut <- cutpointr(resultsForY, am_pathogenicity, ann_classificationVKGL, direction = ">=", pos_class = "LP", neg_class = "LB", method = maximize_metric, metric = youden)
+auc(opt_cut)
 youdenIndex <- opt_cut$optimal_cutpoint
 tp <- sum(resultsForY[resultsForY$ann_classificationVKGL=="LP",'am_pathogenicity'] >= youdenIndex)
 fp <- sum(resultsForY[resultsForY$ann_classificationVKGL=="LB",'am_pathogenicity'] >= youdenIndex)

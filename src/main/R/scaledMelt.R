@@ -75,7 +75,6 @@ for(select in c("delta_", "mutant_")){
   p <- ggplot(results_var_means_CI_agg_clsf_loc_cast, aes(x =  x.mean_LB, y = x.mean_LP, color = Localization, label=Variable)) +
     theme_classic() +
     geom_point() +
-    #geom_abline(intercept = 0, slope = 1) +
     geom_segment(aes(x = x.lower_LB, y = x.mean_LP, xend = x.upper_LB, yend = x.mean_LP)) +
     geom_segment(aes(x = x.mean_LB, y = x.lower_LP, xend = x.mean_LB, yend = x.upper_LP)) +
     geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.upper_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.upper_LP)) + # top tip
@@ -83,6 +82,7 @@ for(select in c("delta_", "mutant_")){
     geom_segment(aes(x = x.lower_LB, y = x.mean_LP-seg_tip_len_y, xend = x.lower_LB, yend = x.mean_LP+seg_tip_len_y)) + # left tip
     geom_segment(aes(x = x.upper_LB, y = x.mean_LP-seg_tip_len_y, xend = x.upper_LB, yend = x.mean_LP+seg_tip_len_y)) + # right tip
     geom_text(size=2, hjust = "right", vjust="top", nudge_x = -seg_tip_len_x, nudge_y = -seg_tip_len_y, check_overlap = F) +
+    #geom_smooth(formula = 'y ~ x', method='lm', fullrange = TRUE) +
     scale_color_manual(name="Protein\nlocalization", labels=c("intracellular" = "Intracellular", "membrane" = "Membrane", "secreted" = "Secreted"), values=c("intracellular"=int, "membrane"=mem, "secreted"=sec))
   ggsave(filename=paste0("scatter-loc-",select,".png"), plot=p, width = 8, height = 4.5)
 }
@@ -99,7 +99,6 @@ for(select in c("delta_", "mutant_")){
   p <- ggplot(results_var_means_CI_agg_clsf_chp_cast, aes(x =  x.mean_LB, y = x.mean_LP, color = Chaperoned, label=Variable)) +
     theme_classic() +
     geom_point() +
-    #geom_abline(intercept = 0, slope = 1) +
     geom_segment(aes(x = x.lower_LB, y = x.mean_LP, xend = x.upper_LB, yend = x.mean_LP)) +
     geom_segment(aes(x = x.mean_LB, y = x.lower_LP, xend = x.mean_LB, yend = x.upper_LP)) +
     geom_segment(aes(x = x.mean_LB-seg_tip_len_x, y = x.upper_LP, xend = x.mean_LB+seg_tip_len_x, yend = x.upper_LP)) + # top tip

@@ -3,6 +3,7 @@ library(caret)
 library(pROC)
 library(ROCR)
 library(randomForestExplainer)
+library(dplyr)
 
 # interesting? https://jtr13.github.io/cc21fall2/introduction-to-xai-explainable-ai-in-r.html
 
@@ -13,6 +14,8 @@ data <- read.csv(freeze2)
 ####################
 # Data preparation #
 ####################
+# For some reproduciblity, set a random seed, though RF is non-deterministic by design
+set.seed(222)
 # Nice row names
 rownames(data) <- paste0(data$gene, "/", data$UniProtID, ":", data$delta_aaSeq)
 # Select only LB and LP
@@ -32,19 +35,43 @@ data$ann_proteinLocalization <- as.factor(data$ann_proteinLocalization)
 sapply(data, class)
 
 # Subselect on localization, chaperonization, etc
-#data <- subset(data, ann_proteinLocalization == "membrane")
+#secr_data <- subset(data, ann_proteinLocalization == "secreted")
+#memb_intr_data <- subset(data, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
 #data <- subset(data, ann_proteinIschaperoned == FALSE)
 
-set.seed(222)
-draw <- sample(c(TRUE, FALSE), nrow(data), replace=TRUE, prob=c(0.8, 0.2))
-train <- data[draw, ]
-test <- data[!draw, ]
+propTrain <- 0.8
+propTest <- 0.2
+
+all_draw <- sample(c(TRUE, FALSE), nrow(data), replace=TRUE, prob=c(propTrain, propTest))
+all_train <- data[all_draw, ]
+all_test <- data[!all_draw, ]
+
+secr_train_data <- subset(all_train, ann_proteinLocalization == "secreted")
+secr_train_draw <- sample(c(TRUE, FALSE), nrow(secr_train_data), replace=TRUE, prob=c(propTrain, propTest))
+secr_train <- secr_train_data[secr_train_draw, ]
+
+secr_test_data <- subset(all_test, ann_proteinLocalization == "secreted")
+secr_test_draw <- sample(c(TRUE, FALSE), nrow(secr_test_data), replace=TRUE, prob=c(propTrain, propTest))
+secr_test <- secr_test_data[!secr_test_draw, ]
+
+memb_intr_train_data <- subset(all_train, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
+memb_intr_train_draw <- sample(c(TRUE, FALSE), nrow(memb_intr_train_data), replace=TRUE, prob=c(propTrain, propTest))
+memb_intr_train <- memb_intr_train_data[memb_intr_train_draw, ]
+
+memb_intr_test_data <- subset(all_test, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
+memb_intr_test_draw <- sample(c(TRUE, FALSE), nrow(memb_intr_test_data), replace=TRUE, prob=c(propTrain, propTest))
+memb_intr_test <- memb_intr_test_data[!memb_intr_test_draw, ]
 
 # worked before not not now? optimal mtry for RF
-#bestmtry <- tuneRF(train,train$classificationVKGL,stepFactor = 1.2, improve = 0.01, trace=T, plot= T) 
-rf <-randomForest(ann_classificationVKGL~., data=train, mtry=round(sqrt(length(data))), ntree=1000, keep.forest=TRUE, importance=TRUE, xtest=subset(test, select=-ann_classificationVKGL))
-rf.pr = predict(rf,type="prob",newdata=test)[,2]
-rf.pred = prediction(rf.pr, test$ann_classificationVKGL)
+#bestmtry <- tuneRF(train,train$classificationVKGL,stepFactor = 1.2, improve = 0.01, trace=T, plot= T) # mtry=16,  mtry=round(sqrt(length(data))) ?
+all_rf <-randomForest(ann_classificationVKGL~., data=all_train, ntree=100, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
+secr_rf <-randomForest(ann_classificationVKGL~., data=secr_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
+memb_intr_rf <-randomForest(ann_classificationVKGL~., data=memb_intr_train, ntree=100, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
+
+rf <- secr_rf # all_rf, secr_rf, memb_intr_rf
+testData <- secr_test # all_test, secr_test, memb_intr_test
+rf.pr = predict(rf,type="prob",newdata=testData)[,2]
+rf.pred = prediction(rf.pr, testData$ann_classificationVKGL)
 rf.perf = performance(rf.pred, "tpr", "fpr")
 auc <- performance(rf.pred,"auc")
 auc <- unlist(slot(auc, "y.values"))
@@ -52,6 +79,8 @@ plot(rf.perf,main=paste0("Variant classification on peptide and\nfolding propert
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
 auc
 
+rf.pv = performance(rf.pred, "ppv", "npv")
+plot(rf.pv)
 
 
 # Extra stuff: PPV/NPV, feature importance, etc
