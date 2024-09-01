@@ -6,42 +6,74 @@ library(scales)
 library(cutpointr)
 library(plyr)
 library(dplyr)
+library(crunch)    # Compress results
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
 alphaMissenseLoc <- "/Applications/AlphaFold2/AlphaMissense_hg38.tsv.gz"
-freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
-results <- read.csv(freeze1)
+freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
+results <- read.csv(freeze2)
+results$AAwithoutAchain <- paste0(substr(results$delta_aaSeq, 1, 1), substr(results$delta_aaSeq, 3, nchar(results$delta_aaSeq)))
 
 uniqGenes <- unique(results$gene)
 resultsWithAM <- data.frame()
 for(i in 1:length(uniqGenes)){
   geneName <- uniqGenes[i]
+  variantsForGene <- subset(results, gene == geneName)
+  chrom <- unique(variantsForGene$dna_variant_chrom)
+  if(length(chrom) > 1)
+  {
+    stop(paste0("Multiple chroms for ", geneName, ", stopping"))
+  }
+  chrom <- paste0("chr", chrom)
+  gene_start <- min(variantsForGene$dna_variant_pos)
+  gene_end <- max(variantsForGene$dna_variant_pos)
+  
   cat(paste("Working on ",geneName," (",i," of ",length(uniqGenes),")\n", sep=""))
-  geneCoords <- subset(ENSGENES, gene_symbol==geneName)
-  if(nrow(geneCoords)==0){
-    cat(paste0("No coords for ", geneName, ", skipping..."))
-    next
-  }
-  geneChr <- gsub("chr","", geneCoords$chrom)
-  geneTabix <- paste(geneCoords$chrom, paste(geneCoords$gene_start, geneCoords$gene_end, sep="-"), sep=":")
+  geneTabix <- paste(chrom, paste(gene_start, gene_end, sep="-"), sep=":")
   geneAlphaMissenseData <- tabix.read(alphaMissenseLoc, geneTabix)
-  alphaMissense <- read.table(text=geneAlphaMissenseData, sep = '\t', header = FALSE, fileEncoding = "UTF-16LE", col.names = c("CHROM", "POS", "REF", "ALT", "genome", "uniprot_id", "transcript_id", "protein_variant", "am_pathogenicity", "am_class"))
-  vkglGeneWithAlph <- merge(x = results, y = alphaMissense, by.x = c("dna_variant_pos", "dna_variant_ref", "dna_variant_alt"), by.y = c("POS","REF", "ALT"))
-  if(!all(vkglGeneWithAlph$uniprot_id == vkglGeneWithAlph$UniProtID)){
-    cat(paste0("UniProt ID mismatch for ", geneName, ", skipping..."))
+  if(length(geneAlphaMissenseData)==0)
+  {
+    cat(paste0("No AlphaMissense data for ", geneName, ", skipping"))
     next
   }
-  AAwithoutAchain <- paste0(substr(vkglGeneWithAlph$delta_aaSeq, 1, 1), substr(vkglGeneWithAlph$delta_aaSeq, 3, nchar(vkglGeneWithAlph$delta_aaSeq)))
-  if(!all(AAwithoutAchain == vkglGeneWithAlph$protein_variant)){
-    cat(paste0("AA change mismatch for ", geneName, ", skipping..."))
+  alphaMissense <- read.table(text=geneAlphaMissenseData, sep = '\t', header = FALSE, fileEncoding = "UTF-16LE", colClasses = c("character", "numeric", "character", "character", "character", "character", "character", "character", "numeric", "character"), col.names = c("CHROM", "POS", "REF", "ALT", "genome", "uniprot_id", "transcript_id", "protein_variant", "am_pathogenicity", "am_class"))
+  alphaMissense$CHROM <- gsub("chr", "", alphaMissense$CHROM)
+  # Sometimes a merge on seemly good data results in 0 overlap, e.g. for ALPK3
+  # On close inspection, the AA change is different, probably due to trancript subversions (ENST00000258888 vs. AM: ENST00000258888.5)
+  # Also, we could match on transcript here as well, but that would require a 'contains' operation (see later)
+  vkglGeneWithAlph <- merge(x = variantsForGene, y = alphaMissense, by.x = c("dna_variant_chrom", "dna_variant_pos", "dna_variant_ref", "dna_variant_alt","AAwithoutAchain","UniProtID"), by.y = c("CHROM","POS","REF", "ALT","protein_variant","uniprot_id"))
+  if(dim(vkglGeneWithAlph)[1]==0)
+  {
+    cat(paste0("No merged data for ", geneName, ", skipping"))
     next
   }
-  cat(paste("Adding ",nrow(vkglGeneWithAlph)," variants\n", sep=""))
+  vkglGeneWithAlph$key <- paste0(vkglGeneWithAlph$dna_variant_chrom,"_",vkglGeneWithAlph$dna_variant_pos,"_",vkglGeneWithAlph$dna_variant_ref,"_",vkglGeneWithAlph$dna_variant_alt,"_",vkglGeneWithAlph$AAwithoutAchain,"_",vkglGeneWithAlph$UniProtID)
+  #cat(paste("Adding ",nrow(vkglGeneWithAlph)," variants\n", sep=""))
   resultsWithAM <- rbind(resultsWithAM, vkglGeneWithAlph)
 }
+# The merged results contain some overlapping genes, cannot use directly
+results$ann_am_pathogenicity <- NA
+for(i in 1:nrow(results)){
+  #i <- 3523
+  row <- results[i,]
+  resultKey <- paste0(row$dna_variant_chrom,"_",row$dna_variant_pos,"_",row$dna_variant_ref,"_",row$dna_variant_alt,"_",row$AAwithoutAchain,"_",row$UniProtID)
+  fromAM <- resultsWithAM[resultsWithAM$key==resultKey,]
+  if(dim(fromAM)[1]==0){
+    #cat(paste0("No data for ", i, ", skipping\n"))
+  }else if(dim(fromAM)[1]==1){
+    results[i,"ann_am_pathogenicity"] <- fromAM$am_pathogenicity
+  }else{
+    # Sometimes the exact same variant was present for multiple transcript, e.g. 19_53982805_G_A_A412T_Q8WXS5 for ENST00000270458.2 and ENST00000638874.1.
+    # However, AM pathogenicity score is the same, in this case 0.1358.
+    #cat(paste0("Multiple data for ", i, ", skipping\n"))
+  }
+}
+# Remove tmp column used for merging
+results$AAwithoutAchain <- NULL
+
 # Persist these mappings to make it faster next time
-resultsWithAMFile <- paste(rootDir, "data", "resultsWithAM.csv", sep="/")
-#write.csv(resultsWithAM, resultsWithAMFile, row.names = FALSE, quote = FALSE)
+resultsWithAMFile <- paste(rootDir, "data", "freeze2-AMmerge.csv.gz", sep="/")
+#write.csv.gz(results, resultsWithAMFile, row.names = FALSE, quote = FALSE)
 resultsWithAM <- read.csv(resultsWithAMFile)
 
 

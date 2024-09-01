@@ -8,7 +8,7 @@ library(dplyr)
 # interesting? https://jtr13.github.io/cc21fall2/introduction-to-xai-explainable-ai-in-r.html
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
-freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
+freeze2 <- paste(rootDir, "data", "freeze2-AMmerge.csv.gz", sep="/")
 data <- read.csv(freeze2)
 
 ####################
@@ -20,11 +20,13 @@ set.seed(222)
 rownames(data) <- paste0(data$gene, "/", data$UniProtID, ":", data$delta_aaSeq)
 # Select only LB and LP
 data <- subset(data, ann_classificationVKGL == "LP" | ann_classificationVKGL == "LB")
+# For AM result, remove rows for which ann_am_pathogenicity = NA
+data <- data[!is.na(data$ann_am_pathogenicity), ]
 # Remove all columns with only 0 values
 data <- data[, colSums(data != 0) > 0]
 # Select all columns with relevant factors or numerical variables for analysis
 # We drop mutant and WT information here and only focus on the deltas
-data <- data %>% select(contains(c("ann_classificationVKGL", "ann_proteinIschaperoned", "ann_proteinLocalization", "delta_", "mutant_")))
+data <- data %>% select(contains(c("ann_classificationVKGL", "ann_proteinIschaperoned", "ann_proteinLocalization", "ann_am_pathogenicity", "delta_", "mutant_")))
 data <- data %>% select(-contains(c("ann_mutant_energy_SD", "_aaSeq")))
 
 # Factorize categoricals
