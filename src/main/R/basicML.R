@@ -48,27 +48,16 @@ all_draw <- sample(c(TRUE, FALSE), nrow(data), replace=TRUE, prob=c(propTrain, p
 all_train <- data[all_draw, ]
 all_test <- data[!all_draw, ]
 
-secr_train_data <- subset(all_train, ann_proteinLocalization == "secreted")
-secr_train_draw <- sample(c(TRUE, FALSE), nrow(secr_train_data), replace=TRUE, prob=c(propTrain, propTest))
-secr_train <- secr_train_data[secr_train_draw, ]
-
-secr_test_data <- subset(all_test, ann_proteinLocalization == "secreted")
-secr_test_draw <- sample(c(TRUE, FALSE), nrow(secr_test_data), replace=TRUE, prob=c(propTrain, propTest))
-secr_test <- secr_test_data[!secr_test_draw, ]
-
-memb_intr_train_data <- subset(all_train, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
-memb_intr_train_draw <- sample(c(TRUE, FALSE), nrow(memb_intr_train_data), replace=TRUE, prob=c(propTrain, propTest))
-memb_intr_train <- memb_intr_train_data[memb_intr_train_draw, ]
-
-memb_intr_test_data <- subset(all_test, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
-memb_intr_test_draw <- sample(c(TRUE, FALSE), nrow(memb_intr_test_data), replace=TRUE, prob=c(propTrain, propTest))
-memb_intr_test <- memb_intr_test_data[!memb_intr_test_draw, ]
+secr_train <- subset(all_train, ann_proteinLocalization == "secreted")
+secr_test <- subset(all_test, ann_proteinLocalization == "secreted")
+memb_intr_train <- subset(all_train, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
+memb_intr_test <- subset(all_test, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
 
 # worked before not not now? optimal mtry for RF
 #bestmtry <- tuneRF(train,train$classificationVKGL,stepFactor = 1.2, improve = 0.01, trace=T, plot= T) # mtry=16,  mtry=round(sqrt(length(data))) ?
-all_rf <-randomForest(ann_classificationVKGL~., data=all_train, ntree=100, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
+all_rf <-randomForest(ann_classificationVKGL~., data=all_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
 secr_rf <-randomForest(ann_classificationVKGL~., data=secr_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
-memb_intr_rf <-randomForest(ann_classificationVKGL~., data=memb_intr_train, ntree=100, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
+memb_intr_rf <-randomForest(ann_classificationVKGL~., data=memb_intr_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
 
 rf <- secr_rf # all_rf, secr_rf, memb_intr_rf
 testData <- secr_test # all_test, secr_test, memb_intr_test
