@@ -37,16 +37,26 @@ X_test <- test_set %>% select(-ann_classificationVKGL)
 
 xgb_train <- xgb.DMatrix(data = as.matrix(X_train), label = y_train)
 xgb_test <- xgb.DMatrix(data = as.matrix(X_test), label = y_test)
+#xgb_params <- list(
+#  booster = "gbtree",
+#  eta = 0.01,
+#  max_depth = 8,
+#  gamma = 4,
+#  subsample = 0.75,
+#  colsample_bytree = 1,
+#  objective = "multi:softprob",
+#  eval_metric = "mlogloss",
+#  num_class = length(levels(data$ann_classificationVKGL))
+#)
 xgb_params <- list(
   booster = "gbtree",
-  eta = 0.01,
-  max_depth = 8,
-  gamma = 4,
-  subsample = 0.75,
-  colsample_bytree = 1,
-  objective = "multi:softprob",
-  eval_metric = "mlogloss",
-  num_class = length(levels(data$ann_classificationVKGL))
+  eta = 0.05,  # Slightly higher learning rate for faster convergence
+  max_depth = 6,  # Shallower trees to avoid overfitting
+  gamma = 1,  # Moderate regularization
+  subsample = 0.8,  # Slightly increased to leverage more data
+  colsample_bytree = 0.8,  # Reduced to avoid overfitting
+  objective = "binary:logistic",  # Corrected for binary classification
+  eval_metric = "logloss"  # Changed metric to logloss
 )
 
 xgb_model <- xgb.train(
@@ -59,11 +69,11 @@ xgb_model
 
 xgb_preds <- predict(xgb_model, as.matrix(X_test), reshape = TRUE)
 xgb_preds <- as.data.frame(xgb_preds)
-colnames(xgb_preds) <- levels(data$classificationVKGL)
+colnames(xgb_preds) <- levels(data$ann_classificationVKGL)
 xgb_preds
 
 xgb_preds$PredictedClass <- apply(xgb_preds, 1, function(y) colnames(xgb_preds)[which.max(y)])
-xgb_preds$ActualClass <- levels(data$classificationVKGL)[y_test + 1]
+xgb_preds$ActualClass <- levels(data$ann_classificationVKGL)[y_test + 1]
 xgb_preds
 
 accuracy <- sum(xgb_preds$PredictedClass == xgb_preds$ActualClass) / nrow(xgb_preds)
