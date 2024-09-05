@@ -8,7 +8,7 @@ library(dplyr)
 # interesting? https://jtr13.github.io/cc21fall2/introduction-to-xai-explainable-ai-in-r.html
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
-freeze4 <- paste(rootDir, "data", "freeze4", sep="/")
+freeze4 <- paste(rootDir, "data", "freeze4.csv.gz", sep="/")
 data <- read.csv(freeze4)
 
 ####################

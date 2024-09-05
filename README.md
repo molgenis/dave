@@ -25,6 +25,9 @@ interesting? https://academic.oup.com/nar/article/52/W1/W187/7688983
 Analysis of AlphaMissense data in different protein groups and structural context
 https://www.nature.com/articles/s41597-024-03327-8
 
+VUStruct: a compute pipeline for high throughput and personalized structural biology
+https://www.biorxiv.org/content/10.1101/2024.08.06.606224v1.full.pdf
+
 Identification of pathogenic missense mutations using protein stability predictors
 https://www.nature.com/articles/s41598-020-72404-w
 
