@@ -10,8 +10,8 @@ library(crunch)    # Compress results
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
 alphaMissenseLoc <- "/Applications/AlphaFold2/AlphaMissense_hg38.tsv.gz"
-freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
-results <- read.csv(freeze2)
+freeze3 <- paste(rootDir, "data", "freeze3.csv.gz", sep="/")
+results <- read.csv(freeze3)
 results$AAwithoutAchain <- paste0(substr(results$delta_aaSeq, 1, 1), substr(results$delta_aaSeq, 3, nchar(results$delta_aaSeq)))
 
 uniqGenes <- unique(results$gene)
@@ -55,27 +55,32 @@ for(i in 1:length(uniqGenes)){
 results$ann_am_pathogenicity <- NA
 for(i in 1:nrow(results)){
   #i <- 3523
+  cat(paste0("Working on ",i," of ",nrow(results),"\n"))
   row <- results[i,]
   resultKey <- paste0(row$dna_variant_chrom,"_",row$dna_variant_pos,"_",row$dna_variant_ref,"_",row$dna_variant_alt,"_",row$AAwithoutAchain,"_",row$UniProtID)
   fromAM <- resultsWithAM[resultsWithAM$key==resultKey,]
   if(dim(fromAM)[1]==0){
-    #cat(paste0("No data for ", i, ", skipping\n"))
+    cat(paste0("No data for ", i, ", skipping\n"))
   }else if(dim(fromAM)[1]==1){
     results[i,"ann_am_pathogenicity"] <- fromAM$am_pathogenicity
-  }else{
+  }else if(length(unique(fromAM$am_pathogenicity))==1){
     # Sometimes the exact same variant was present for multiple transcript, e.g. 19_53982805_G_A_A412T_Q8WXS5 for ENST00000270458.2 and ENST00000638874.1.
-    # However, AM pathogenicity score is the same, in this case 0.1358.
-    #cat(paste0("Multiple data for ", i, ", skipping\n"))
+    # Check if unique is 1 and assign
+    results[i,"ann_am_pathogenicity"] <- unique(fromAM$am_pathogenicity)
+    cat(paste0("Unique fix for ", i, " applied\n"))
+  }else{
+    # Check for multiple different values
+    cat(paste0("Multiple non-unique data for ", i, "\n"))
+    stop()
   }
 }
 # Remove tmp column used for merging
 results$AAwithoutAchain <- NULL
 
-# Persist these mappings to make it faster next time
-resultsWithAMFile <- paste(rootDir, "data", "freeze2-AMmerge.csv.gz", sep="/")
-#write.csv.gz(results, resultsWithAMFile, row.names = FALSE, quote = FALSE)
-resultsWithAM <- read.csv(resultsWithAMFile)
-
+# Save as freeze 4
+resultsFreeze4 <- paste(rootDir, "data", "freeze4.csv.gz", sep="/")
+#write.csv.gz(results, resultsFreeze4, row.names = FALSE, quote = FALSE)
+results <- read.csv(resultsFreeze4)
 
 ####################################################
 # Determine optimal threshold using Youden's Index #

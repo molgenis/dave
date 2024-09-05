@@ -7,6 +7,7 @@ library(dplyr)     # to remove duplicate rows
 library(Peptides)  # protein annotations
 library(peptoolkit)# QSAR features
 library(crunch)    # Compress results
+library(protr)     # PseAAC/APseAAC features
 
 
 #######################
@@ -473,8 +474,46 @@ results <- cbind(results, delta_qsarFt, mutant_qsarFt, WT_qsarFt)
 
 
 #######################################################
+# Pseudo-Amino Acid Composition (PseAAC) and.         #
+# Amphiphilic Pseudo Amino Acid Composition (APseAAC) #
+#######################################################
+res_APseAAC <- data.frame()
+for(i in 1:nrow(results))
+{
+  cat(paste0("working on row ", i, "\n"))
+  wtAAseq <- results[i,'WT_aaSeq']
+  mutantAAseq <- results[i,'mutant_aaSeq']
+  wtPAAC <- as.data.frame(t(protr::extractPAAC(wtAAseq)))
+  wtAPAAC <- as.data.frame(t(protr::extractAPAAC(wtAAseq)))
+  mutantPAAC <- as.data.frame(t(protr::extractPAAC(mutantAAseq)))
+  mutantAPAAC <- as.data.frame(t(protr::extractAPAAC(mutantAAseq)))
+  deltaPAAC <- mutantPAAC-wtPAAC
+  deltaAPAAC <- mutantAPAAC-wtAPAAC
+  colnames(wtPAAC) <- paste("WT", colnames(wtPAAC), sep = "_")
+  colnames(wtAPAAC) <- paste("WT", colnames(wtAPAAC), sep = "_")
+  colnames(mutantPAAC) <- paste("mutant", colnames(mutantPAAC), sep = "_")
+  colnames(mutantAPAAC) <- paste("mutant", colnames(mutantAPAAC), sep = "_")
+  colnames(deltaPAAC) <- paste("delta", colnames(deltaPAAC), sep = "_")
+  colnames(deltaAPAAC) <- paste("delta", colnames(deltaAPAAC), sep = "_")
+  allCols <- cbind(wtPAAC, wtAPAAC, mutantPAAC, mutantAPAAC, deltaPAAC, deltaAPAAC)
+  res_APseAAC <- rbind(res_APseAAC, allCols)
+}
+write.csv(res_APseAAC, paste(rootDir, "data", "res_APseAAC.csv", sep="/"), row.names = FALSE, quote = FALSE)
+results <- cbind(results, res_APseAAC)
+
+
+#######################################################
 # Write/read complete collation of variant level data #
 #######################################################
-freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
-#write.csv.gz(results, freeze2, row.names = FALSE, quote = FALSE)
-results <- read.csv(freeze2)
+freeze3 <- paste(rootDir, "data", "freeze3.csv.gz", sep="/")
+#write.csv.gz(results, freeze3, row.names = FALSE, quote = FALSE)
+results <- read.csv(freeze3)
+# NOTE: freeze3 data was superseded by freeze4 and therefore left out
+
+
+######################################
+# Add AlphaMissense am_pathogenicity #
+######################################
+# see: CombineWithAlhaMissense.R
+# This results in the creation of freeze4.csv.gz
+
