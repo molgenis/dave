@@ -8,8 +8,8 @@ library(dplyr)
 # interesting? https://jtr13.github.io/cc21fall2/introduction-to-xai-explainable-ai-in-r.html
 
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
-freeze2 <- paste(rootDir, "data", "freeze2-AMmerge.csv.gz", sep="/")
-data <- read.csv(freeze2)
+freeze3 <- paste(rootDir, "data", "freeze4", sep="/")
+data <- read.csv(freeze3)
 
 ####################
 # Data preparation #
@@ -26,7 +26,8 @@ data <- data[!is.na(data$ann_am_pathogenicity), ]
 data <- data[, colSums(data != 0) > 0]
 # Select all columns with relevant factors or numerical variables for analysis
 # We drop mutant and WT information here and only focus on the deltas
-data <- data %>% select(contains(c("ann_classificationVKGL", "ann_proteinIschaperoned", "ann_proteinLocalization", "ann_am_pathogenicity", "delta_", "mutant_")))
+# With or without "ann_am_pathogenicity"
+data <- data %>% select(contains(c("ann_classificationVKGL", "ann_proteinIschaperoned", "ann_am_pathogenicity", "ann_proteinLocalization", "delta_", "mutant_")))
 data <- data %>% select(-contains(c("ann_mutant_energy_SD", "_aaSeq")))
 
 # Factorize categoricals
@@ -48,19 +49,23 @@ all_draw <- sample(c(TRUE, FALSE), nrow(data), replace=TRUE, prob=c(propTrain, p
 all_train <- data[all_draw, ]
 all_test <- data[!all_draw, ]
 
-secr_train <- subset(all_train, ann_proteinLocalization == "secreted")
 secr_test <- subset(all_test, ann_proteinLocalization == "secreted")
-memb_intr_train <- subset(all_train, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
-memb_intr_test <- subset(all_test, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
+memb_test <- subset(all_test, ann_proteinLocalization == "membrane")
+intr_test <- subset(all_test, ann_proteinLocalization == "intracellular")
+
 
 # worked before not not now? optimal mtry for RF
 #bestmtry <- tuneRF(train,train$classificationVKGL,stepFactor = 1.2, improve = 0.01, trace=T, plot= T) # mtry=16,  mtry=round(sqrt(length(data))) ?
 all_rf <-randomForest(ann_classificationVKGL~., data=all_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
-secr_rf <-randomForest(ann_classificationVKGL~., data=secr_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
-memb_intr_rf <-randomForest(ann_classificationVKGL~., data=memb_intr_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
-
-rf <- secr_rf # all_rf, secr_rf, memb_intr_rf
-testData <- secr_test # all_test, secr_test, memb_intr_test
+feat_imp_df <- importance(all_rf) %>% data.frame() %>% mutate(feature = row.names(.)) 
+# Feature selection using MeanDecreaseAccuracy
+feat_imp_df[order(feat_imp_df$MeanDecreaseAccuracy, decreasing = T),]
+topFeat <- feat_imp_df[order(feat_imp_df$MeanDecreaseAccuracy, decreasing = T)[1:50],]$feature
+fs1_train <- all_train %>% select(c("ann_classificationVKGL", topFeat))
+fs1_rf <-randomForest(ann_classificationVKGL~., data=fs1_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
+#save(fs1_rf, file="top50_97prAUC.Rdata")
+rf <- fs1_rf # all_rf, secr_rf, memb_intr_rf
+testData <- secr_test # all_test, secr_test, memb_test, intr_test
 rf.pr = predict(rf,type="prob",newdata=testData)[,2]
 rf.pred = prediction(rf.pr, testData$ann_classificationVKGL)
 rf.perf = performance(rf.pred, "tpr", "fpr")
@@ -68,7 +73,7 @@ auc <- performance(rf.pred,"auc")
 auc <- unlist(slot(auc, "y.values"))
 plot(rf.perf,main=paste0("Variant classification on peptide and\nfolding properties, RF ROC curve (AUC ",round(auc,2),")"),col=2,lwd=2)
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
-auc
+auc # 97% total, 98% for secr and memb, 95% for intr
 
 rf.pv = performance(rf.pred, "ppv", "npv")
 plot(rf.pv)
@@ -79,7 +84,6 @@ ppvnpv = performance(rf.pred, "ppv", "npv")
 plot(ppvnpv,main="PPV/NPV plot",col=2,lwd=2)
 # from https://datasciencechronicle.wordpress.com/2014/03/17/r-tips-part2-rocr-example-with-randomforest/
 # feature importance?
-varImpPlot(rf)
+varImpPlot(all_rf)
 measure_importance(rf)
-# PCA?
-# affinity-prop clustering?
+

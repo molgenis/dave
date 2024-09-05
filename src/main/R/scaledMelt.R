@@ -14,8 +14,8 @@ imgDir <- paste(rootDir, "img", sep="/")
 setwd(imgDir)
 
 # Load the data and assign meaningful row names
-freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
-results <- read.csv(freeze2)
+freeze <- paste(rootDir, "data", "freeze4.csv.gz", sep="/")
+results <- read.csv(freeze)
 rownames(results) <- paste0(results$gene, "/", results$UniProtID, ":", results$delta_aaSeq)
 
 # For non-parametric bootstrapping of means
@@ -42,6 +42,8 @@ seg_tip_len_scale = 0.01 # relative tip length for showing CI
 ####################
 # Remove 'CF' i.e. 'Conflicting' interpretations
 results <- subset(results,  ann_classificationVKGL != "CF")
+# Drop AM since it's not 100% complete
+results$ann_am_pathogenicity <- NULL
 # Remove all columns with only 0 values (for WT, mutant and delta: electrostatic.kon, Entropy.Complex, mloop_entropy, partial.covalent.bonds, sloop_entropy, water.bridge)
 results <- results[, colSums(results != 0) > 0]
 # Select all columns with relevant factors or numerical variables for analysis
@@ -142,7 +144,7 @@ wilcox.test(secr_lp$delta_total.energy, intr_lp$delta_total.energy)
 ######################################################################
 # Select only total energy
 results_scaled_melt_sub <- subset(results_scaled_melt, variable == "delta_total.energy" ) #& ann_classificationVKGL != "VUS"
-results_scaled_melt_sub_agg <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Localization=results_scaled_melt_sub$ann_proteinLocalization, Chaperoned=results_scaled_melt_sub$ann_proteinIschaperoned, Variable=results_scaled_melt_sub$variable), FUN=npCI)
+results_scaled_melt_sub_agg <- aggregate(results_scaled_melt_sub$value, by=list(Classification=results_scaled_melt_sub$ann_classificationVKGL, Localization=results_scaled_melt_sub$ann_proteinLocalization, Chaperoned=results_scaled_melt_sub$ann_proteinIschaperoned, Variable=results_scaled_melt_sub$variable), FUN=CI)
 results_scaled_melt_sub_cast <- data.table::dcast(as.data.table(results_scaled_melt_sub_agg), Localization+Chaperoned+Variable~Classification, value.var=c("x.upper", "x.mean", "x.lower"))
 seg_tip_len_x <- (max(results_scaled_melt_sub_cast$x.mean_LB)-min(results_scaled_melt_sub_cast$x.mean_LB))*seg_tip_len_scale
 seg_tip_len_y <- (max(results_scaled_melt_sub_cast$x.mean_LP)-min(results_scaled_melt_sub_cast$x.mean_LP))*seg_tip_len_scale
