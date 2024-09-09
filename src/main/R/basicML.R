@@ -27,7 +27,7 @@ data <- data[, colSums(data != 0) > 0]
 # Select all columns with relevant factors or numerical variables for analysis
 # We drop mutant and WT information here and only focus on the deltas
 # With or without "ann_am_pathogenicity"
-data <- data %>% select(contains(c("ann_classificationVKGL", "ann_proteinIschaperoned", "ann_am_pathogenicity", "ann_proteinLocalization", "delta_", "mutant_")))
+data <- data %>% select(contains(c("ann_classificationVKGL", "ann_proteinIschaperoned", "ann_am_pathogenicity", "ann_proteinLocalization", "delta_")))
 data <- data %>% select(-contains(c("ann_mutant_energy_SD", "_aaSeq")))
 
 # Factorize categoricals
@@ -37,11 +37,7 @@ data$ann_proteinLocalization <- as.factor(data$ann_proteinLocalization)
 # Check column types
 sapply(data, class)
 
-# Subselect on localization, chaperonization, etc
-#secr_data <- subset(data, ann_proteinLocalization == "secreted")
-#memb_intr_data <- subset(data, ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular")
-#data <- subset(data, ann_proteinIschaperoned == FALSE)
-
+# Divide and subset
 propTrain <- 0.8
 propTest <- 0.2
 
@@ -53,18 +49,17 @@ secr_test <- subset(all_test, ann_proteinLocalization == "secreted")
 memb_test <- subset(all_test, ann_proteinLocalization == "membrane")
 intr_test <- subset(all_test, ann_proteinLocalization == "intracellular")
 
-
-# worked before not not now? optimal mtry for RF
-#bestmtry <- tuneRF(train,train$classificationVKGL,stepFactor = 1.2, improve = 0.01, trace=T, plot= T) # mtry=16,  mtry=round(sqrt(length(data))) ?
+# Train complete model
 all_rf <-randomForest(ann_classificationVKGL~., data=all_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
+
+# Get most important features and generalize model
 feat_imp_df <- importance(all_rf) %>% data.frame() %>% mutate(feature = row.names(.)) 
-# Feature selection using MeanDecreaseAccuracy
 feat_imp_df[order(feat_imp_df$MeanDecreaseAccuracy, decreasing = T),]
-topFeat <- feat_imp_df[order(feat_imp_df$MeanDecreaseAccuracy, decreasing = T)[1:50],]$feature
+topFeat <- feat_imp_df[order(feat_imp_df$MeanDecreaseAccuracy, decreasing = T)[1:25],]$feature
 fs1_train <- all_train %>% select(c("ann_classificationVKGL", topFeat))
 fs1_rf <-randomForest(ann_classificationVKGL~., data=fs1_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
-#save(fs1_rf, file="top50_97prAUC.Rdata")
-#load(paste(rootDir, "data", "top50_97prAUC.Rdata", sep="/"))
+#save(fs1_rf, file="rf_top25_deltaonly.Rdata")
+#load(paste(rootDir, "data", "rf_top25_deltaonly.Rdata", sep="/"))
 rf <- fs1_rf # all_rf, secr_rf, memb_intr_rf
 testData <- all_test # all_test, secr_test, memb_test, intr_test
 rf.pr = predict(rf,type="prob",newdata=testData)[,2]
