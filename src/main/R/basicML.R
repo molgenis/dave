@@ -64,8 +64,9 @@ topFeat <- feat_imp_df[order(feat_imp_df$MeanDecreaseAccuracy, decreasing = T)[1
 fs1_train <- all_train %>% select(c("ann_classificationVKGL", topFeat))
 fs1_rf <-randomForest(ann_classificationVKGL~., data=fs1_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
 #save(fs1_rf, file="top50_97prAUC.Rdata")
+#load(paste(rootDir, "data", "top50_97prAUC.Rdata", sep="/"))
 rf <- fs1_rf # all_rf, secr_rf, memb_intr_rf
-testData <- secr_test # all_test, secr_test, memb_test, intr_test
+testData <- all_test # all_test, secr_test, memb_test, intr_test
 rf.pr = predict(rf,type="prob",newdata=testData)[,2]
 rf.pred = prediction(rf.pr, testData$ann_classificationVKGL)
 rf.perf = performance(rf.pred, "tpr", "fpr")
@@ -84,6 +85,35 @@ ppvnpv = performance(rf.pred, "ppv", "npv")
 plot(ppvnpv,main="PPV/NPV plot",col=2,lwd=2)
 # from https://datasciencechronicle.wordpress.com/2014/03/17/r-tips-part2-rocr-example-with-randomforest/
 # feature importance?
-varImpPlot(all_rf)
+varImpPlot(rf)
 measure_importance(rf)
+
+
+# Check for bias for mutant variable(s) that may correlate with genes with skewed LB/LP proportion
+biasCheck <- read.csv(freeze4)
+biasCheckGeneRes <- data.frame()
+uniqGenes <- unique(biasCheck$gene)
+rownames(biasCheck) <- paste0(biasCheck$gene, "/", biasCheck$UniProtID, ":", biasCheck$delta_aaSeq)
+biasCheck <- subset(biasCheck, ann_classificationVKGL == "LP" | ann_classificationVKGL == "LB")
+for(selectGene in uniqGenes){
+  cat(paste0(selectGene,"\n"))
+  byGene <- subset(biasCheck, gene == selectGene)
+  lpS <- sum(str_count(byGene$ann_classificationVKGL, "LP"))
+  lbS <- sum(str_count(byGene$ann_classificationVKGL, "LB"))
+  if(lpS == 0 & lbS > 0){
+    propLP <- 0
+  }else if(lbS == 0 & lpS > 0){
+    propLP <- 1 
+  }else{
+    propLP <- lpS/(lpS+lbS)
+  }
+  geneRes <- data.frame(propLP = propLP, WT_Xc2.lambda.28 = byGene$WT_Xc2.lambda.28[1])
+  biasCheckGeneRes <- rbind(biasCheckGeneRes, geneRes)
+}
+plot(biasCheckGeneRes$propLP ~ biasCheckGeneRes$WT_Xc2.lambda.28)
+cor.test(biasCheckGeneRes$propLP, biasCheckGeneRes$WT_Xc2.lambda.28)
+cor.test(biasCheckGeneRes$propLP, biasCheckGeneRes$WT_Xc2.lambda.28, method="kendall")
+# Indeed: genes with a low proportion of LP also have low WT_Xc2.lambda.28
+# Therefore we have detected a bias
+
 
