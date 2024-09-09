@@ -112,3 +112,27 @@ cor.test(biasCheckGeneRes$propLP, biasCheckGeneRes$WT_Xc2.lambda.28, method="ken
 # Therefore we have detected a bias
 
 
+#####
+# VUS classification using model
+#####
+rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
+freeze4 <- paste(rootDir, "data", "freeze4.csv.gz", sep="/")
+vusPred <- read.csv(freeze4)
+# For some reproduciblity, set a random seed, though RF is non-deterministic by design
+set.seed(222)
+# Nice row names
+rownames(vusPred) <- paste0(vusPred$gene, "/", vusPred$UniProtID, ":", vusPred$delta_aaSeq)
+# Select LB, LP and VUS, rows with AM, remove 0 cols
+vusPred <- subset(vusPred, ann_classificationVKGL != "CF")
+vusPred <- vusPred[!is.na(vusPred$ann_am_pathogenicity), ]
+vusPred <- vusPred[, colSums(vusPred != 0) > 0]
+# Apply model
+load(paste(rootDir, "data", "rf_top25_deltaonly.Rdata", sep="/"))
+predictions = predict(fs1_rf,type="prob",newdata=vusPred)[,2]
+vusPred <- cbind(vusPred, predictions)
+ggplot(vusPred, aes(predictions, colour = ann_classificationVKGL, fill = ann_classificationVKGL)) +
+  theme_classic()+
+  geom_density(adjust=0.5, alpha = 0.25)
+
+
+
