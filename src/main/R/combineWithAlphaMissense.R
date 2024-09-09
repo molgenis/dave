@@ -86,6 +86,9 @@ results <- read.csv(resultsFreeze4)
 # Determine optimal threshold using Youden's Index #
 ####################################################
 # Read existing results
+# For AM result, remove rows for which ann_am_pathogenicity = NA
+resultsWithAM <- results[!is.na(results$ann_am_pathogenicity), ]
+#resultsWithAM <- subset(resultsWithAM, ann_proteinLocalization == "intracellular") # membrane / intracellular
 resultsForY <- subset(resultsWithAM, (ann_classificationVKGL=="LB" | ann_classificationVKGL == "LP") ) #  &  (ann_proteinLocalization == "membrane" | ann_proteinLocalization == "intracellular") / ann_proteinLocalization == "secreted"
 resultsForY <- resultsForY[!is.na(resultsForY$ann_am_pathogenicity), ]
 resultsForY$ann_classificationVKGL <- as.factor(resultsForY$ann_classificationVKGL)
