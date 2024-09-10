@@ -83,6 +83,16 @@ ppvnpv = performance(rf.pred, "ppv", "npv")
 plot(ppvnpv,main="PPV/NPV plot",col=2,lwd=2)
 
 
+###########################
+# AlphaMissense performance only - using the same method as before
+##################################
+testData <- all_test # all_test, secr_test, memb_test, intr_test
+am.pred <- prediction(testData$ann_am_pathogenicity, testData$ann_classificationVKGL)
+am.perf = performance(am.pred, "tpr", "fpr")
+auc <- performance(am.pred,"auc")
+auc <- unlist(slot(auc, "y.values"))
+auc
+
 ################
 # Find good PPV/NPV thresholds using the test data draw on full data
 ################
