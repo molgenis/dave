@@ -61,8 +61,8 @@ fs1_train <- all_train %>% select(c("ann_classificationVKGL", topFeat))
 fs1_rf <-randomForest(ann_classificationVKGL~., data=fs1_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
 
 # Persist / load model for next time
-#save(fs1_rf, file="rf_top25_deltaonly.Rdata")
-load(paste(rootDir, "data", "rf_top25_deltaonly.Rdata", sep="/"))
+#save(fs1_rf, file=paste(rootDir, "models", "rf_top25_deltaonly.Rdata", sep="/"))
+load(paste(rootDir, "models", "rf_top25_deltaonly.Rdata", sep="/"))
 
 # Apply model on test data
 testData <- all_test # all_test, secr_test, memb_test, intr_test
@@ -101,7 +101,6 @@ ggplot(full_test_data, aes(test.pr, colour = ann_classificationVKGL, fill = ann_
   geom_density(adjust=0.5, alpha = 0.25) +
   scale_fill_manual(name = "Classification", values = c("LB" = "green","LP" = "red")) +
   scale_colour_manual(name = "Classification", values = c("LB" = "green","LP" = "red"))
-
 cutoff <- 0.75
 tp <- sum(full_test_data[full_test_data$ann_classificationVKGL=="LP",'ann_am_pathogenicity'] >= cutoff)
 fp <- sum(full_test_data[full_test_data$ann_classificationVKGL=="LB",'ann_am_pathogenicity'] >= cutoff)
@@ -112,7 +111,10 @@ npv <-  100*tn/(tn+fn)
 sens <- 100*tp/(tp+fn)
 spec <- 100*tn/(fp+tn)
 cat(paste("At cutoff ",round(cutoff,5)," we find PPV ",round(ppv),"%, NPV ",round(npv),"%, sensitivity ",round(sens),"% and specificity ",round(spec),"%.\n",sep=""))
-
+# At cutoff 0.5 we find PPV 78%, NPV 94%, sensitivity 80% and specificity 93%.
+# At cutoff 0.75 we find PPV 86%, NPV 90%, sensitivity 66% and specificity 97%.
+# At cutoff 0.9 we find PPV 91%, NPV 88%, sensitivity 53% and specificity 98%.
+# At cutoff 0.95 we find PPV 93%, NPV 85%, sensitivity 43% and specificity 99%.
 
 #####
 # Check for bias for mutant variable(s) that may correlate with genes with skewed LB/LP proportion
@@ -159,12 +161,14 @@ vusPred <- subset(vusPred, ann_classificationVKGL != "CF")
 vusPred <- vusPred[!is.na(vusPred$ann_am_pathogenicity), ]
 vusPred <- vusPred[, colSums(vusPred != 0) > 0]
 # Apply model
-load(paste(rootDir, "data", "rf_top25_deltaonly.Rdata", sep="/"))
+load(paste(rootDir, "models", "rf_top25_deltaonly.Rdata", sep="/"))
 predictions = predict(fs1_rf,type="prob",newdata=vusPred)[,2]
 vusPred <- cbind(vusPred, predictions)
 ggplot(vusPred, aes(predictions, colour = ann_classificationVKGL, fill = ann_classificationVKGL)) +
   theme_classic()+
   geom_density(adjust=0.5, alpha = 0.25)
-
-
-
+vusOnlyPred <- subset(vusPred, ann_classificationVKGL == "VUS")
+vusOnlyPredSecr <- subset(vusOnlyPred, ann_proteinLocalization == "membrane")
+vusOnlyPredSecrLP <- subset(vusOnlyPredSecr, predictions >= 0.75)
+nrow(vusOnlyPredSecrLP)
+plot(vusOnlyPredSecrLP$ann_am_pathogenicity ~ vusOnlyPredSecrLP$predictions)
