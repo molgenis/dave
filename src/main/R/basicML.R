@@ -49,20 +49,24 @@ secr_test <- subset(all_test, ann_proteinLocalization == "secreted")
 memb_test <- subset(all_test, ann_proteinLocalization == "membrane")
 intr_test <- subset(all_test, ann_proteinLocalization == "intracellular")
 
-# Train complete model
+# Train model on ALL features
 all_rf <-randomForest(ann_classificationVKGL~., data=all_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
 
 # Get most important features and generalize model
 feat_imp_df <- importance(all_rf) %>% data.frame() %>% mutate(feature = row.names(.)) 
 feat_imp_df[order(feat_imp_df$MeanDecreaseAccuracy, decreasing = T),]
+# Plot: varImpPlot(fs1_rf)
 topFeat <- feat_imp_df[order(feat_imp_df$MeanDecreaseAccuracy, decreasing = T)[1:25],]$feature
 fs1_train <- all_train %>% select(c("ann_classificationVKGL", topFeat))
 fs1_rf <-randomForest(ann_classificationVKGL~., data=fs1_train, ntree=1000, keep.forest=TRUE, importance=TRUE, do.trace=TRUE)
+
+# Persist / load model for next time
 #save(fs1_rf, file="rf_top25_deltaonly.Rdata")
-#load(paste(rootDir, "data", "rf_top25_deltaonly.Rdata", sep="/"))
-rf <- fs1_rf # all_rf, secr_rf, memb_intr_rf
+load(paste(rootDir, "data", "rf_top25_deltaonly.Rdata", sep="/"))
+
+# Apply model on test data
 testData <- all_test # all_test, secr_test, memb_test, intr_test
-rf.pr = predict(rf,type="prob",newdata=testData)[,2]
+rf.pr = predict(fs1_rf,type="prob",newdata=testData)[,2]
 rf.pred = prediction(rf.pr, testData$ann_classificationVKGL)
 rf.perf = performance(rf.pred, "tpr", "fpr")
 auc <- performance(rf.pred,"auc")
@@ -71,20 +75,48 @@ plot(rf.perf,main=paste0("Variant classification on peptide and\nfolding propert
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
 auc # 97% total, 98% for secr and memb, 95% for intr
 
+# PPV/NPV plot
 rf.pv = performance(rf.pred, "ppv", "npv")
 plot(rf.pv)
-
-
-# Extra stuff: PPV/NPV, feature importance, etc
+# Alternative
 ppvnpv = performance(rf.pred, "ppv", "npv")
 plot(ppvnpv,main="PPV/NPV plot",col=2,lwd=2)
-# from https://datasciencechronicle.wordpress.com/2014/03/17/r-tips-part2-rocr-example-with-randomforest/
-# feature importance?
-varImpPlot(rf)
-measure_importance(rf)
 
 
+################
+# Find good PPV/NPV thresholds using the test data draw on full data
+################
+data <- read.csv(freeze4)
+rownames(data) <- paste0(data$gene, "/", data$UniProtID, ":", data$delta_aaSeq)
+data <- subset(data, ann_classificationVKGL == "LP" | ann_classificationVKGL == "LB")
+data <- data[!is.na(data$ann_am_pathogenicity), ]
+data <- data[, colSums(data != 0) > 0]
+data$ann_classificationVKGL <- as.factor(data$ann_classificationVKGL)
+data$ann_proteinLocalization <- as.factor(data$ann_proteinLocalization)
+full_test_data <- data[!all_draw, ]
+test.pr = predict(fs1_rf,type="prob",newdata=full_test_data)[,2]
+full_test_data <- cbind(full_test_data, test.pr)
+ggplot(full_test_data, aes(test.pr, colour = ann_classificationVKGL, fill = ann_classificationVKGL)) +
+  theme_classic() +
+  geom_density(adjust=0.5, alpha = 0.25) +
+  scale_fill_manual(name = "Classification", values = c("LB" = "green","LP" = "red")) +
+  scale_colour_manual(name = "Classification", values = c("LB" = "green","LP" = "red"))
+
+cutoff <- 0.75
+tp <- sum(full_test_data[full_test_data$ann_classificationVKGL=="LP",'ann_am_pathogenicity'] >= cutoff)
+fp <- sum(full_test_data[full_test_data$ann_classificationVKGL=="LB",'ann_am_pathogenicity'] >= cutoff)
+tn <- sum(full_test_data[full_test_data$ann_classificationVKGL=="LB",'ann_am_pathogenicity'] < cutoff)
+fn <- sum(full_test_data[full_test_data$ann_classificationVKGL=="LP",'ann_am_pathogenicity'] < cutoff)
+ppv <-  100*tp/(tp+fp)
+npv <-  100*tn/(tn+fn)
+sens <- 100*tp/(tp+fn)
+spec <- 100*tn/(fp+tn)
+cat(paste("At cutoff ",round(cutoff,5)," we find PPV ",round(ppv),"%, NPV ",round(npv),"%, sensitivity ",round(sens),"% and specificity ",round(spec),"%.\n",sep=""))
+
+
+#####
 # Check for bias for mutant variable(s) that may correlate with genes with skewed LB/LP proportion
+#####
 biasCheck <- read.csv(freeze4)
 biasCheckGeneRes <- data.frame()
 uniqGenes <- unique(biasCheck$gene)
