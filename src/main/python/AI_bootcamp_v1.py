@@ -202,7 +202,7 @@ dt.fit(X_train, y_train)
 print("Decision tree with explainable feature model AUC:", roc_auc_score(y_test, dt.predict_proba(X_test)[:, 1])) # 0.76270635
 
 # Decision tree plot
-dot_data = tree.export_graphviz(dt, out_file=None, feature_names=X.columns, class_names=['Pathogenic', 'Benign'], filled=True)
+dot_data = tree.export_graphviz(dt, out_file=None, feature_names=X.columns, class_names=['Benign', 'Pathogenic'], filled=True)
 graph = graphviz.Source(dot_data, format="png")
 graph.render("decision_tree_graph", format="png", cleanup=True)
 
@@ -264,17 +264,15 @@ plt.legend(loc="lower right")
 plt.show()
 
 
-#######
-# AUC bar plots for slides
-########
-
+###############################
+# AUC bar plot nr 1 for slides
+#################################
 barWidth = 0.25
 fig, ax = plt.subplots(figsize =(12, 8)) 
 FM = [88, 86, 85, 79, 78] 
 TF = [84, 84, 80, 72, 72] 
 br1 = np.arange(len(FM)) 
 br2 = [x + barWidth for x in br1] 
-#F0E442
 ax.bar(br1, FM, color ='#E69F00', width = barWidth, edgecolor ='grey', label ='Full 263 feature model') 
 ax.bar(br2, TF, color ='#56B4F9', width = barWidth, edgecolor ='grey', label ='Top 25 feature model (based on RF perm.)') 
 ax.set_xlabel('Machine learning method', fontweight ='bold', fontsize = 15) 
@@ -283,5 +281,26 @@ ax.set_xticks([r + barWidth/2 for r in range(len(FM))])
 ax.set_xticklabels(['XGBoost', 'Random Forest', 'Multi-layer\nperceptron\n(untuned)', 'Support Vector\nMachine (untuned)', 'Logistic regression'])
 ax.set_ylim(70, 90)
 ax.set_yticks([70, 75, 80, 85, 90])
+ax.legend()
+plt.show()
+
+
+###############################
+# AUC bar plot nr 2 for slides
+#################################
+barWidth = 0.25
+fig, ax = plt.subplots(figsize =(12, 8)) 
+FM = [95.55, 93.64, 94.78, 88.17, 94.23] 
+TF = [95.21, 94.56, 94.77, 93.63, 94.21] 
+br1 = np.arange(len(FM)) 
+br2 = [x + barWidth for x in br1] 
+ax.bar(br1, FM, color ='#E69F00', width = barWidth, edgecolor ='grey', label ='Full 264 feature model') 
+ax.bar(br2, TF, color ='#56B4F9', width = barWidth, edgecolor ='grey', label ='Top 25 feature model (based on RF perm.)') 
+ax.set_xlabel('Machine learning method', fontweight ='bold', fontsize = 15) 
+ax.set_ylabel('Performance (AUC)', fontweight ='bold', fontsize = 15) 
+ax.set_xticks([r + barWidth/2 for r in range(len(FM))])
+ax.set_xticklabels(['XGBoost', 'Random Forest', 'Multi-layer\nperceptron\n(untuned)', 'Support Vector\nMachine (untuned)', 'Logistic regression'])
+ax.set_ylim(88, 96)
+ax.set_yticks([88, 90, 92, 94, 96])
 ax.legend()
 plt.show()
