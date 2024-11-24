@@ -26,7 +26,7 @@ df_source = df_source.filter(regex='|'.join(anyInterestingColumns))
 df_source.drop(columns=['delta_aaSeq'], inplace=True)
 
 # For modeling purposes, create 'df_forML' with only binarized LP/LB mutations, and dummies for localization
-df_forML = df_source[(df_source['ann_classificationVKGL'] == 'LP') | (dat['ann_classificationVKGL'] == 'LB')]
+df_forML = df_source[(df_source['ann_classificationVKGL'] == 'LP') | (df_source['ann_classificationVKGL'] == 'LB')]
 df_forML['ann_classificationVKGL'] = df_forML['ann_classificationVKGL'].replace({'LB': 0, 'LP': 1})
 df_forML = pd.get_dummies(df_forML, columns=['ann_proteinLocalization'], drop_first=True)
 print("columns = ", df_forML.columns)
@@ -181,7 +181,9 @@ print("Support Vector Machine top feature model AUC", roc_auc_score(y_test, svm_
 ####################################################
 # Question 3: Can we develop a viable predictor that is more insightful than AlphaMissense?
 ####################################################
-df_explF = df_forML[['ann_classificationVKGL', 'ann_proteinIschaperoned', 'ann_proteinLocalization_membrane', 'ann_proteinLocalization_secreted', 'delta_aliphaticIndex', 'delta_backbone.clash', 'delta_Backbone.Hbond', 'delta_bomanIndex', 'delta_charge', 'delta_cis_bond', 'delta_disulfide', 'delta_electrostatic.kon', 'delta_Electrostatics', 'delta_energy.Ionisation', 'delta_Entropy.Complex', 'delta_entropy.mainchain', 'delta_entropy.sidechain', 'delta_helix.dipole', 'delta_hydrophobicity', 'delta_hydrophobicMoment', 'delta_instabilityIndex', 'delta_isoElecPoint', 'delta_massOverCharge', 'delta_mloop_entropy', 'delta_molWeight', 'delta_partial.covalent.bonds', 'delta_Sidechain.Hbond', 'delta_sloop_entropy', 'delta_Solvation.Hydrophobic', 'delta_Solvation.Polar', 'delta_torsional.clash', 'delta_total.energy', 'delta_Van.der.Waals', 'delta_Van.der.Waals.clashes', 'delta_water.bridge']]
+# Alternative: also include AM !
+df_explF = df_forML[['ann_am_pathogenicity','ann_classificationVKGL', 'ann_proteinIschaperoned', 'ann_proteinLocalization_membrane', 'ann_proteinLocalization_secreted', 'delta_aliphaticIndex', 'delta_backbone.clash', 'delta_Backbone.Hbond', 'delta_bomanIndex', 'delta_charge', 'delta_cis_bond', 'delta_disulfide', 'delta_electrostatic.kon', 'delta_Electrostatics', 'delta_energy.Ionisation', 'delta_Entropy.Complex', 'delta_entropy.mainchain', 'delta_entropy.sidechain', 'delta_helix.dipole', 'delta_hydrophobicity', 'delta_hydrophobicMoment', 'delta_instabilityIndex', 'delta_isoElecPoint', 'delta_massOverCharge', 'delta_mloop_entropy', 'delta_molWeight', 'delta_partial.covalent.bonds', 'delta_Sidechain.Hbond', 'delta_sloop_entropy', 'delta_Solvation.Hydrophobic', 'delta_Solvation.Polar', 'delta_torsional.clash', 'delta_total.energy', 'delta_Van.der.Waals', 'delta_Van.der.Waals.clashes', 'delta_water.bridge']]
+#df_explF = df_forML[['ann_am_pathogenicity', 'ann_classificationVKGL']]
 X = df_explF.drop('ann_classificationVKGL', axis=1)
 y = df_explF['ann_classificationVKGL']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -197,14 +199,14 @@ param_grid = {
 grid_search = GridSearchCV(estimator=dt, param_grid=param_grid, cv=5, verbose=1, n_jobs=-1)
 grid_search.fit(X_train, y_train)
 print("Best parameters found: ", grid_search.best_params_)
-dt = DecisionTreeClassifier(random_state=42, criterion='gini', max_depth=5, max_features=None, min_samples_leaf=1, min_samples_split=2)
+dt = DecisionTreeClassifier(random_state=42, criterion='gini', max_depth=5, max_features=None, min_samples_leaf=500, min_samples_split=1000)
 dt.fit(X_train, y_train)
 print("Decision tree with explainable feature model AUC:", roc_auc_score(y_test, dt.predict_proba(X_test)[:, 1])) # 0.76270635
 
 # Decision tree plot
 dot_data = tree.export_graphviz(dt, out_file=None, feature_names=X.columns, class_names=['Benign', 'Pathogenic'], filled=True)
 graph = graphviz.Source(dot_data, format="png")
-graph.render("decision_tree_graph", format="png", cleanup=True)
+graph.render("am_decision_tree_graph", format="png", cleanup=True)
 
 
 ######################################
@@ -273,8 +275,8 @@ FM = [88, 86, 85, 79, 78]
 TF = [84, 84, 80, 72, 72] 
 br1 = np.arange(len(FM)) 
 br2 = [x + barWidth for x in br1] 
-ax.bar(br1, FM, color ='#E69F00', width = barWidth, edgecolor ='grey', label ='Full 263 feature model') 
-ax.bar(br2, TF, color ='#56B4F9', width = barWidth, edgecolor ='grey', label ='Top 25 feature model (based on RF perm.)') 
+ax.bar(br1, FM, color ='darkgray', width = barWidth, edgecolor ='grey', label ='Full 263 feature model') 
+ax.bar(br2, TF, color ='lightgray', width = barWidth, edgecolor ='grey', label ='Top 25 feature model (based on RF perm.)') 
 ax.set_xlabel('Machine learning method', fontweight ='bold', fontsize = 15) 
 ax.set_ylabel('Performance (AUC)', fontweight ='bold', fontsize = 15) 
 ax.set_xticks([r + barWidth/2 for r in range(len(FM))])
@@ -294,8 +296,8 @@ FM = [95.55, 93.64, 94.78, 88.17, 94.23]
 TF = [95.21, 94.56, 94.77, 93.63, 94.21] 
 br1 = np.arange(len(FM)) 
 br2 = [x + barWidth for x in br1] 
-ax.bar(br1, FM, color ='#E69F00', width = barWidth, edgecolor ='grey', label ='Full 264 feature model') 
-ax.bar(br2, TF, color ='#56B4F9', width = barWidth, edgecolor ='grey', label ='Top 25 feature model (based on RF perm.)') 
+ax.bar(br1, FM, color ='darkgray', width = barWidth, edgecolor ='grey', label ='Full 264 feature model') 
+ax.bar(br2, TF, color ='lightgray', width = barWidth, edgecolor ='grey', label ='Top 25 feature model (based on RF perm.)') 
 ax.set_xlabel('Machine learning method', fontweight ='bold', fontsize = 15) 
 ax.set_ylabel('Performance (AUC)', fontweight ='bold', fontsize = 15) 
 ax.set_xticks([r + barWidth/2 for r in range(len(FM))])
