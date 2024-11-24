@@ -8,3 +8,8 @@ aa3to1 <- function(aa3list) {
   aa1listColl <- paste(aa1list, collapse='')
   return(aa1listColl)
 }
+
+aa1to3 <- function(aa1) {
+  aa3 <- switch(aa1, A={"ALA"}, R={"ARG"}, N={"ASN"}, D={"ASP"}, B={"ASX"}, C={"CYS"}, Q={"GLN"}, E={"GLU"}, Z={"GLX"}, G={"GLY"}, H={"HIS"}, I={"ILE"}, L={"LEU"}, K={"LYS"}, M={"MET"}, F={"PHE"}, P={"PRO"}, S={"SER"}, T={"THR"}, W={"TRP"}, Y={"TYR"}, V={"VAL"})
+  return(aa3)
+}
