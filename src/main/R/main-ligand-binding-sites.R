@@ -74,7 +74,6 @@ for(i in seq_along(succesfulGenesSub))
     mutation <- variants$ProtChange[j]
     cat(paste("Working on ", mutation, " (gene ",geneName,", mutation ", j, " of ", nrow(variants), ")\n", sep=""))
     mutationDir <- paste(foldingResultsDir, mutation, sep="/")
-    cat("A\n")
     if(!dir.exists(mutationDir))
     {
       stop(paste("No mutation dir", mutationDir, "\n", sep=" "))
