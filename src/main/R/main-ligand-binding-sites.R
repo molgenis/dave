@@ -29,12 +29,17 @@ source(paste(rootDir, "src", "main", "R", "aa3to1.R", sep="/"))
 setwd(dataGenesDir)
 succesfulGenes <- unique(results$gene)
 
+# Possible gene lists to work on
+secr <- read.table(file=paste(rootDir, "data", "protein-atlas-secreted-geneIDs-mane-uniprot-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+intr <- read.table(file=paste(rootDir, "data", "protein-atlas-intracellular-geneIDs-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+memb <- read.table(file=paste(rootDir, "data", "protein-atlas-membrane-geneIDs-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
+succesfulGenesSub <- Reduce(intersect, list(secr$Gene.name, succesfulGenes))
 
-
-for(i in seq_along(succesfulGenes))
+# Iterate over selection of genes
+for(i in seq_along(succesfulGenesSub))
 {
   #i <- 1 # DEBUG/DEV
-  geneName <- succesfulGenes[i]
+  geneName <- succesfulGenesSub[i]
   cat(paste("Working on gene:", geneName, "\n", sep=" "))
   specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
   setwd(specificGeneDir)
