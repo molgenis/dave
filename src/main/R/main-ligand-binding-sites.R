@@ -31,7 +31,7 @@ succesfulGenes <- unique(results$gene)
 
 for(i in seq_along(succesfulGenes))
 {
-  i <- 1 # DEBUG/DEV
+  #i <- 1 # DEBUG/DEV
   geneName <- succesfulGenes[i]
   
   cat(paste("working on gene:", geneName, "\n", sep=" "))
@@ -42,25 +42,28 @@ for(i in seq_along(succesfulGenes))
     stop(paste("No PDB file for gene", geneName, "\n", sep=" "))
   }
   
-  # predict on WT structure
+  # ligand binding sites for WT structure, keep only _predictions file
   tmpDir <- paste(specificGeneDir, "tmp", sep="/")
   mkdirs(tmpDir)
   setwd(tmpDir)
   file.copy(from = paste(specificGeneDir, pdbFile, sep="/"), to = tmpDir)
   system(paste(p2rankExec, " predict -c alphafold -f ", pdbFile ," -o ",tmpDir,sep=""), intern = TRUE)
+  wtPred <- paste0(pdbFile,"_predictions.csv")
+  file.copy(from = paste(tmpDir, wtPred, sep="/"), to = specificGeneDir)
+  if(!file.exists(paste(specificGeneDir,wtPred,sep="/"))){
+    stop(paste("Missing wild-type p2rank output:", wtPred, "\n", sep=" "))
+  }
+  unlink(tmpDir, recursive = TRUE)
   
-  # TAR GZ results
-  
-  
+
   
   variants <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE, colClasses = c("character", "character", "numeric", "character", "character", "character", "character", "numeric", "character"))
   foldingResultsDir <- paste(specificGeneDir, "folding-results", sep="/")
-  
   for(j in 1:nrow(variants))
   {
-    j <- 2 # DEBUG/DEV
+    #j <- 1 # DEBUG/DEV
     mutation <- variants$ProtChange[j]
-    cat(paste("working on mutant:", geneName, mutation, "\n", sep=" "))
+    cat(paste("Working on ", mutation, " (gene ",geneName,", mutation ", j, " of ", nrow(variants), ")\n", sep=""))
     
     mutationDir <- paste(foldingResultsDir, mutation, sep="/")
     if(!dir.exists(mutationDir))
@@ -68,6 +71,7 @@ for(i in seq_along(succesfulGenes))
       stop(paste("No mutation dir", mutationDir, "\n", sep=" "))
     }
     if(length(list.files(mutationDir, pattern="*.fxout")) == 0){
+      # mutation failed apparently, ignore it
       next
     }
     
@@ -78,32 +82,16 @@ for(i in seq_along(succesfulGenes))
     
     system(paste(foldxExec, " --command=PositionScan --pdb=",pdbFile,"  --out-pdb=true --positions=",mutation,sep=""), intern = TRUE)
     
-    wtAA <- substr(mutation, 1, 1)
-    muAA <- substr(mutation, nchar(mutation), nchar(mutation))
-    posi <- substr(mutation, 3, nchar(mutation)-1)
-    wtAA3 <- aa1to3(wtAA)
-    muAA3 <- aa1to3(muAA)
-    
-    wtPDB <- paste0(wtAA3,posi,"_",pdbFile)
-    muPDB <- paste0(muAA3,posi,"_",pdbFile)
-
-    system(paste(p2rankExec, " predict -c alphafold -f ", muPDB ," -o ",tmpDir,sep=""), intern = TRUE)
-    
-    wtPred <- paste0(wtAA3,posi,"_",pdbFile,"_predictions.csv")
-    wtResi <- paste0(wtAA3,posi,"_",pdbFile,"_residues.csv")
-    muPred <- paste0(muAA3,posi,"_",pdbFile,"_predictions.csv")
-    muResi <- paste0(muAA3,posi,"_",pdbFile,"_residues.csv")
-    
-    if(!file.exists(wtPred) | !file.exists(wtResi) | !file.exists(muPred) | !file.exists(muResi)){
-      stop(paste("Missing p2rank output for ", mutationDir, "\n", sep=" "))
+    mutantAA1 <- substr(mutation, nchar(mutation), nchar(mutation))
+    position <- substr(mutation, 3, nchar(mutation)-1)
+    mutantAA3 <- aa1to3(mutantAA1)
+    mutantPDB <- paste0(mutantAA3,position,"_",pdbFile)
+    system(paste(p2rankExec, " predict -c alphafold -f ", mutantPDB ," -o ",tmpDir,sep=""), intern = TRUE)
+    mutantLBSPred <- paste0(mutantAA3,position,"_",pdbFile,"_predictions.csv")
+    file.copy(from = paste(tmpDir, mutantLBSPred, sep="/"), to = mutationDir)
+    if(!file.exists(paste(mutationDir, mutantLBSPred, sep="/"))){
+      stop(paste("Missing mutant p2rank output:", mutantLBSPred, "\n", sep=" "))
     }
-    
-    filesToArchive <- c(wtPred, wtResi, muPred, muResi)
-    tarFile <- paste0(mutation,".tar")
-    tar(tarfile = tarFile, files = filesToArchive)
-    gzip(tarFile, overwrite = TRUE)
-    tarGzFile <- paste0(tarFile,".gz")
-    file.copy(from = paste(tmpDir, tarGzFile, sep="/"), to = mutationDir)
     unlink(tmpDir, recursive = TRUE)
   }
 }
