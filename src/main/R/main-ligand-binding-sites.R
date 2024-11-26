@@ -43,7 +43,7 @@ for(i in seq_along(succesfulGenesSub))
   cat(paste("Working on gene:", geneName, "\n", sep=" "))
   specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
   setwd(specificGeneDir)
-  pdbFile <- list.files(pattern="*_Repair.pdb")
+  pdbFile <- list.files(pattern="*_Repair.pdb$")
   if(length(pdbFile) == 0){
     stop(paste("No PDB file for gene", geneName, "\n", sep=" "))
   }
@@ -80,6 +80,10 @@ for(i in seq_along(succesfulGenesSub))
     }
     if(!length(list.files(mutationDir, pattern="Repair.pdb_predictions.csv")) == 0){
       cat("Mutant *Repair.pdb_predictions.csv file already present, skipping..\n")
+      next
+    }
+    if(!length(list.files(mutationDir, pattern="exception.txt")) == 0){
+      cat("Exception present, skipping..\n")
       next
     }
     tmpDir <- paste(mutationDir, "tmp", sep="/")
