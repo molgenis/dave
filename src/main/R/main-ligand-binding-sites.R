@@ -15,7 +15,8 @@ p2rankExec <- "/Applications/p2rank_2.5/prank"
 rootDir <- "D:/github/vkgl-secretome-protein-stability"
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv"
 foldxExec <- "C:/\"Program Files\"/FoldX/foldx_20241231.exe"
-p2rankExec <- "C:/\"Program Files\"/p2rank_2.5/prank"
+java <- r"(C:\Program Files\OpenLogic\jdk-22.0.2.9-hotspot\bin\java.exe)"
+prank <- r"(D:/p2rank_2.5/bin/p2rank.jar;D:/p2rank_2.5/bin/lib/*)"
 
 # Assuming data was produced by main.R and enriched by CombineWithAlhaMissense.R
 # Load the freeze4 data and assign meaningful row names
@@ -53,7 +54,15 @@ for(i in seq_along(succesfulGenesSub))
     mkdirs(tmpDir)
     setwd(tmpDir)
     file.copy(from = paste(specificGeneDir, pdbFile, sep="/"), to = tmpDir)
-    system(paste(p2rankExec, " predict -c alphafold -f ", pdbFile ," -o ",tmpDir,sep=""), intern = TRUE)
+    prArgs <- paste0(" predict -c alphafold -f ", pdbFile ," -o ",tmpDir)
+    
+    if(.Platform$OS.type == "windows")
+    {
+      system2(command = java, args = c("-Xmx2048m", paste0("-cp ", prank), "cz.siret.prank.program.Main", prArgs) )
+    }else{
+      system(paste(p2rankExec, prArgs ,sep=""), intern = TRUE)
+    }
+    
     wtPred <- paste0(pdbFile,"_predictions.csv")
     file.copy(from = paste(tmpDir, wtPred, sep="/"), to = specificGeneDir)
     if(!file.exists(paste(specificGeneDir,wtPred,sep="/"))){
@@ -95,7 +104,16 @@ for(i in seq_along(succesfulGenesSub))
     position <- substr(mutation, 3, nchar(mutation)-1)
     mutantAA3 <- aa1to3(mutantAA1)
     mutantPDB <- paste0(mutantAA3, position, "_", pdbFile)
-    system(paste(p2rankExec, " predict -c alphafold -f ", mutantPDB ," -o ", tmpDir, sep=""), intern = TRUE)
+    
+    prArgs <- paste0(" predict -c alphafold -f ", mutantPDB ," -o ", tmpDir)
+    
+    if(.Platform$OS.type == "windows")
+    {
+      system2(command = java, args = c("-Xmx2048m", paste0("-cp ", prank), "cz.siret.prank.program.Main", prArgs) )
+    }else{
+      system(paste(p2rankExec, prArgs, tmpDir, sep=""), intern = TRUE)
+    }
+
     mutantLBSPred <- paste0(mutantAA3, position, "_", pdbFile, "_predictions.csv")
     file.copy(from = paste(tmpDir, mutantLBSPred, sep="/"), to = mutationDir)
     if(!file.exists(paste(mutationDir, mutantLBSPred, sep="/"))){
