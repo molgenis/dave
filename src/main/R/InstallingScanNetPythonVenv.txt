@@ -11,11 +11,17 @@ Set-ExecutionPolicy Unrestricted
 cd D:\github\ScanNet
 
 # Create Python 3.7.9 venv in this dir or wherever you prefer
+# Win:
 C:\Users\Joeri\AppData\Local\Programs\Python\Python37\python.exe -m venv venv
+# Mac/Linux:
+/Library/Frameworks/Python.framework/Versions/3.7/bin/python3 -m venv venv
 
 # Activate venv
+# Win:
 venv\Scripts\activate
-
+# Mac/Linux:
+source venv/bin/activate
+ 
 # Install dependencies
 pip install numpy==1.19.5
 pip install h5py==2.10.0
@@ -34,5 +40,13 @@ pip install ipywebrtc==0.5.0
 # For Win10, this was needed as a fix:
 pip install protobuf==3.20.*
 
-# You could try running on GPU
+# For ARM-based Macs (M1, M2 etc), TensorFlow will fail because it was compiled to use AVX instructions that are Intel only
+# To fix this issue, remove TensorFlow and install an AVX-less version from a custom repo:
+pip uninstall tensorflow -y 
+pip install https://github.com/spinalcordtoolbox/docker-tensorflow-builder/releases/download/v1.15.5-py3.7/tensorflow-1.15.0-py3-none-any.whl
+
+# Run a test with any (small) PDB file, e.g.
+python predict_bindingsites.py A2M.pdb --noMSA
+
+# You could try running on GPU but this requires CUDA and other dependencies to be set up just right:
 # pip install tensorflow-gpu==1.14
