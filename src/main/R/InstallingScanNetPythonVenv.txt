@@ -1,0 +1,36 @@
+
+# Install Python 3.7.9 from
+https://www.python.org/downloads/release/python-379/
+
+# Go into Powershell and run:
+Set-ExecutionPolicy Unrestricted
+
+# Your ScanNet dir as cloned from GitHub
+cd D:\github\ScanNet
+
+# Create Python 3.7.9 venv in ScanNet dir or wherever you prefer
+C:\Users\Joeri\AppData\Local\Programs\Python\Python37\python.exe -m venv venv
+
+# Activate venv
+venv\Scripts\activate
+
+# Install dependencies
+pip install numpy==1.19.5
+pip install h5py==2.10.0
+pip install keras==2.2.5
+pip install tensorflow==1.14.0
+pip install biopython==1.78
+pip install numba==0.52.0
+pip install pandas==1.1.5
+pip install scipy==1.5.4
+pip install matplotlib==3.3.3
+pip install scikit-learn==0.24.2
+pip install pythreejs
+pip install ipywidgets==7.5.1
+pip install ipywebrtc==0.5.0
+
+# For Win10, this was needed as a fix:
+pip install protobuf==3.20.*
+
+# You could try running on GPU
+# pip install tensorflow-gpu==1.14

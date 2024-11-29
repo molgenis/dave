@@ -516,4 +516,5 @@ results <- read.csv(freeze3)
 ######################################
 # see: CombineWithAlhaMissense.R
 # This results in the creation of freeze4.csv.gz
+# After this, run main-ligand-binding-sites.R and main-scan-net.R for protein site predictions
 
