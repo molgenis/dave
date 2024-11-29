@@ -111,7 +111,7 @@ for(i in seq_along(succesfulGenesSub))
     {
       system2(command = java, args = c("-Xmx2048m", paste0("-cp ", prank), "cz.siret.prank.program.Main", prArgs) )
     }else{
-      system(paste(p2rankExec, prArgs, tmpDir, sep=""), intern = TRUE)
+      system(paste(p2rankExec, prArgs, sep=""), intern = TRUE)
     }
 
     mutantLBSPred <- paste0(mutantAA3, position, "_", pdbFile, "_predictions.csv")
