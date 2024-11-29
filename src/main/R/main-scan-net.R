@@ -54,66 +54,67 @@ for(i in seq_along(succesfulGenesSub))
   if(length(pdbFile) == 0){
     stop(paste("No PDB file for gene", geneName, "\n", sep=" "))
   }
-  if(length(list.files(specificGeneDir, pattern="CombinedScanNetPredictions.csv")) == 0){
-    tmpDir <- paste(specificGeneDir, "tmp", sep="/")
-    mkdirs(tmpDir)
-    setwd(tmpDir)
-    file.copy(from = paste(specificGeneDir, pdbFile, sep="/"), to = tmpDir)
-
-    setwd(scanNetDir)
-    
-    scanNetExe_WT_int <- paste0("WT_int_", scanNetExe)
-    scanNetExe_WT_epi <- paste0("WT_epi_", scanNetExe)
-    scanNetExe_WT_idp <- paste0("WT_idp_", scanNetExe)
-
-    file.copy(from = scanNetExe, to = scanNetExe_WT_int)
-    file.copy(from = scanNetExe, to = scanNetExe_WT_epi)
-    file.copy(from = scanNetExe, to = scanNetExe_WT_idp)
-    
-    oldArgs <- "    args = parser.parse_args()"
-    newArgs_int <- paste0("    args = parser.parse_args([\"",paste(tmpDir, pdbFile, sep="/"),"\", \"--noMSA\", \"--predictions_folder\", \"",tmpDir,"\", \"--mode\", \"interface\"])")
-    newArgs_epi <- paste0("    args = parser.parse_args([\"",paste(tmpDir, pdbFile, sep="/"),"\", \"--noMSA\", \"--predictions_folder\", \"",tmpDir,"\", \"--mode\", \"epitope\"])")
-    newArgs_idp <- paste0("    args = parser.parse_args([\"",paste(tmpDir, pdbFile, sep="/"),"\", \"--noMSA\", \"--predictions_folder\", \"",tmpDir,"\", \"--mode\", \"idp\"])")
-    
-    ok1 <- replace_line_in_file(scanNetExe_WT_int, oldArgs, newArgs_int)
-    ok2 <- replace_line_in_file(scanNetExe_WT_epi, oldArgs, newArgs_epi)
-    ok3 <- replace_line_in_file(scanNetExe_WT_idp, oldArgs, newArgs_idp)
-    
-    if(!(ok1 && ok2 && ok3)){
-      stop("Args replace failed")
-    }
-  
-    py_run_file(scanNetExe_WT_int)
-    py_run_file(scanNetExe_WT_epi)
-    py_run_file(scanNetExe_WT_idp)
-    
-    unlink(scanNetExe_WT_int)
-    unlink(scanNetExe_WT_epi)
-    unlink(scanNetExe_WT_idp)
-  
-    setwd(tmpDir)
-    pdbNoExt <- substr(pdbFile, 1, nchar(pdbFile)-4)
-    intFile <- paste0(tmpDir, "/", pdbNoExt, "_single_ScanNet_interface_noMSA/", "predictions_",pdbNoExt,".csv")
-    epiFile <- paste0(tmpDir, "/", pdbNoExt, "_single_ScanNet_epitope_noMSA/", "predictions_",pdbNoExt,".csv")
-    idpFile <- paste0(tmpDir, "/", pdbNoExt, "_single_ScanNet_idp_noMSA/", "predictions_",pdbNoExt,".csv")
-    combinedFile <- "CombinedScanNetPredictions.csv"
-    combine_last_columns(intFile, epiFile, idpFile, c("int", "epi", "idp"), combinedFile)
-    
-    if(!file.exists(combinedFile)){
-      stop("Combined file for WT failed")
-    }
-    
-    file.copy(from = combinedFile, to = specificGeneDir)
-    
-    if(!file.exists(paste(specificGeneDir, combinedFile, sep="/"))){
-      stop("Combined file for WT not in final location")
-    }
-    
-    setwd(specificGeneDir)
-    unlink(tmpDir, recursive = TRUE)
-  }else{
+  if(!length(list.files(specificGeneDir, pattern="CombinedScanNetPredictions.csv")) == 0){
     cat("Wild-type CombinedScanNetPredictions.csv file already present, skipping..\n")
+    next
   }
+  
+  tmpDir <- paste(specificGeneDir, "tmp", sep="/")
+  mkdirs(tmpDir)
+  setwd(tmpDir)
+  file.copy(from = paste(specificGeneDir, pdbFile, sep="/"), to = tmpDir)
+
+  setwd(scanNetDir)
+  
+  scanNetExe_WT_int <- paste0(geneName,"_WT_int_", scanNetExe)
+  scanNetExe_WT_epi <- paste0(geneName,"_WT_epi_", scanNetExe)
+  scanNetExe_WT_idp <- paste0(geneName,"_WT_idp_", scanNetExe)
+
+  file.copy(from = scanNetExe, to = scanNetExe_WT_int)
+  file.copy(from = scanNetExe, to = scanNetExe_WT_epi)
+  file.copy(from = scanNetExe, to = scanNetExe_WT_idp)
+  
+  oldArgs <- "    args = parser.parse_args()"
+  newArgs_int <- paste0("    args = parser.parse_args([\"",paste(tmpDir, pdbFile, sep="/"),"\", \"--noMSA\", \"--predictions_folder\", \"",tmpDir,"\", \"--mode\", \"interface\"])")
+  newArgs_epi <- paste0("    args = parser.parse_args([\"",paste(tmpDir, pdbFile, sep="/"),"\", \"--noMSA\", \"--predictions_folder\", \"",tmpDir,"\", \"--mode\", \"epitope\"])")
+  newArgs_idp <- paste0("    args = parser.parse_args([\"",paste(tmpDir, pdbFile, sep="/"),"\", \"--noMSA\", \"--predictions_folder\", \"",tmpDir,"\", \"--mode\", \"idp\"])")
+  
+  ok1 <- replace_line_in_file(scanNetExe_WT_int, oldArgs, newArgs_int)
+  ok2 <- replace_line_in_file(scanNetExe_WT_epi, oldArgs, newArgs_epi)
+  ok3 <- replace_line_in_file(scanNetExe_WT_idp, oldArgs, newArgs_idp)
+  
+  if(!(ok1 && ok2 && ok3)){
+    stop("Args replace failed")
+  }
+
+  py_run_file(scanNetExe_WT_int)
+  py_run_file(scanNetExe_WT_epi)
+  py_run_file(scanNetExe_WT_idp)
+  
+  unlink(scanNetExe_WT_int)
+  unlink(scanNetExe_WT_epi)
+  unlink(scanNetExe_WT_idp)
+
+  setwd(tmpDir)
+  pdbNoExt <- substr(pdbFile, 1, nchar(pdbFile)-4)
+  intFile <- paste0(tmpDir, "/", pdbNoExt, "_single_ScanNet_interface_noMSA/", "predictions_",pdbNoExt,".csv")
+  epiFile <- paste0(tmpDir, "/", pdbNoExt, "_single_ScanNet_epitope_noMSA/", "predictions_",pdbNoExt,".csv")
+  idpFile <- paste0(tmpDir, "/", pdbNoExt, "_single_ScanNet_idp_noMSA/", "predictions_",pdbNoExt,".csv")
+  combinedFile <- "CombinedScanNetPredictions.csv"
+  combine_last_columns(intFile, epiFile, idpFile, c("int", "epi", "idp"), combinedFile)
+  
+  if(!file.exists(combinedFile)){
+    stop("Combined file for WT failed")
+  }
+  
+  file.copy(from = combinedFile, to = specificGeneDir)
+  
+  if(!file.exists(paste(specificGeneDir, combinedFile, sep="/"))){
+    stop("Combined file for WT not in final location")
+  }
+  
+  setwd(specificGeneDir)
+  unlink(tmpDir, recursive = TRUE)
   
   # Iterate over variants, mutate PDB and predict ligand binding sites
   variants <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE, colClasses = c("character", "character", "numeric", "character", "character", "character", "character", "numeric", "character"))
@@ -128,7 +129,7 @@ for(i in seq_along(succesfulGenesSub))
     {
       stop(paste("No mutation dir", mutationDir, "\n", sep=" "))
     }
-    if(length(list.files(mutationDir, pattern="CombinedScanNetPredictions.csv")) == 0){
+    if(!length(list.files(mutationDir, pattern="CombinedScanNetPredictions.csv")) == 0){
       cat("Mutant CombinedScanNetPredictions.csv file already present, skipping..\n")
       next
     }
@@ -155,9 +156,9 @@ for(i in seq_along(succesfulGenesSub))
 
     setwd(scanNetDir)
     
-    scanNetExe_mu_int <- paste0(mutantAA3, position, "_int_", scanNetExe)
-    scanNetExe_mu_epi <- paste0(mutantAA3, position, "_epi_", scanNetExe)
-    scanNetExe_mu_idp <- paste0(mutantAA3, position, "_idp_", scanNetExe)
+    scanNetExe_mu_int <- paste0(geneName,"_",mutantAA3, position, "_int_", scanNetExe)
+    scanNetExe_mu_epi <- paste0(geneName,"_",mutantAA3, position, "_epi_", scanNetExe)
+    scanNetExe_mu_idp <- paste0(geneName,"_",mutantAA3, position, "_idp_", scanNetExe)
     
     file.copy(from = scanNetExe, to = scanNetExe_mu_int)
     file.copy(from = scanNetExe, to = scanNetExe_mu_epi)
