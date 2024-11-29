@@ -45,7 +45,7 @@ succesfulGenesSub <- Reduce(intersect, list(memb$Gene.name, succesfulGenes))
 # Iterate over selection of genes
 for(i in seq_along(succesfulGenesSub))
 {
-  i <- 1 # DEBUG/DEV
+  #i <- 1 # DEBUG/DEV
   geneName <- succesfulGenesSub[i]
   cat(paste("Working on gene:", geneName, "\n", sep=" "))
   specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
@@ -120,7 +120,7 @@ for(i in seq_along(succesfulGenesSub))
   foldingResultsDir <- paste(specificGeneDir, "folding-results", sep="/")
   for(j in 1:nrow(variants))
   {
-    j <- 1 # DEBUG/DEV
+    #j <- 1 # DEBUG/DEV
     mutation <- variants$ProtChange[j]
     cat(paste("Working on ", mutation, " (gene ",geneName,", mutation ", j, " of ", nrow(variants), ")\n", sep=""))
     mutationDir <- paste(foldingResultsDir, mutation, sep="/")
@@ -128,7 +128,7 @@ for(i in seq_along(succesfulGenesSub))
     {
       stop(paste("No mutation dir", mutationDir, "\n", sep=" "))
     }
-    if(length(list.files(specificGeneDir, pattern="CombinedScanNetPredictions.csv")) == 0){
+    if(length(list.files(mutationDir, pattern="CombinedScanNetPredictions.csv")) == 0){
       cat("Mutant CombinedScanNetPredictions.csv file already present, skipping..\n")
       next
     }
@@ -136,6 +136,7 @@ for(i in seq_along(succesfulGenesSub))
       cat("Exception present, skipping..\n")
       next
     }
+    
     tmpDir <- paste(mutationDir, "tmp", sep="/")
     mkdirs(tmpDir)
     setwd(tmpDir)
