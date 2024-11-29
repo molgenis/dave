@@ -1,14 +1,16 @@
+# Git clone ScanNet from
+https://github.com/jertubiana/ScanNet
 
 # Install Python 3.7.9 from
 https://www.python.org/downloads/release/python-379/
 
-# Go into Powershell and run:
+# Run Powershell as Administrator and run:
 Set-ExecutionPolicy Unrestricted
 
-# Your ScanNet dir as cloned from GitHub
+# Go to ScanNet dir if you want the venv there
 cd D:\github\ScanNet
 
-# Create Python 3.7.9 venv in ScanNet dir or wherever you prefer
+# Create Python 3.7.9 venv in this dir or wherever you prefer
 C:\Users\Joeri\AppData\Local\Programs\Python\Python37\python.exe -m venv venv
 
 # Activate venv
