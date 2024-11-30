@@ -42,6 +42,8 @@ secr <- read.table(file=paste(rootDir, "data", "protein-atlas-secreted-geneIDs-m
 intr <- read.table(file=paste(rootDir, "data", "protein-atlas-intracellular-geneIDs-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
 memb <- read.table(file=paste(rootDir, "data", "protein-atlas-membrane-geneIDs-mane-uniprot-random2000-withvariants.txt", sep="/"), sep = '\t',header = TRUE)
 succesfulGenesSub <- Reduce(intersect, list(secr$Gene.name, succesfulGenes))
+results <- NULL # unload results to save memory
+
 
 # Iterate over selection of genes
 for(i in seq_along(succesfulGenesSub))
