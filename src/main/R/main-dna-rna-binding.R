@@ -82,6 +82,7 @@ for(i in seq_along(succesfulGenesSub))
     if(file.exists("1bna.interaction_terms.txt")){ stop("Old 1bna.interaction_terms.txt still present") }
     if(file.exists("4jrd-A.interaction_terms.txt")){ stop("Old 4jrd-A.interaction_terms.txt still present") }
     if(file.exists(resultFileName)){ stop("Old combined result file still present") }
+    unlink(pdbFile)
   }
   
   # Iterate over variants, mutate PDB and predict ligand binding sites
@@ -135,6 +136,7 @@ for(i in seq_along(succesfulGenesSub))
     if(file.exists("1bna.interaction_terms.txt")){ stop("Old 1bna.interaction_terms.txt still present") }
     if(file.exists("4jrd-A.interaction_terms.txt")){ stop("Old 4jrd-A.interaction_terms.txt still present") }
     if(file.exists(resultFileName)){ stop("Old combined result file still present") }
+    unlink(mutantPDB)
     unlink(tmpDir, recursive = TRUE)
   }
 }
