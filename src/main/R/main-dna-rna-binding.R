@@ -71,6 +71,9 @@ for(i in seq_along(succesfulGenesSub))
     setwd(glmScoreDir)
     dna_pKd <- system(paste(glmScoreDirExe, paste0(pdbFile, " 1bna.pdb  1bna.mol2 DNA")), intern = TRUE)
     rna_pKd <- system(paste(glmScoreDirExe, paste0(pdbFile, " 4jrd-A.pdb 4jrd-A.mol2 RNA")), intern = TRUE)
+    # warnings may be included, so take only last element
+    dna_pKd <- dna_pKd[length(dna_pKd)]
+    rna_pKd <- rna_pKd[length(rna_pKd)]
     # Grab interaction terms for both and combine into one file. From https://github.com/Klab-Bioinfo-Tools/GLM-Score doc:
     # Total hydrophobic contact score (V2), Van der Waals interactions (V3), side chain rotation (V4), hydrogen bonding (V5), assessible to solvent area ASA of protein (V6) and ligand (V7), repulsive interactions (V18), london disperson forces (V19), contact hydrophobicity (V20), total hydrophobicity (V21), contact surface tension (V22), total surface tension (V23)
     transpose_and_label("1bna.interaction_terms.txt", "4jrd-A.interaction_terms.txt", dna_pKd, rna_pKd, resultFileName)
@@ -127,6 +130,8 @@ for(i in seq_along(succesfulGenesSub))
     setwd(glmScoreDir)
     dna_pKd <- system(paste(glmScoreDirExe, paste0(mutantPDB, " 1bna.pdb  1bna.mol2 DNA")), intern = TRUE)
     rna_pKd <- system(paste(glmScoreDirExe, paste0(mutantPDB, " 4jrd-A.pdb 4jrd-A.mol2 RNA")), intern = TRUE)
+    dna_pKd <- dna_pKd[length(dna_pKd)]
+    rna_pKd <- rna_pKd[length(rna_pKd)]
     transpose_and_label("1bna.interaction_terms.txt", "4jrd-A.interaction_terms.txt", dna_pKd, rna_pKd, resultFileName)
     file.copy(from = resultFileName, to = mutationDir)
     if(!file.exists(paste(mutationDir, resultFileName, sep="/"))){ stop("Copy of combined result file failed") }
