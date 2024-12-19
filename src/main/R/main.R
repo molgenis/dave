@@ -41,7 +41,7 @@ selectedGenes <- allg
 # Derived paths of directories and files #
 ##########################################
 dataGenesDir <- paste(rootDir, "data", "genes", sep="/")
-source(paste(rootDir, "src", "main", "R", "aa3to1.R", sep="/"))
+source(paste(rootDir, "src", "main", "R", "helper-functions.R", sep="/"))
 
 
 #################################################

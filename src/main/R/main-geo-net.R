@@ -28,9 +28,7 @@ freeze <- paste(rootDir, "data", "freeze4.csv.gz", sep="/")
 results <- read.csv(freeze)
 rownames(results) <- paste0(results$gene, "/", results$UniProtID, ":", results$delta_aaSeq)
 dataGenesDir <- paste(rootDir, "data", "genes", sep="/")
-source(paste(rootDir, "src", "main", "R", "aa3to1.R", sep="/"))
-source(paste(rootDir, "src", "main", "R", "replace-line-in-file.R", sep="/"))
-source(paste(rootDir, "src", "main", "R", "combine-last-columns.R", sep="/"))
+source(paste(rootDir, "src", "main", "R", "helper-functions.R", sep="/"))
 
 # Iterate over genes and then over mutations
 setwd(dataGenesDir)

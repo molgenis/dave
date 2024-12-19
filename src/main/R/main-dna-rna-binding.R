@@ -29,8 +29,7 @@ dataGenesDir <- paste(rootDir, "data", "genes", sep="/")
 dataStructDir <- paste(rootDir, "data", "structures", sep="/")
 glmScoreDirExe <- paste(glmScoreDir, glmScoreExe, sep="/")
 resultFileName <- "DNA_RNA_interaction_terms.csv"
-source(paste(rootDir, "src", "main", "R", "aa3to1.R", sep="/"))
-source(paste(rootDir, "src", "main", "R", "combineDNAandRNAresults.R", sep="/"))
+source(paste(rootDir, "src", "main", "R", "helper-functions.R", sep="/"))
 
 
 # Iterate over genes and then over mutations
