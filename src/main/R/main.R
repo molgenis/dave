@@ -516,5 +516,28 @@ results <- read.csv(freeze3)
 ######################################
 # see: CombineWithAlhaMissense.R
 # This results in the creation of freeze4.csv.gz
-# After this, run main-ligand-binding-sites.R and main-scan-net.R for protein site predictions
 
+
+######################################
+# Functional annotations
+######################################
+# After this:
+# --> main-ligand-binding-sites.R
+#     Runs P2Rank and adds <mutations>_<protein>_v4_Repair.pdb_predictions.csv
+#     Contains predicted ligand binding pockets
+# --> main-dna-rna-binding.R
+#     Runs GLM-Score and adds DNA_RNA_interaction_terms.csv
+#     Contains simulated binding energy to actual DNA and RNA molecules
+# --> main-geo-net.R
+#     Runs GeoNet and adds CombinedGeoNetPredictions.csv
+#     Contains predicted protein, DNA and RNA binding sites
+#
+# If all is complete, based on freeze4 dataset:
+# 2596 wildtypes + 23417 mutations = 26013 files of each:
+#     P2Rank:     find . -name "*_v4_Repair.pdb_predictions.csv" | wc -l
+#     GLM-Score:  find . -name "DNA_RNA_interaction_terms.csv" | wc -l
+#     GeoNet:     find . -name "CombinedGeoNetPredictions.csv" | wc -l
+#
+# make-freeze5.R combines these functional features and remove non-functional ones
+# Resulting in freeze5.csv.gz
+#
