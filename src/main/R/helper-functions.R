@@ -94,117 +94,129 @@ combine_geonet_results <- function(file1, file2, file3, colNames, output_file) {
   write.csv(combined_data, file = output_file, row.names = FALSE)
 }
 
-# TEMPORARY until GeoNet results are complete, impute for LP/LB/VUS
-get_imputed_GeoNet_values <- function(dataGenesDir, vkglProtVarFileName)
+
+######################
+# Feature extraction #
+######################
+
+# Extract GeoNet DNA/RNA/Protein binding site features from input data frames
+extract_geonet_features <- function(geoNet_WT, geoNet_Mu){
+  return(
+    data.frame(
+      delta_DNAs_cumu_prob = sum(geoNet_Mu$dnaProb) - sum(geoNet_WT$dnaProb),
+      delta_DNAs_cumu_bin = sum(geoNet_Mu$dnaBin) - sum(geoNet_WT$dnaBin),
+      delta_RNAs_cumu_prob = sum(geoNet_Mu$rnaProb) - sum(geoNet_WT$rnaProb),
+      delta_RNAs_cumu_bin = sum(geoNet_Mu$rnaBin) - sum(geoNet_WT$rnaBin),
+      delta_ProtS_cumu_prob = sum(geoNet_Mu$pProb) - sum(geoNet_WT$pProb),
+      delta_ProtS_cumu_bin = sum(geoNet_Mu$pBin) - sum(geoNet_WT$pBin)
+    )
+  )
+}
+
+# TEMPORARY until GeoNet results are complete, bell curve values to impute for LP/LB/VUS
+get_GeoNet_bellcurve_values <- function(dataGenesDir, vkglProtVarFileName)
 {
-  dfForImputation <- data.frame(label=character(), delta_cumuDNAProb=numeric(), delta_cumuDNABin=numeric(), delta_cumuRNAProb=numeric(), delta_cumuRNABin=numeric(), delta_cumuPProb=numeric(), delta_cumuPBin=numeric())
+  dfForImputation <- data.frame()
   
   # Iterate over selection of genes
   for(i in seq_along(succesfulGenes))
   {
-    #i <- 1 # DEBUG/DEV
+    # i <- 1 # DEBUG/DEV
     geneName <- succesfulGenes[i]
     cat(paste("GeoNet imputation, working on gene:", geneName, "\n", sep=" "))
     specificGeneDir <- paste(dataGenesDir, geneName, sep="/")
     if(!length(list.files(specificGeneDir, pattern="CombinedGeoNetPredictions.csv")) == 0){
-      wt_gnRes <- read.csv(paste(specificGeneDir, "CombinedGeoNetPredictions.csv", sep = "/"))
+      geoNet_WT <- read.csv(paste(specificGeneDir, "CombinedGeoNetPredictions.csv", sep = "/"))
     }else{
       next
     }
-    
-    wt_cumuDNAProb <- sum(wt_gnRes$dnaProb)
-    wt_cumuDNABin <- sum(wt_gnRes$dnaBin)
-    wt_cumuRNAProb <- sum(wt_gnRes$rnaProb)
-    wt_cumuRNABin <- sum(wt_gnRes$rnaBin)
-    wt_cumuPProb <- sum(wt_gnRes$pProb)
-    wt_cumuPBin <- sum(wt_gnRes$pBin)
-    
     variants <- read.table(file=paste(specificGeneDir, vkglProtVarFileName, sep="/"), sep = '\t', header = TRUE, colClasses = c("character", "character", "numeric", "character", "character", "character", "character", "numeric", "character"))
     foldingResultsDir <- paste(specificGeneDir, "folding-results", sep="/")
-    
     for(j in 1:nrow(variants))
     {
-      #j <- 1 # DEBUG/DEV
+      # j <- 1 # DEBUG/DEV
       mutation <- variants$ProtChange[j]
       cat(paste("GeoNet imputation, working on ", mutation, " (gene ",geneName,", mutation ", j, " of ", nrow(variants), ")\n", sep=""))
       mutationDir <- paste(foldingResultsDir, mutation, sep="/")
       if(!length(list.files(mutationDir, pattern="CombinedGeoNetPredictions.csv")) == 0){
-        mut_gnRes <- read.csv(paste(mutationDir, "CombinedGeoNetPredictions.csv", sep="/"))
-        mut_cumuDNAProb <- sum(mut_gnRes$dnaProb)
-        mut_cumuDNABin <- sum(mut_gnRes$dnaBin)
-        mut_cumuRNAProb <- sum(mut_gnRes$rnaProb)
-        mut_cumuRNABin <- sum(mut_gnRes$rnaBin)
-        mut_cumuPProb <- sum(mut_gnRes$pProb)
-        mut_cumuPBin <- sum(mut_gnRes$pBin)
-        
-        dfForImputation <- rbind(dfForImputation, data.frame(label = variants$Classification[j],
-                                                             delta_cumuDNAProb = mut_cumuDNAProb - wt_cumuDNAProb,
-                                                             delta_cumuDNABin = mut_cumuDNABin - wt_cumuDNABin,
-                                                             delta_cumuRNAProb = mut_cumuRNAProb - wt_cumuRNAProb,
-                                                             delta_cumuRNABin = mut_cumuRNABin - wt_cumuRNABin,
-                                                             delta_cumuPProb = mut_cumuPProb - wt_cumuPProb,
-                                                             delta_cumuPBin = mut_cumuPBin - wt_cumuPBin))
+        geoNet_Mu <- read.csv(paste(mutationDir, "CombinedGeoNetPredictions.csv", sep="/"))
+        dfForImputation <- rbind(dfForImputation, data.frame(label = variants$Classification[j], extract_geonet_features(geoNet_WT, geoNet_Mu)))
       }
     }
   }
-  agg <- aggregate(.~label, dfForImputation, mean)
-  return(agg)
+  means <- data.frame(bell="means", aggregate(.~label, dfForImputation, mean))
+  SDs <- data.frame(bell="SDs", aggregate(.~label, dfForImputation, sd))
+  res <- rbind(means, SDs)
+  res$bell <- as.factor(res$bell)
+  res$label <- as.factor(res$label)
+  return(res)
+}
+
+# TEMPORARY until GeoNet results are complete, impute for LP/LB/VUS
+# # e.g. gnImp[gnImp$label=="LB" & gnImp$bell=="means",]$delta_DNAs_cumu_prob
+
+impute_GeoNet_features <- function(gnImp, cLabel)
+{
+  return(
+    data.frame(
+      delta_DNAs_cumu_prob = rnorm(1, gnImp[gnImp$label==cLabel & gnImp$bell=="means",]$delta_DNAs_cumu_prob, gnImp[gnImp$label==cLabel & gnImp$bell=="SDs",]$delta_DNAs_cumu_prob),
+      delta_DNAs_cumu_bin = rnorm(1, gnImp[gnImp$label==cLabel & gnImp$bell=="means",]$delta_DNAs_cumu_bin, gnImp[gnImp$label==cLabel & gnImp$bell=="SDs",]$delta_DNAs_cumu_bin),
+      delta_RNAs_cumu_prob = rnorm(1, gnImp[gnImp$label==cLabel & gnImp$bell=="means",]$delta_RNAs_cumu_prob, gnImp[gnImp$label==cLabel & gnImp$bell=="SDs",]$delta_RNAs_cumu_prob),
+      delta_RNAs_cumu_bin = rnorm(1, gnImp[gnImp$label==cLabel & gnImp$bell=="means",]$delta_RNAs_cumu_bin, gnImp[gnImp$label==cLabel & gnImp$bell=="SDs",]$delta_RNAs_cumu_bin),
+      delta_ProtS_cumu_prob = rnorm(1, gnImp[gnImp$label==cLabel & gnImp$bell=="means",]$delta_ProtS_cumu_prob, gnImp[gnImp$label==cLabel & gnImp$bell=="SDs",]$delta_ProtS_cumu_prob),
+      delta_ProtS_cumu_bin = rnorm(1, gnImp[gnImp$label==cLabel & gnImp$bell=="means",]$delta_ProtS_cumu_bin, gnImp[gnImp$label==cLabel & gnImp$bell=="SDs",]$delta_ProtS_cumu_bin)
+    )
+  )
 }
 
 # Extract GLM-Score DNA/RNA binding features from input data frames
 extract_glmscore_features <- function(glmScore_WT, glmScore_Mu){
-
-  featDF <- data.frame(delta_DNA_total_hydrophobic_contact_score_V2 = numeric(),
-                       delta_DNA_Van_der_Waals_interactions_V3 = numeric(),
-                       delta_DNA_side_chain_rotation_V4 = numeric(),
-                       delta_DNA_hydrogen_bonding_V5 = numeric(),
-                       delta_DNA_accessible_to_solvent_area_of_protein_V6 = numeric(),
-                       delta_DNA_accessible_to_solvent_area_of_ligand_V7 = numeric(),
-                       delta_DNA_repulsive_interactions_V18 = numeric(),
-                       delta_DNA_london_disperson_forces_V19 = numeric(),
-                       delta_DNA_contact_hydrophobicity_V20 = numeric(),
-                       delta_DNA_total_hydrophobicity_V21 = numeric(),
-                       delta_DNA_contact_surface_tension_V22 = numeric(),
-                       delta_DNA_total_surface_tension_V23 = numeric(),
-                       delta_DNA_binding_affinity_pKd = numeric(),
-                       delta_RNA_total_hydrophobic_contact_score_V2 = numeric(),
-                       delta_RNA_Van_der_Waals_interactions_V3 = numeric(),
-                       delta_RNA_side_chain_rotation_V4 = numeric(),
-                       delta_RNA_hydrogen_bonding_V5 = numeric(),
-                       delta_RNA_accessible_to_solvent_area_of_protein_V6 = numeric(),
-                       delta_RNA_accessible_to_solvent_area_of_ligand_V7 = numeric(),
-                       delta_RNA_repulsive_interactions_V18 = numeric(),
-                       delta_RNA_london_disperson_forces_V19 = numeric(),
-                       delta_RNA_contact_hydrophobicity_V20 = numeric(),
-                       delta_RNA_total_hydrophobicity_V21 = numeric(),
-                       delta_RNA_contact_surface_tension_V22 = numeric(),
-                       delta_RNA_total_surface_tension_V23 = numeric(),
-                       delta_RNA_binding_affinity_pKd = numeric())
-
   return(
     data.frame(
-      delta_DNA_total_hydrophobic_contact_score_V2 = glmScore_Mu["V2",]$DNA - glmScore_WT["V2",]$DNA,
-      delta_DNA_Van_der_Waals_interactions_V3 = glmScore_Mu["V3",]$DNA - glmScore_WT["V3",]$DNA
+      delta_DNAb_total_hydrophobic_contact_score_V2 = glmScore_Mu["V2",]$DNA - glmScore_WT["V2",]$DNA,
+      delta_DNAb_Van_der_Waals_interactions_V3 = glmScore_Mu["V3",]$DNA - glmScore_WT["V3",]$DNA,
+      delta_DNAb_side_chain_rotation_V4 = glmScore_Mu["V4",]$DNA - glmScore_WT["V4",]$DNA,
+      delta_DNAb_hydrogen_bonding_V5 = glmScore_Mu["V5",]$DNA - glmScore_WT["V5",]$DNA,
+      delta_DNAb_accessible_to_solvent_area_of_protein_V6= glmScore_Mu["V6",]$DNA - glmScore_WT["V6",]$DNA,
+      delta_DNAb_accessible_to_solvent_area_of_ligand_V7 = glmScore_Mu["V7",]$DNA - glmScore_WT["V7",]$DNA,
+      delta_DNAb_repulsive_interactions_V18 = glmScore_Mu["V18",]$DNA - glmScore_WT["V18",]$DNA,
+      delta_DNAb_london_disperson_forces_V19 = glmScore_Mu["V19",]$DNA - glmScore_WT["V19",]$DNA,
+      delta_DNAb_contact_hydrophobicity_V20 = glmScore_Mu["V20",]$DNA - glmScore_WT["V20",]$DNA,
+      delta_DNAb_total_hydrophobicity_V21 = glmScore_Mu["V21",]$DNA - glmScore_WT["V21",]$DNA,
+      delta_DNAb_contact_surface_tension_V22 = glmScore_Mu["V22",]$DNA - glmScore_WT["V22",]$DNA,
+      delta_DNAb_total_surface_tension_V23 = glmScore_Mu["V23",]$DNA - glmScore_WT["V23",]$DNA,
+      delta_DNAb_binding_affinity_pKd = glmScore_Mu["pKd",]$DNA - glmScore_WT["pKd",]$DNA,
+      delta_RNAb_total_hydrophobic_contact_score_V2 = glmScore_Mu["V2",]$RNA - glmScore_WT["V2",]$RNA,
+      delta_RNAb_Van_der_Waals_interactions_V3 = glmScore_Mu["V3",]$RNA - glmScore_WT["V3",]$RNA,
+      delta_RNAb_side_chain_rotation_V4 = glmScore_Mu["V4",]$RNA - glmScore_WT["V4",]$RNA,
+      delta_RNAb_hydrogen_bonding_V5 = glmScore_Mu["V5",]$RNA - glmScore_WT["V5",]$RNA,
+      delta_RNAb_accessible_to_solvent_area_of_protein_V6 = glmScore_Mu["V6",]$RNA - glmScore_WT["V6",]$RNA,
+      delta_RNAb_accessible_to_solvent_area_of_ligand_V7 = glmScore_Mu["V7",]$RNA - glmScore_WT["V7",]$RNA,
+      delta_RNAb_repulsive_interactions_V18 = glmScore_Mu["V18",]$RNA - glmScore_WT["V18",]$RNA,
+      delta_RNAb_london_disperson_forces_V19 = glmScore_Mu["V19",]$RNA - glmScore_WT["V19",]$RNA,
+      delta_RNAb_contact_hydrophobicity_V20 = glmScore_Mu["V20",]$RNA - glmScore_WT["V20",]$RNA,
+      delta_RNAb_total_hydrophobicity_V21 = glmScore_Mu["V21",]$RNA - glmScore_WT["V21",]$RNA,
+      delta_RNAb_contact_surface_tension_V22 = glmScore_Mu["V22",]$RNA - glmScore_WT["V22",]$RNA,
+      delta_RNAb_total_surface_tension_V23 = glmScore_Mu["V23",]$RNA - glmScore_WT["V23",]$RNA,
+      delta_RNAb_binding_affinity_pKd = glmScore_Mu["pKd",]$RNA - glmScore_WT["pKd",]$RNA
       )
-  )
+    )
 }
 
 # Extract P2Rank ligand pocket features from input data frames
 extract_p2rank_features <- function(p2rank_WT, p2rank_Mu){
-  
-  
-  featDF <- data.frame(delta_nr_of_predicted_pockets = numeric(),
-                       delta_cumu_score = numeric(),
-                       delta_cumu_prob = numeric(),
-                       delta_cumu_sas_points = numeric(),
-                       delta_cumu_surf_atoms = numeric(),
-                       delta_rank1_score = numeric(),
-                       delta_rank1_prob = numeric(),
-                       delta_rank1_sas_points = numeric(),
-                       delta_rank1_surf_atoms = numeric()
-                       )
-  
-  
-  
+  res <- data.frame(
+    delta_ligand_nr_of_predicted_pockets = dim(p2rank_Mu)[1]-dim(p2rank_WT)[1],
+    delta_ligand_cumu_score = sum(p2rank_Mu$score)-sum(p2rank_WT$score),
+    delta_ligand_cumu_prob = sum(p2rank_Mu$probability)-sum(p2rank_WT$probability),
+    delta_ligand_cumu_sas_points = sum(p2rank_Mu$sas_points)-sum(p2rank_WT$sas_points),
+    delta_ligand_cumu_surf_atoms = sum(p2rank_Mu$surf_atoms)-sum(p2rank_WT$surf_atoms),
+    delta_ligand_rank1_score = p2rank_Mu$score[1]-p2rank_WT$score[1],
+    delta_ligand_rank1_prob = p2rank_Mu$probability[1]-p2rank_WT$probability[1],
+    delta_ligand_rank1_sas_points = p2rank_Mu$sas_points[1]-p2rank_WT$sas_points[1],
+    delta_ligand_rank1_surf_atoms = p2rank_Mu$surf_atoms[1]-p2rank_WT$surf_atoms[1]
+    )
+  res[is.na(res)] <- 0 # if WT or Mu had 0 pockets, we get NA values. Replace with 0 here.
+  return(res)
 }
 
