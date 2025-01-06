@@ -1,5 +1,8 @@
 # vkgl-secretome-protein-stability
 
+Characterizing and explaining the impact of disease-associated mutations in proteins without known structures or structural homologs
+https://academic.oup.com/bib/article/23/4/bbac187/6596316
+
 SIGMA leverages protein structural information to predict the pathogenicity of missense variants
 https://www.cell.com/cell-reports-methods/pdf/S2667-2375(23)00373-9.pdf
 
