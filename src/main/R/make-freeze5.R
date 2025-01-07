@@ -45,11 +45,13 @@ freeze4 <- NULL
 am_mean <- mean(subFreeze4[!is.na(subFreeze4$ann_am_pathogenicity),]$ann_am_pathogenicity)
 subFreeze4["ann_am_pathogenicity"][is.na(subFreeze4["ann_am_pathogenicity"])] <- am_mean
 
+# Genes present in freeze 4, meaning they have at least 1 succesfully analyzed mutation
+succesfulGenes <- unique(subFreeze4$gene)
+
 # TEMPORARY: get imputed values for GeoNet per classification label
-gnImp <- get_GeoNet_bellcurve_values(dataGenesDir, vkglProtVarFileName)
+gnImp <- get_GeoNet_bellcurve_values(dataGenesDir, vkglProtVarFileName, succesfulGenes)
 
 # Iterate over genes and gather functional features
-succesfulGenes <- unique(subFreeze4$gene)
 funcFeat <- data.frame()
 for(i in seq_along(succesfulGenes))
 {

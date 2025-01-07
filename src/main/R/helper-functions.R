@@ -114,7 +114,7 @@ extract_geonet_features <- function(geoNet_WT, geoNet_Mu){
 }
 
 # TEMPORARY until GeoNet results are complete, bell curve values to impute for LP/LB/VUS
-get_GeoNet_bellcurve_values <- function(dataGenesDir, vkglProtVarFileName)
+get_GeoNet_bellcurve_values <- function(dataGenesDir, vkglProtVarFileName, succesfulGenes)
 {
   dfForImputation <- data.frame()
   
