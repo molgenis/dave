@@ -1,8 +1,7 @@
 ######################
 # Load used packages #
 ######################
-library(R.utils)    # for 'gunzip', 'mkdirs'
-library(crunch)     # Compress results
+library(crunch)     # To compress results
 
 #######################
 # Adjustable settings #
@@ -48,8 +47,8 @@ subFreeze4["ann_am_pathogenicity"][is.na(subFreeze4["ann_am_pathogenicity"])] <-
 # Genes present in freeze 4, meaning they have at least 1 succesfully analyzed mutation
 succesfulGenes <- unique(subFreeze4$gene)
 
-# TEMPORARY: get imputed values for GeoNet per classification label
-gnImp <- get_GeoNet_bellcurve_values(dataGenesDir, vkglProtVarFileName, succesfulGenes)
+# TEMPORARY: get imputed values for GeoNet per classification label or globally (!)
+gnImp <- get_GeoNet_bellcurve_values(dataGenesDir, vkglProtVarFileName, succesfulGenes, FALSE)
 
 # Iterate over genes and gather functional features
 funcFeat <- data.frame()
@@ -114,7 +113,7 @@ dim(freeze5)
 setdiff(names(freeze5raw), names(freeze5))
 
 # Save as freeze 5
-resultsFreeze5 <- paste(rootDir, "data", "freeze5-provisional.csv.gz", sep="/")
+resultsFreeze5 <- paste(rootDir, "data", "freeze5-provisional-targetless-impute.csv.gz", sep="/")
 write.csv.gz(freeze5, resultsFreeze5, row.names = FALSE, quote = FALSE)
 
 # Load back in

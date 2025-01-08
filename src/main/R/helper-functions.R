@@ -114,7 +114,9 @@ extract_geonet_features <- function(geoNet_WT, geoNet_Mu){
 }
 
 # TEMPORARY until GeoNet results are complete, bell curve values to impute for LP/LB/VUS
-get_GeoNet_bellcurve_values <- function(dataGenesDir, vkglProtVarFileName, succesfulGenes)
+# perLabel TRUE = means/SDs per LP/LB/VUS
+# perLabel FALSE = assign global means/SDs to all labels (LP/LB/VUS), preventing any potential bias at the cost of power
+get_GeoNet_bellcurve_values <- function(dataGenesDir, vkglProtVarFileName, succesfulGenes, perLabel)
 {
   dfForImputation <- data.frame()
   
@@ -144,8 +146,23 @@ get_GeoNet_bellcurve_values <- function(dataGenesDir, vkglProtVarFileName, succe
       }
     }
   }
+
   means <- data.frame(bell="means", aggregate(.~label, dfForImputation, mean))
   SDs <- data.frame(bell="SDs", aggregate(.~label, dfForImputation, sd))
+  if(!perLabel){
+    means$delta_DNAs_cumu_prob <- mean(dfForImputation$delta_DNAs_cumu_prob)
+    means$delta_DNAs_cumu_bin <- mean(dfForImputation$delta_DNAs_cumu_bin)
+    means$delta_RNAs_cumu_prob <- mean(dfForImputation$delta_RNAs_cumu_prob)
+    means$delta_RNAs_cumu_bin <- mean(dfForImputation$delta_RNAs_cumu_bin)
+    means$delta_ProtS_cumu_prob <- mean(dfForImputation$delta_ProtS_cumu_prob)
+    means$delta_ProtS_cumu_bin <- mean(dfForImputation$delta_ProtS_cumu_bin)
+    SDs$delta_DNAs_cumu_prob <- sd(dfForImputation$delta_DNAs_cumu_prob)
+    SDs$delta_DNAs_cumu_bin <- sd(dfForImputation$delta_DNAs_cumu_bin)
+    SDs$delta_RNAs_cumu_prob <- sd(dfForImputation$delta_RNAs_cumu_prob)
+    SDs$delta_RNAs_cumu_bin <- sd(dfForImputation$delta_RNAs_cumu_bin)
+    SDs$delta_ProtS_cumu_prob <- sd(dfForImputation$delta_ProtS_cumu_prob)
+    SDs$delta_ProtS_cumu_bin <- sd(dfForImputation$delta_ProtS_cumu_bin)
+  }
   res <- rbind(means, SDs)
   res$bell <- as.factor(res$bell)
   res$label <- as.factor(res$label)
