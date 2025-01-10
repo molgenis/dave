@@ -1,5 +1,11 @@
 # vkgl-secretome-protein-stability
 
+Mutation Pathogenicity Prediction by a Biology Based Explainable AI Multi-Modal Algorithm
+https://www.medrxiv.org/content/10.1101/2024.06.05.24308476v1.full.pdf
+
+Explainable AI for Estimating Pathogenicity of Genetic Variants Using Large-Scale Knowledge Graphs
+https://www.mdpi.com/2072-6694/15/4/1118
+
 Characterizing and explaining the impact of disease-associated mutations in proteins without known structures or structural homologs
 https://academic.oup.com/bib/article/23/4/bbac187/6596316
 
