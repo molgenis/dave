@@ -95,7 +95,8 @@ for(i in seq_along(succesfulGenes))
       geoNet_Mu <- read.csv(paste(mutationDir, "CombinedGeoNetPredictions.csv", sep="/"))
       geonetFeat <- extract_geonet_features(geoNet_WT, geoNet_Mu)
     }else{
-      geonetFeat <- impute_GeoNet_features(gnImp, variants$Classification[j])
+      #geonetFeat <- impute_GeoNet_features(gnImp, variants$Classification[j])
+      geonetFeat <- na_GeoNet_features()
     }
     funcFeat <- rbind(funcFeat, data.frame(p2rankFeat, glmFeat, geonetFeat))
   }
@@ -106,14 +107,14 @@ freeze5raw <- cbind(subFreeze4, funcFeat)
 dim(freeze5raw)
 
 # Remove all columns with only 0 values
-freeze5 <- freeze5raw[, colSums(freeze5raw != 0) > 0]
+freeze5 <- freeze5raw[, colSums(freeze5raw != 0, na.rm = T) > 0]
 dim(freeze5)
 
 # Inspect removed columns
 setdiff(names(freeze5raw), names(freeze5))
 
 # Save as freeze 5
-resultsFreeze5 <- paste(rootDir, "data", "freeze5-provisional-targetless-impute.csv.gz", sep="/")
+resultsFreeze5 <- paste(rootDir, "data", "freeze5-provisional-NAs.csv.gz", sep="/")
 write.csv.gz(freeze5, resultsFreeze5, row.names = FALSE, quote = FALSE)
 
 # Load back in
