@@ -1,16 +1,22 @@
-# Use Python 3.12.4
+# Dependencies
+###############
+# Using Python 3.12.4
 import pandas as pd
 import xgboost as xgb
+import numpy as np
+import shap
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 
 
+# Data import and initial split
+###############################
 # Import data
 freeze5 = pd.read_csv("/Users/joeri/git/vkgl-secretome-protein-stability/data/freeze5-provisional-NAs.csv.gz", low_memory=False)
-
-# Split into LB/LP and VUS (plus a few CF) sets
+# Split into on "labeled" test/validation/train data and "unlabeled" data that we want to apply the model on
 freeze5_LB_LP = freeze5[(freeze5['ann_classificationVKGL'] == 'LB') | (freeze5['ann_classificationVKGL'] == 'LP')]
 freeze5_VUS_CF = freeze5[(freeze5['ann_classificationVKGL'] == 'VUS') | (freeze5['ann_classificationVKGL'] == 'CF')]
+
 
 # Data preparation for ML on the LB/LP set
 ##########################################
@@ -18,7 +24,7 @@ freeze5_VUS_CF = freeze5[(freeze5['ann_classificationVKGL'] == 'VUS') | (freeze5
 # "xx_secreted" with the 3rd one ("xx_intracellular") being implicit if the other ones are false
 freeze5_LB_LP_prep_for_ML = pd.get_dummies(freeze5_LB_LP, columns=['ann_proteinLocalization'], drop_first=True)
 # Select columns that are relevant features for training the model
-featureSelection = ["ann_classificationVKGL", "ann_proteinIschaperoned", "ann_proteinLocalization", "delta_"]
+featureSelection = ["ann_classificationVKGL", "delta_"] #  "ann_proteinLocalization", "ann_proteinIschaperoned" --> not adding these because they're not functional!
 freeze5_LB_LP_prep_for_ML = freeze5_LB_LP_prep_for_ML.filter(regex='|'.join(featureSelection))
 freeze5_LB_LP_prep_for_ML = freeze5_LB_LP_prep_for_ML.drop(['delta_aaSeq'], axis=1)
 # Convert LB/LP labels into booleans
@@ -30,6 +36,16 @@ X = freeze5_LB_LP_prep_for_ML.drop('ann_classificationVKGL', axis=1)
 y = freeze5_LB_LP_prep_for_ML['ann_classificationVKGL']
 X_train, X_val_test, y_train, y_val_test = train_test_split(X, y, test_size=0.2, random_state=42)
 X_val, X_test, y_val, y_test = train_test_split(X_val_test, y_val_test, test_size=0.5, random_state=42)
+
+
+# Machine learning procedure
+############################
+# TODO
+# implement 5 fold cross validation, perhaps stratification on y across folds
+# Try different models (any or all of RF, GLMNET, Naive Bayes, Neaural Net, SVN, XGBoost, ElasticNet, SVM)
+# Metrics: ROC AUC Mean, ROC AUC St.Dev, on tes/train, on 10-40-full features
+# Find effect of regularization within models (e.g. in XGBoost L1, L2)
+#
 # Define XGBoost model, hyperparameters have been tuned on the validation test
 xgb_reg = xgb.XGBRegressor(objective='binary:logistic', eval_metric = 'logloss', eta = 0.01, subsample = 0.6, learning_rate = 0.09, n_estimators = 150, random_state = 42)
 # Using the train/validation data, find out optimal number of estimators
@@ -42,27 +58,34 @@ xgb_reg.fit(pd.concat([X_train, X_val]), pd.concat([y_train, y_val]), eval_set=e
 # After optimizing, check the AUC of the test set that is now seen for the first time
 print("XGBoost model final test AUC: ", roc_auc_score(y_test, xgb_reg.predict(X_test)))
 
-# Add predictions to all 'X' data used for ML and label as 'Train' (now including 'Validation'), and 'Test'
-X_train["Probs"] = xgb_reg.predict(X_train)
-X_train["MLSplit"] = "Train"
-X_val["Probs"] = xgb_reg.predict(X_val)
-X_val["MLSplit"] = "Train"
-X_test["Probs"] = xgb_reg.predict(X_test)
-X_test["MLSplit"] = "Test"
-X_all = pd.concat([X_train, X_val, X_test])
 
-# Prepare VUS (and CF) set for prediction using the model
-freeze5_VUS_CF_forPred = pd.get_dummies(freeze5_VUS_CF, columns=['ann_proteinLocalization'], drop_first=True)
-freeze5_VUS_CF_forPred = freeze5_VUS_CF_forPred.filter(regex='|'.join(featureSelection))
-freeze5_VUS_CF_forPred = freeze5_VUS_CF_forPred.drop(['delta_aaSeq'], axis=1)
-freeze5_VUS_CF_forPred = freeze5_VUS_CF_forPred.drop('ann_classificationVKGL', axis=1)
+# Explain the predictions
+#########################
+# Set up SHAP explainer
+explainer = shap.TreeExplainer(xgb_reg)
+# Add function to scale probabilities to SHAP and add info on the machine-learning split
+def predict_as_prob_scaled_SHAP(df: pd.DataFrame, explainer: shap.TreeExplainer, mlsplit: str) -> pd.DataFrame:
+    df_SHAP_values = explainer(df).values
+    df_SHAP_row_sums = df_SHAP_values.sum(axis=1, keepdims=True)
+    df_SHAP_values_norm = df_SHAP_values / df_SHAP_row_sums
+    df_probs = xgb_reg.predict(df).reshape(-1, 1)
+    df_SHAP_values_p = df_SHAP_values_norm * df_probs
+    renamed_columns = [f"{col}.ps" for col in df.columns]
+    df_SHAP_values_p_df = pd.DataFrame(df_SHAP_values_p, columns=renamed_columns, index=df.index)
+    df_SHAP_values_p_df["MLSplit"] = mlsplit
+    df_SHAP_values_p_df["ProbabilitySum"] = df_probs
+    return df_SHAP_values_p_df
+# Get predictions for X train, val, test as SHAP-value scales probabilities (rowsum = final probability)
+X_train_SHAP_prob_values = predict_as_prob_scaled_SHAP(X_train, explainer, "Train")
+X_val_SHAP_prob_values = predict_as_prob_scaled_SHAP(X_val, explainer, "Train")
+X_test_SHAP_prob_values = predict_as_prob_scaled_SHAP(X_test, explainer, "Test")
+# Prepare VUS (and CF) set for prediction and add probability scaled SHAP values
+fr5_VUS_CF_forPred = freeze5_VUS_CF.filter(regex='|'.join(featureSelection))
+fr5_VUS_CF_forPred = fr5_VUS_CF_forPred.drop(['delta_aaSeq'], axis=1)
+fr5_VUS_CF_forPred = fr5_VUS_CF_forPred.drop('ann_classificationVKGL', axis=1)
+fr5_VUS_CF_SHAP_prob_values = predict_as_prob_scaled_SHAP(fr5_VUS_CF_forPred, explainer, "Unknown")
+# Combine all with original data and write to file
+allPredsInOne = pd.concat([X_train_SHAP_prob_values, X_val_SHAP_prob_values, X_test_SHAP_prob_values, fr5_VUS_CF_SHAP_prob_values])
+freeze5_plus_pred = pd.concat([freeze5, allPredsInOne], axis=1)
+freeze5_plus_pred.to_csv("/Users/joeri/git/vkgl-secretome-protein-stability/data/freeze5_predictions.csv", index=False)
 
-# Add predictions to the VUS dataset and label as 'Unknown'
-freeze5_VUS_CF_forPred["Probs"] = xgb_reg.predict(freeze5_VUS_CF_forPred)
-freeze5_VUS_CF_forPred["MLSplit"] = "Unknown"
-
-# Combine all X and VUS data into one dataframe and write to file
-allPredsInOne = pd.concat([X_all, freeze5_VUS_CF_forPred])
-freeze5["Probs"] = allPredsInOne["Probs"]
-freeze5["MLSplit"] = allPredsInOne["MLSplit"]
-freeze5.to_csv("/Users/joeri/git/vkgl-secretome-protein-stability/data/freeze5_with_NAs_predictions.csv", index=False)
