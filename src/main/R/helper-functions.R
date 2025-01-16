@@ -186,6 +186,21 @@ impute_GeoNet_features <- function(gnImp, cLabel)
   )
 }
 
+
+na_GeoNet_features <- function()
+{
+  return(
+    data.frame(
+      delta_DNAs_cumu_prob = NA,
+      delta_DNAs_cumu_bin = NA,
+      delta_RNAs_cumu_prob = NA,
+      delta_RNAs_cumu_bin = NA,
+      delta_ProtS_cumu_prob = NA,
+      delta_ProtS_cumu_bin = NA
+    )
+  )
+}
+
 # Extract GLM-Score DNA/RNA binding features from input data frames
 extract_glmscore_features <- function(glmScore_WT, glmScore_Mu){
   return(
