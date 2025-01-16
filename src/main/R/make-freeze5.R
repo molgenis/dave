@@ -48,7 +48,7 @@ subFreeze4["ann_am_pathogenicity"][is.na(subFreeze4["ann_am_pathogenicity"])] <-
 succesfulGenes <- unique(subFreeze4$gene)
 
 # TEMPORARY: get imputed values for GeoNet per classification label or globally (!)
-gnImp <- get_GeoNet_bellcurve_values(dataGenesDir, vkglProtVarFileName, succesfulGenes, FALSE)
+#gnImp <- get_GeoNet_bellcurve_values(dataGenesDir, vkglProtVarFileName, succesfulGenes, FALSE)
 
 # Iterate over genes and gather functional features
 funcFeat <- data.frame()
@@ -118,6 +118,6 @@ resultsFreeze5 <- paste(rootDir, "data", "freeze5-provisional-NAs.csv.gz", sep="
 write.csv.gz(freeze5, resultsFreeze5, row.names = FALSE, quote = FALSE)
 
 # Load back in
-frz5 <- read.csv(resultsFreeze5)
-rownames(frz5) <- paste0(frz5$gene, "/", frz5$UniProtID, ":", frz5$delta_aaSeq)
-head(frz5)
+#frz5 <- read.csv(resultsFreeze5)
+#rownames(frz5) <- paste0(frz5$gene, "/", frz5$UniProtID, ":", frz5$delta_aaSeq)
+#head(frz5)
