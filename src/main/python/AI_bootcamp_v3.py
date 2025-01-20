@@ -5,6 +5,7 @@ import pandas as pd
 import xgboost as xgb
 import numpy as np
 import shap
+import math
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 
@@ -63,18 +64,48 @@ print("XGBoost model final test AUC: ", roc_auc_score(y_test, xgb_reg.predict(X_
 #########################
 # Set up SHAP explainer
 explainer = shap.TreeExplainer(xgb_reg)
-# Add function to scale probabilities to SHAP and add info on the machine-learning split
+# sigmoid(SHAP) -> probability
+# inverseSigmoid(probability) -> SHAP
+# We set these anchor points:
+# 1. base SHAP value (same for each observation) -> calculate probability
+# 2. total SHAP value (different for each observation) -> calculate probability
+# using these, we can use the per-feature SHAP value to scale probabilities
+# this is not technically correct since probabilities are lineair and SHAP is sigmoidal
+# but since SHAP force plot also show these values on a lineair scale, it's not quite wrong either
+# Functions:
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+def inverseSigmoid(x: float):
+    return np.log(x / (1 - x))
+
+# Function to add scaled probabilities to input data
 def predict_as_prob_scaled_SHAP(df: pd.DataFrame, explainer: shap.TreeExplainer, mlsplit: str) -> pd.DataFrame:
-    df_SHAP_values = explainer(df).values
-    df_SHAP_row_sums = df_SHAP_values.sum(axis=1, keepdims=True)
-    df_SHAP_values_norm = df_SHAP_values / df_SHAP_row_sums
-    df_probs = xgb_reg.predict(df).reshape(-1, 1)
-    df_SHAP_values_p = df_SHAP_values_norm * df_probs
-    renamed_columns = [f"{col}.ps" for col in df.columns]
-    df_SHAP_values_p_df = pd.DataFrame(df_SHAP_values_p, columns=renamed_columns, index=df.index)
-    df_SHAP_values_p_df["MLSplit"] = mlsplit
-    df_SHAP_values_p_df["ProbabilitySum"] = df_probs
-    return df_SHAP_values_p_df
+    expl = explainer(df)
+
+    # Convert base SHAP value to probabilities
+    df_SHAP_basevalue =  expl.base_values.reshape(-1, 1)
+    df_SHAP_basevalue_P = sigmoid(df_SHAP_basevalue)
+
+    # Sum per-feature SHAP values for each observations and convert to probabilities
+    df_SHAP_values = expl.values
+    df_SHAP_values_sum = df_SHAP_values.sum(axis=1, keepdims=True)
+    df_SHAP_values_sum_P = sigmoid(df_SHAP_basevalue + df_SHAP_values_sum)
+
+    # Sanity check: this should be equal to prediction probability output (except for rounding..)
+    xgb_reg.predict(df).reshape(-1, 1)
+
+    # Get scaling factors using SHAP values and apply to the probability range (= difference prob. sum and base value)
+    df_SHAP_values_scaled = df_SHAP_values / df_SHAP_values_sum
+    df_SHAP_values_scaled_P = df_SHAP_values_scaled * (df_SHAP_values_sum_P - df_SHAP_basevalue_P)
+
+    # Rename and apply columns, 'pp' for 'pseudo-probabilities'
+    renamed_columns = [f"{col}.pp" for col in df.columns]
+    result = pd.DataFrame(df_SHAP_values_scaled_P, columns=renamed_columns, index=df.index)
+    result["BaseProbability.pp"] = pd.DataFrame(df_SHAP_basevalue_P, index=df.index)
+    result["FinalProbability.pp"] = pd.DataFrame(df_SHAP_values_sum_P, index=df.index)
+    result["MLSplit"] = mlsplit
+    return result
+
 # Get predictions for X train, val, test as SHAP-value scales probabilities (rowsum = final probability)
 X_train_SHAP_prob_values = predict_as_prob_scaled_SHAP(X_train, explainer, "Train")
 X_val_SHAP_prob_values = predict_as_prob_scaled_SHAP(X_val, explainer, "Train")
