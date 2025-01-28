@@ -28,6 +28,7 @@ freeze5_LB_LP_prep_for_ML = pd.get_dummies(freeze5_LB_LP, columns=['ann_proteinL
 featureSelection = ["ann_classificationVKGL", "delta_"] #  "ann_proteinLocalization", "ann_proteinIschaperoned" --> not adding these because they're not functional!
 freeze5_LB_LP_prep_for_ML = freeze5_LB_LP_prep_for_ML.filter(regex='|'.join(featureSelection))
 freeze5_LB_LP_prep_for_ML = freeze5_LB_LP_prep_for_ML.drop(['delta_aaSeq'], axis=1)
+# TODO remove either total.energy or seperate FoldX terms, since total is the sum of the others??
 # Convert LB/LP labels into booleans
 freeze5_LB_LP_prep_for_ML.loc[freeze5_LB_LP_prep_for_ML.ann_classificationVKGL == 'LB', 'ann_classificationVKGL'] = False
 freeze5_LB_LP_prep_for_ML.loc[freeze5_LB_LP_prep_for_ML.ann_classificationVKGL == 'LP', 'ann_classificationVKGL'] = True
@@ -70,8 +71,11 @@ explainer = shap.TreeExplainer(xgb_reg)
 # 1. base SHAP value (same for each observation) -> calculate probability
 # 2. total SHAP value (different for each observation) -> calculate probability
 # using these, we can use the per-feature SHAP value to scale probabilities
-# this is not technically correct since probabilities are lineair and SHAP is sigmoidal
-# but since SHAP force plot also show these values on a lineair scale, it's not quite wrong either
+# NOTE:
+# SHAP values are reported in the log-odds domain so that they preserve the additive property. Once you apply a sigmoid/logistic transform, you are in probability space—which is non-linear.
+# While scaling each log-odds SHAP by a fraction of Δ𝑝 is a straightforward trick to “get some notion” of probability contribution, it does not correspond to the exact SHAP decomposition in probability space.
+# It’s not wrong to say “I want to distribute the probability gap proportionally to each feature’s share of total log-odds SHAP.”
+# But it is a heuristic (a “quick-and-dirty” approach) that often appears in practice, but it is not the strict, theory-backed approach that underpins SHAP.
 # Functions:
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -110,11 +114,13 @@ def predict_as_prob_scaled_SHAP(df: pd.DataFrame, explainer: shap.TreeExplainer,
 X_train_SHAP_prob_values = predict_as_prob_scaled_SHAP(X_train, explainer, "Train")
 X_val_SHAP_prob_values = predict_as_prob_scaled_SHAP(X_val, explainer, "Train")
 X_test_SHAP_prob_values = predict_as_prob_scaled_SHAP(X_test, explainer, "Test")
+
 # Prepare VUS (and CF) set for prediction and add probability scaled SHAP values
 fr5_VUS_CF_forPred = freeze5_VUS_CF.filter(regex='|'.join(featureSelection))
 fr5_VUS_CF_forPred = fr5_VUS_CF_forPred.drop(['delta_aaSeq'], axis=1)
 fr5_VUS_CF_forPred = fr5_VUS_CF_forPred.drop('ann_classificationVKGL', axis=1)
 fr5_VUS_CF_SHAP_prob_values = predict_as_prob_scaled_SHAP(fr5_VUS_CF_forPred, explainer, "Unknown")
+
 # Combine all with original data and write to file
 allPredsInOne = pd.concat([X_train_SHAP_prob_values, X_val_SHAP_prob_values, X_test_SHAP_prob_values, fr5_VUS_CF_SHAP_prob_values])
 freeze5_plus_pred = pd.concat([freeze5, allPredsInOne], axis=1)
