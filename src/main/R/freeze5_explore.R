@@ -36,10 +36,9 @@ formatDelta <- function(input) {
 }
 
 # Data prep
-featureContribThreshold <- 0.05
-selectRow <- 1
-#topImportantFeatures <- 25 # 66 max. Alternative: implement automatic '% contribution' cutoff
-row <- fr5sub[selectRow,] # Index of a row, see top effects: order(fr5sub$FinalProbability.sph, decreasing = T)[1:10]
+selectRow <- 2333 # Index of a row, see top effects: order(fr5sub$FinalProbability.sph, decreasing = T)[1:10]
+featureContribThreshold <- 0.01 # Terms below will be summed together as one term
+row <- fr5sub[selectRow,] # Select the row
 variantName <- paste(row$gene, ":", row$delta_aaSeq, ", ", row$dna_variant_assembly, " ", row$dna_variant_chrom, ":", row$dna_variant_pos, row$dna_variant_ref, ">", row$dna_variant_alt, ", VKGL April 2024: ", row$ann_classificationVKGL, sep="")
 rowSPH <- row[, grepl(".sph$", names(row))] # all rows with a feature SHAP probability heuristic
 rowSPH$FinalProbability # Sanity check pt.1: this cumulative P value should match pt.2 later
@@ -47,7 +46,7 @@ rowSPH <- rowSPH[, !grepl("FinalProbability", names(rowSPH))] # Remove cumulativ
 rowSPHmelt <- reshape2::melt(rowSPH, na.rm = FALSE, id.vars = integer())
 nAboveFeatContribThr <- sum(abs(rowSPHmelt$value) >= featureContribThreshold)
 other <- sum(rowSPHmelt[rev(order(abs(rowSPHmelt$value)))[(nAboveFeatContribThr+1):dim(rowSPHmelt)[1]],]$value) # Order by absolute value and sum the bottom contributors
-rowSPHmelt <- rowSPHmelt[rev(order(abs(rowSPHmelt$value)))[1:nAboveFeatContribThr],] # Select only the top contributors
+rowSPHmelt <- if(nAboveFeatContribThr==0) { rowSPHmelt[0, ] } else { rowSPHmelt[rev(order(abs(rowSPHmelt$value)))[1:nAboveFeatContribThr],] }# Select only the top contributors
 if (!is.na(other)){rowSPHmelt <- rbind(rowSPHmelt, data.frame(variable="OTHER.sph", value=other))} # Add 'other' unless it was NA (i.e. at a threshold of 0)
 rowSPHmelt <- rowSPHmelt[order(abs(rowSPHmelt$value)),] # Re-order by value now that the set is complete
 row.names(rowSPHmelt) <- NULL # Clear out row names (i.e. row indices), resetting them to 1..n
@@ -58,11 +57,13 @@ rowSPHmelt$prevValue <- c(rowSPHmelt$value[-1], NA) # Add 'previous value' to he
 rowSPHmelt <- merge(rowSPHmelt, feat, by.x = "variable", by.y = "Feature", all.x = T) # Merge with label data
 originalVars <- sub("\\.sph$", "", grep("BaseProbability|OTHER", rowSPHmelt$variable, value = TRUE, invert = TRUE)) # Reconstruct original variable names of current variables except Base and OTHER
 deltaValues <- reshape2::melt(row[originalVars], na.rm = FALSE, id.vars = integer()) # Get original deltas for these variables
+if(ncol(deltaValues) > 0){
 deltaValues$value <- round(deltaValues$value, digits = 6) # Round to prevent values like 1.3000000000109
 deltaValues$variable <- paste0(deltaValues$variable, ".sph") # Equalize variable names for for merging back
 rowSPHmelt <- merge(rowSPHmelt, deltaValues, by.x = "variable", by.y = "variable", all.x = TRUE) # Merge back
 names(rowSPHmelt)[names(rowSPHmelt) == 'value.y'] <- 'delta' # Rename for clarity
 names(rowSPHmelt)[names(rowSPHmelt) == 'value.x'] <- 'value' # Rename back to original
+}
 # Restore order and make labels
 rowSPHmelt <- rowSPHmelt[order(rowSPHmelt$idx), ] # Re-order by index since merging swaps things around
 rowSPHmelt$NamePlusEffect <- paste(rowSPHmelt$Name, sapply(rowSPHmelt$delta, formatDelta)) # Create enhanced labels
@@ -88,16 +89,21 @@ g <- rasterGrob(colorMat, width = unit(1, "npc"), height = unit(1, "npc"), inter
 rowSPHmelt$valuecs <- rev(cumsum(rev(rowSPHmelt$value)))
 rowSPHmelt$valuecs[rowSPHmelt$valuecs > 1] <- 1 # Floating point errors can lead to >1, fix here
 p <- ggplot(rowSPHmelt, aes(x = idx, y = valuecs, color = value > 0)) +
-  annotation_custom(g, xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) + 
+  annotation_custom(g, xmin=-Inf, xmax=Inf, ymin=0, ymax=1) + # ymin=0, ymax=1
   geom_line(aes(group = 1, color=(value > 0)), linewidth=2, alpha=0.5) +
   geom_point() +
   scale_color_manual(labels = c("TRUE" = "More pathogenic", "FALSE" = "More benign"), values = c("TRUE" = shapRed, "FALSE" = shapBlu), name = "Impact") +
-  labs(title = "SHAP Decision Plot for a Single Observation",
+  #scale_y_continuous(breaks = round(seq(min(rowSPHmelt$valuecs), max(rowSPHmelt$valuecs), by = 0.1), 1))+
+  labs(title = paste("SHAP Decision Plot for", variantName),
        x = "Terms affecting probability in descending order of effect strength",
-       y = paste("Probability of pathogenicity = ", round(sum(rowSPHmelt$value), digits=2))) +
-  theme_minimal() + theme(legend.position="none") + ylim(0,1) + coord_flip()
+       y = paste("Probability heuristic for SHAP values. Final probability for being pathogenic:", round(sum(rowSPHmelt$value), digits=2))) +
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(plot.caption = element_text(hjust = 0, face= "italic"),
+        plot.title.position = "plot",
+        plot.caption.position =  "plot") +
+  theme(legend.position="none") + coord_flip()
 p
-ggsave("myplot.pdf", plot = p, device = "pdf", width = 12, height = 8)
+ggsave("myplot.pdf", plot = p, device = "pdf", width = 10, height = 6)
 
 
 
