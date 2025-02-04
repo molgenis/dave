@@ -95,9 +95,9 @@ shapDecisionPlot <- function(row, featureContribThreshold){
   if(nrow(rowSPHmelt) < 40) { x_text_size <- 10 } else{ x_text_size <- 5 } # NOTE: This text resizing 'cutoff' may change if the number of features in the model changes!
   p <- ggplot(rowSPHmelt, aes(x = idx, y = valuecs, color = value > 0)) +
     annotation_custom(g, xmin=-Inf, xmax=Inf, ymin=0, ymax=1) +
-    geom_line(aes(group = 1, color=(value > 0)), linewidth=2, alpha=0.5) +
+    geom_line(aes(group = 1, color=(value > 0)), linewidth=1, alpha=1, arrow = arrow(angle = 30, length = unit(0.2,"cm"), ends = "first", type = "open")) +
     geom_vline(xintercept=seq(0, nrow(rowSPHmelt), by=1), linetype="dashed", linewidth=0.2) +
-    geom_point() +
+    #geom_point() +
     scale_color_manual(labels = c("TRUE" = "More pathogenic", "FALSE" = "More benign"), values = c("TRUE" = shapRed, "FALSE" = shapBlu), name = "Impact") +
     labs(title = paste("SHAP decision plot for ", row$delta_aaSeq, " in gene ", row$gene, " (",row$UniProtID,"), ", row$dna_variant_assembly, " ",
                        row$dna_variant_chrom, ":", row$dna_variant_pos, row$dna_variant_ref, ">", row$dna_variant_alt, ", VKGL April 2024: ", row$ann_classificationVKGL, sep=""),
@@ -118,6 +118,7 @@ shapDecisionPlot <- function(row, featureContribThreshold){
           axis.line = element_line(colour = "black")
           ) + coord_flip()
   ggsave(paste(paste0(row$gene, "_", row$delta_aaSeq, "_thr",featureContribThreshold,".pdf")), plot = p, device = "pdf", width = 10, height = 6.25)
+  #ggsave(paste(paste0(row$gene, "_", row$delta_aaSeq, "_thr",featureContribThreshold,".png")), plot = p, device = "png", width = 11.111111, height = 6.25) # 16:9 as PNG for full screen slides
 }
 
 # Example function calls
@@ -140,6 +141,10 @@ shapDecisionPlot(freeze5[LP_ExIdx,], 0.01)
 shapDecisionPlot(freeze5[LB_ExIdx,], 0.01)
 shapDecisionPlot(freeze5[VUS_lowP_ExIdx,], 0.01)
 shapDecisionPlot(freeze5[VUS_highP_ExIdx,], 0.01)
+
+# Extra
+shapDecisionPlot(freeze5[which(rownames(freeze5) == "CLDN19/Q8N6F1:LA50R"),], 0.00)
+shapDecisionPlot(freeze5[which(rownames(freeze5) == "CLDN19/Q8N6F1:LA50R"),], 0.01)
 
 
 
