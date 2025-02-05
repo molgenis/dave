@@ -24,6 +24,7 @@ save as protein-atlas-secreted-EnsemblGeneIDs.tsv
 -- comparison to non-secretome:
 also download membrane (5,354) and intracellular (12,917) genes from
 https://www.proteinatlas.org/humanproteome/tissue/secretome
+(actually https://www.proteinatlas.org/humanproteome/tissue/membrane+proteome ??)
 take 3rd column ('Ensembl')
 save as protein-atlas-intracellular-EnsemblGeneIDs.tsv
 and protein-atlas-membrane-EnsemblGeneIDs.tsv
