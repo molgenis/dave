@@ -176,3 +176,9 @@ interacting-with-chaperones-genenames-merged-with-uniprotmapped.txt
 TP53, multi-AA change blocking analysis: HHA178-179HY
 also DSG2: NVA287-288NI, TRPM4:CCA758-759WG
 does this happen more? filter for this and rerun?
+
+--- POTENTIALLY use interPro for protein annotations ?
+API call per protein
+https://www.ebi.ac.uk/interpro/protein/UniProt/P01023
+->
+https://www.ebi.ac.uk/interpro/wwwapi/entry/InterPro/protein/UniProt/P01023
