@@ -1,5 +1,7 @@
 # vkgl-secretome-protein-stability
 
+There is no doc yet - below just a list of potentially relevant papers.
+
 Mutation Pathogenicity Prediction by a Biology Based Explainable AI Multi-Modal Algorithm
 https://www.medrxiv.org/content/10.1101/2024.06.05.24308476v1.full.pdf
 
