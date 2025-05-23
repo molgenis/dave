@@ -9,7 +9,7 @@ library(R.utils)    # for 'gunzip', 'mkdirs'
 # Example for Unix
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability" # root directory that contains README.md, data/, img/, out/, src/, etc.
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv" # loading processed VKGL protein variants from: /data/genes/{gene}/{vkglProtVarFile}
-foldxExec <- "/Applications/FoldX/5/foldx5MacStd/foldx_20241231" # exact path to the FoldX executable
+foldxExec <- "/Applications/FoldX/5/foldx5MacStd/foldx_20251231" # exact path to the FoldX executable
 pythonExe <- "/opt/homebrew/anaconda3/bin/python" # Python 3.12.2 used here
 pdbFixerPath <- "/opt/homebrew/Caskroom/miniconda/base/bin/pdbfixer" # installed via: conda install -c conda-forge pdbfixer
 geoNetScriptsDir <- "/Users/joeri/git/GeoNet/scripts" # installed via: https://github.com/joerivandervelde/GeoNet

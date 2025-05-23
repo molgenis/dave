@@ -541,3 +541,10 @@ results <- read.csv(freeze3)
 # make-freeze5.R combines these functional features and remove non-functional ones
 # Resulting in freeze5.csv.gz
 #
+# Freeze 5 is then used to build a prediction model and make predictions:
+# - currently at AI_bootcamp_v3.py -> freeze5_predictions_Python.csv.gz
+# - alternative: XGBoost_on_freeze5.R -> freeze5_predictions_R.csv.gz
+# 
+# These predictions and SHAP values are loaded back in for analysis at
+# - freeze5_explore.R
+#

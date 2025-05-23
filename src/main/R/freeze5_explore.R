@@ -5,14 +5,33 @@ library(grid)
 #library(tempR)
 library(colorspace)
 library(ggrepel)
+library(pheatmap)
 
 # Set up locations and working dir
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability" # root directory that contains README.md, data/, img/, out/, src/, etc.
 imgDir <- paste(rootDir, "img", sep="/")
 setwd(imgDir)
 
-# Load data
-freeze5 <- read.csv(paste(rootDir, "data", "freeze5_predictions.csv", sep="/"))
+# Load predictions and SHAP values as produced by both Python and R implementations
+freeze5P <- read.csv(paste(rootDir, "data", "freeze5_predictions_Python.csv.gz", sep="/"))
+freeze5R <- read.csv(paste(rootDir, "data", "freeze5_predictions_R.csv.gz", sep="/"))
+
+# sanity check: diff on the numbers, show as heatmap
+freeze5Pn <- freeze5P[ , sapply(freeze5P, is.numeric)]
+freeze5Rn <- freeze5R[ , sapply(freeze5R, is.numeric)]
+fr5diff <- freeze5Pn - freeze5Rn
+pheatmap(fr5diff, cluster_rows=FALSE, cluster_cols=FALSE, show_rownames = FALSE, show_colnames = TRUE)
+
+#####
+# Continue with one selected freeze
+freeze5 <- freeze5R
+freeze5P <- NULL
+freeze5R <- NULL
+freeze5Pn <- NULL
+freeze5Rn <- NULL
+fr5diff <- NULL
+
+# Update row names
 rownames(freeze5) <- paste0(freeze5$gene, "/", freeze5$UniProtID, ":", freeze5$delta_aaSeq)
 
 # Feature labels and descriptions
