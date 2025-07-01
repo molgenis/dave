@@ -180,5 +180,8 @@ does this happen more? filter for this and rerun?
 --- POTENTIALLY use interPro for protein annotations ?
 API call per protein
 https://www.ebi.ac.uk/interpro/protein/UniProt/P01023
-->
 https://www.ebi.ac.uk/interpro/wwwapi/entry/InterPro/protein/UniProt/P01023
+--> no, use this for protein sequence annotations:
+1,18 GB unpacked: https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.xml.gz
+same information via API: https://www.ebi.ac.uk/proteins/api/features/P19961
+
