@@ -181,7 +181,8 @@ does this happen more? filter for this and rerun?
 API call per protein
 https://www.ebi.ac.uk/interpro/protein/UniProt/P01023
 https://www.ebi.ac.uk/interpro/wwwapi/entry/InterPro/protein/UniProt/P01023
---> no, use this for protein sequence annotations:
+not useful, instead, use this for protein sequence annotations:
 1,18 GB unpacked: https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.xml.gz
 same information via API: https://www.ebi.ac.uk/proteins/api/features/P19961
-
+much more info, but nothing more position based https://rest.uniprot.org/uniprotkb/P19961.json
+--> EST OPTION FOR NOW: get entries at https://www.ebi.ac.uk/proteins/api/features/P19961
