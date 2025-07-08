@@ -43,14 +43,39 @@ for(id in uniprotIDs){
 # Read protein sequence features and make freeze 6 #
 ####################################################
 for(id in uniprotIDs){
-  id <- "P04637" # for debugging
+  id <- "P04637" # bug ones for dev/debug: P04637, P00451, P13569, P51787, P49768, Q12809, P38398, P02452
   inputFile <- paste0(protFeatLoc, "/", id, ".json.gz")
   protdat <- fromJSON(gzfile(inputFile))
   protfeat <- protdat$features
-  # exclude:
-  # CATEGORY == VARIANTS, MUTAGENESIS, 
+  
+  # exclude rows
+  protfeat <- protfeat[protfeat$type != "CHAIN", ] # has nice descriptions though..
+  protfeat <- protfeat[protfeat$type != "CONFLICT", ]
   protfeat <- protfeat[protfeat$category != "VARIANTS", ]
   protfeat <- protfeat[protfeat$category != "MUTAGENESIS", ]
+  
+  # exclude columns
+  protfeat$ftId <- NULL
+  protfeat$evidences <- NULL
+  protfeat$alternativeSequence <- NULL
+  
+  # override ligand info with just ligand name
+  protfeat$ligand <- protfeat$ligand$name
+
+  # flatten and cleanup of description values:
+  # simplify values containing 'cleavage' or 'interaction'
+  protfeat$description[protfeat$category == "DOMAINS_AND_SITES" & grepl("cleavage", protfeat$description, ignore.case = TRUE)] <- "Cleavage"
+  protfeat$description[protfeat$category == "DOMAINS_AND_SITES" & grepl("interaction", protfeat$description, ignore.case = TRUE)] <- "Interaction"
+  # remove data after semicolon as it makes it unnecessarily specific
+  has_semicolon <- grepl(";", protfeat$description, fixed = TRUE)
+  protfeat$description[has_semicolon] <- sub(";.*$", "", protfeat$description[has_semicolon])
+  # remove trailing numbers that indicate multiple effects/bindings of the same type
+  has_trailing_num <- grepl("\\s\\d+$", protfeat$description)
+  protfeat$description[has_trailing_num] <- sub("^(.*\\S)\\s+\\d+$", "\\1",protfeat$description[has_trailing_num], perl = TRUE)
+  # move ligand over to description
+  rows <- protfeat$type == "BINDING" & protfeat$description=="" & !protfeat$ligand==""
+  protfeat$description[rows] <- protfeat$ligand[rows]  
+  
   # TODO !!
   # filter more??
   # add gene, then concat to big dataframe?
