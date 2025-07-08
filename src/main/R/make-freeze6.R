@@ -6,7 +6,6 @@ library(jsonlite)   # Reading JSON into dataframes
 #######################
 # Adjustable settings #
 #######################
-vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv" # loading processed VKGL protein variants from: /data/genes/{gene}/{vkglProtVarFile}
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability" # root directory that contains README.md, data/, img/, out/, src/, etc.
 
 
