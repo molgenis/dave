@@ -1,6 +1,7 @@
 library(crunch)     # To compress results
 library(R.utils)    # for 'gunzip', 'mkdirs'
 library(jsonlite)   # Reading JSON into dataframes
+library(dplyr)
 
 
 #######################
@@ -41,44 +42,94 @@ for(id in uniprotIDs){
 ####################################################
 # Read protein sequence features and make freeze 6 #
 ####################################################
-for(id in uniprotIDs){
-  id <- "P04637" # bug ones for dev/debug: P04637, P00451, P13569, P51787, P49768, Q12809, P38398, P02452
+allProtFeat <- data.frame()
+for(i in seq_along(uniprotIDs))
+{
+  id <- uniprotIDs[i]
+# id <- "P25440" # bug ones for dev/debug: P04637, P00451, P13569, P51787, P49768, Q12809, P38398, P02452
+  
+  # load the data and convert JSON into feature data frame
+  cat(paste0("Parsing ", id, ", " , i, " of ", length(uniprotIDs), "\n"))
   inputFile <- paste0(protFeatLoc, "/", id, ".json.gz")
   protdat <- fromJSON(gzfile(inputFile))
-  protfeat <- protdat$features
+  pf <- protdat$features
+  
+  # add the UniProtID
+  pf$UniProtID <- id
+  
+  # rearrange to correct hierarchy of UniProtID -> Category -> Type
+  pf <- pf %>% relocate(category, .before = type)
+  pf <- pf %>% relocate(UniProtID, .before = category)
   
   # exclude rows
-  protfeat <- protfeat[protfeat$type != "CHAIN", ] # has nice descriptions though..
-  protfeat <- protfeat[protfeat$type != "CONFLICT", ]
-  protfeat <- protfeat[protfeat$category != "VARIANTS", ]
-  protfeat <- protfeat[protfeat$category != "MUTAGENESIS", ]
+  pf <- pf[pf$type != "CHAIN", ] # has nice descriptions though..
+  pf <- pf[pf$type != "CONFLICT", ]
+  pf <- pf[pf$category != "VARIANTS", ]
+  pf <- pf[pf$category != "MUTAGENESIS", ]
   
   # exclude columns
-  protfeat$ftId <- NULL
-  protfeat$evidences <- NULL
-  protfeat$alternativeSequence <- NULL
+  pf$ftId <- NULL
+  pf$evidences <- NULL
+  pf$alternativeSequence <- NULL
   
-  # override ligand info with just ligand name
-  protfeat$ligand <- protfeat$ligand$name
+  # override ligand or ligand part info with just ligand name
+  if ("ligandPart" %in% names(pf)) {
+    pf$ligand <- pf$ligandPart$name
+  }else{
+    pf$ligand <- pf$ligand$name
+  }
+
 
   # flatten and cleanup of description values:
   # simplify values containing 'cleavage' or 'interaction'
-  protfeat$description[protfeat$category == "DOMAINS_AND_SITES" & grepl("cleavage", protfeat$description, ignore.case = TRUE)] <- "Cleavage"
-  protfeat$description[protfeat$category == "DOMAINS_AND_SITES" & grepl("interaction", protfeat$description, ignore.case = TRUE)] <- "Interaction"
+  pf$description[pf$category == "DOMAINS_AND_SITES" & grepl("cleavage", pf$description, ignore.case = TRUE)] <- "Cleavage"
+  pf$description[pf$category == "DOMAINS_AND_SITES" & grepl("interaction", pf$description, ignore.case = TRUE)] <- "Interaction"
   # remove data after semicolon as it makes it unnecessarily specific
-  has_semicolon <- grepl(";", protfeat$description, fixed = TRUE)
-  protfeat$description[has_semicolon] <- sub(";.*$", "", protfeat$description[has_semicolon])
+  has_semicolon <- grepl(";", pf$description, fixed = TRUE)
+  pf$description[has_semicolon] <- sub(";.*$", "", pf$description[has_semicolon])
   # remove trailing numbers that indicate multiple effects/bindings of the same type
-  has_trailing_num <- grepl("\\s\\d+$", protfeat$description)
-  protfeat$description[has_trailing_num] <- sub("^(.*\\S)\\s+\\d+$", "\\1",protfeat$description[has_trailing_num], perl = TRUE)
-  # move ligand over to description
-  rows <- protfeat$type == "BINDING" & protfeat$description=="" & !protfeat$ligand==""
-  protfeat$description[rows] <- protfeat$ligand[rows]  
+  has_trailing_num <- grepl("\\s\\d+$", pf$description)
+  pf$description[has_trailing_num] <- sub("^(.*\\S)\\s+\\d+$", "\\1",pf$description[has_trailing_num], perl = TRUE)
+  # move ligand over to description - implicit check on there being no ligands outside 'BINDING' type
+  descr_ok_to_replace <- c("", "in other chain", "in inhibited form", "via 3-oxoalanine")
+  rows <- pf$type == "BINDING" & pf$description %in% descr_ok_to_replace & !pf$ligand==""
+  if(length(rows) > 0){
+    pf$description[rows] <- pf$ligand[rows]
+    pf$ligand[rows] <- NA
+  }
+
+  # check if 'ligand' only has NA values now and remove
+  if ("ligand" %in% names(pf)) {
+    if (any(!is.na(pf$ligand))) {
+      stop("Error: 'ligand' column contains non-empty values.")
+    } else {
+      pf$ligand <- NULL
+    }
+  }
   
-  # TODO !!
-  # filter more??
-  # add gene, then concat to big dataframe?
+  # add to all protein features
+  allProtFeat <- rbind(allProtFeat, pf)
 }
-# use big dataframe to annotate freeze5 and write out freeze 6?
+allProtFeat$begin <- as.numeric(allProtFeat$begin)
+allProtFeat$end <- as.numeric(allProtFeat$end)
+
+
+########################################################
+# Annotate freeze5 data with protein sequence features #
+########################################################
+frz5$seqFt <- ""
+for(i in 1:nrow(frz5))
+{
+  i <- 1
+  row <- frz5[i,]
+  pos <- as.numeric(substr(row$delta_aaSeq, 3, nchar(row$delta_aaSeq)-1))
+  
+  allProtFeat[allProtFeat$UniProtID == "P01023"]
+  
+  hits <- allProtFeat[allProtFeat$UniProtID == row$UniProtID & allProtFeat$begin <= pos & allProtFeat$end >= pos]
+  
+}
+
+
 
 
