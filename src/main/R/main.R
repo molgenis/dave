@@ -548,3 +548,8 @@ results <- read.csv(freeze3)
 # These predictions and SHAP values are loaded back in for analysis at
 # - freeze5_explore.R
 #
+# make-freeze6.R adds UniProt protein sequence feature annotations to freeze5
+# Resulting in freeze6.csv.gz
+#
+# TODO: apply new ML ideas on freeze6, find out if that is more informative
+# 
