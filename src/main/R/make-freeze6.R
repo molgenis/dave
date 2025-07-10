@@ -1,14 +1,20 @@
 library(crunch)     # To compress results
 library(R.utils)    # for 'gunzip', 'mkdirs'
 library(jsonlite)   # Reading JSON into dataframes
-library(dplyr)
-
+library(dplyr)      # Data manipulation
+library(tidyr)      # Data manipulation
 
 #######################
 # Adjustable settings #
 #######################
 rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability" # root directory that contains README.md, data/, img/, out/, src/, etc.
 
+
+########################
+# Seperator characters #
+########################
+CONCAT_SEP <- "~" # used to combine UniProt hierarchy: category -> type -> description -> etc
+VALUE_SEP <- "|" # used to combine multiple annotation values in the output data freeze
 
 ################################
 # Get uniprot IDs from freeze5 #
@@ -135,33 +141,111 @@ allProtFeat <- allProtFeat[!(allProtFeat$begin == "" | allProtFeat$end == ""),]
 allProtFeat$begin <- as.numeric(allProtFeat$begin)
 allProtFeat$end <- as.numeric(allProtFeat$end)
 # Make nice overview table of major effect types
-table(allProtFeat$category, allProtFeat$type)
+t(table(allProtFeat$category, allProtFeat$type))
+
+# Sanity checks, we don't want future seperator characters in the data
+rows_with_CONCAT_SEP <- rowSums(sapply(allProtFeat, grepl, pattern = CONCAT_SEP, fixed = TRUE)) > 0
+if(sum(rows_with_CONCAT_SEP)>0){ stop("data contains CONCAT_SEP, print with -> allProtFeat[rows_with_CONCAT_SEP,]") }
+
+rows_with_VALUE_SEP <- rowSums(sapply(allProtFeat, grepl, pattern = VALUE_SEP, fixed = TRUE)) > 0
+if(sum(rows_with_VALUE_SEP)>0){ stop("data contains VALUE_SEP, print with -> allProtFeat[rows_with_VALUE_SEP,]") }
 
 
 ########################################################
 # Annotate freeze5 data with protein sequence features #
 ########################################################
 frz5$seqFt <- ""
-ALLHITS <- data.frame()
+frz5$chain <- ""
+#ALLHITS <- data.frame()
 for(i in 1:nrow(frz5))
 {
-# i <- 4
   cat(paste0("working on ", i, " of ", nrow(frz5), "\n"))
   row <- frz5[i,]
   pos <- as.numeric(substr(row$delta_aaSeq, 3, nchar(row$delta_aaSeq)-1))
-  pos
   matchID <- allProtFeat[allProtFeat$UniProtID == row$UniProtID,]
-  matchID <- matchID[matchID$type!="CHAIN",] # skip CHAIN for now
+  
+  # Keep CHAIN description in its own column
+  getChainInfo <- matchID[matchID$type=="CHAIN",]
+  if(dim(getChainInfo)[1]==0){
+    getChainInfo <- getChainInfo %>% add_row(description = "")
+  }
+  for(k in 1:nrow(getChainInfo)) # in some cases, more than one
+  {
+    if(k==1){
+      frz5[i,]$chain <- getChainInfo[k,]$description
+    }else{
+      frz5[i,]$chain <- paste0(frz5[i,]$chain, VALUE_SEP, getChainInfo[k,]$description)
+    }
+  }
+  matchID <- matchID[matchID$type!="CHAIN",] # remove CHAIN from further processing
+
+  # Process other protein sequence features
   matchID_DISULFID <- matchID[matchID$type=="DISULFID",]
   matchID <- matchID[matchID$type!="DISULFID",]
-
   hits <- matchID[pos >= matchID$begin & pos <= matchID$end,]
   # Exception: for disulphide bonds, exact match for start and end (=the locations of bonded cysteines)
   hits_DISULFID <- matchID_DISULFID[matchID_DISULFID$begin == pos & matchID_DISULFID$end == pos,]
   hits <- rbind(hits, hits_DISULFID)
-  ALLHITS <- rbind(ALLHITS, hits)
+  if(dim(hits)[1] == 0){ next }
+  for(j in 1:nrow(hits))
+  {
+   #j <- 1
+    #cat(paste0(". adding hit ", j, " of ", nrow(hits), "\n"))
+    hit <- hits[j,]
+    
+    # There must ALWAYS be category and type
+    if(hit$category==""){ stop("category missing!") }
+    if(hit$type==""){ stop("type missing!") }
+    addThis <- paste0(hit$category, VALUE_SEP, hit$category, CONCAT_SEP, hit$type)
+    if(j==1){
+      frz5[i,]$seqFt <- addThis
+    }else{
+      frz5[i,]$seqFt <- paste0(frz5[i,]$seqFt, VALUE_SEP, addThis)
+    }
+    
+    # if we have description or extra info, add
+    if(hit$description!=""){
+      frz5[i,]$seqFt <- paste0(frz5[i,]$seqFt, VALUE_SEP, hit$category, CONCAT_SEP, hit$type, CONCAT_SEP, hit$description)
+    }
+    if(hit$extraInfo!=""){
+      frz5[i,]$seqFt <- paste0(frz5[i,]$seqFt, VALUE_SEP,  hit$category, CONCAT_SEP, hit$type, CONCAT_SEP, hit$description, CONCAT_SEP, hit$extraInfo)
+    }
+  }
 }
+# Inspect results : print counts per unique feature across all seqFt values
+lists <- frz5 %>%
+  select(seqFt) %>%                      # keep only the one column
+  filter(!is.na(seqFt)) %>%              # drop NA rows
+  separate_rows(seqFt, sep = "\\|") %>%  # explode on "|"
+  mutate(seqFt = trimws(seqFt)) %>%      # remove stray spaces
+  filter(seqFt != "") %>%                # drop blank tokens
+  count(seqFt, name = "count", sort = TRUE) %>%   # tally + sort
+  rename(token = seqFt)
+print(lists, n=25)
+# also for chain descriptions
+lists <- frz5 %>% select(chain) %>% filter(!is.na(chain)) %>% separate_rows(chain, sep = "\\|") %>% mutate(chain = trimws(chain)) %>% filter(chain != "") %>% count(chain, name = "count", sort = TRUE) %>% rename(token = chain)
+print(lists, n=25)
 
+####################
+# Save as freeze 6 #
+####################
+resultsFreeze6 <- paste(rootDir, "data", "freeze6.csv.gz", sep="/")
+write.csv.gz(frz5, resultsFreeze6, row.names = FALSE, quote = TRUE)
+orig <- head(frz5)
+frz5 <- NULL
 
+# Load back in
+frz6 <- read.csv(resultsFreeze6)
+loaded <- head(frz6)
 
+# Optional: assign nice row names, for instance (not part of validation)
+rownames(frz6) <- paste0(frz6$gene, "/", frz6$UniProtID, ":", frz6$delta_aaSeq)
+
+# Validate loaded against original
+if (identical(orig, loaded)) {
+  message("They’re identical.")
+} else {
+  message("They differ:")
+  print(waldo::compare(orig, loaded))
+}
 
