@@ -34,7 +34,7 @@ source(paste(rootDir, "src", "main", "R", "ML_on_freeze6_functions.R", sep="/"))
 # Cleanup of variables, dummify etc
 prepFrz6 <- prepForML(frz6)
 # Before we do anything else, keep 20% of data unused in a balanced way
-train_idx <- createDataPartition(y, p = 0.8, list = FALSE)
+train_idx <- createDataPartition(prepFrz6$ann_classificationVKGL, p = 0.8, list = FALSE)
 prepFrz6_train <- prepFrz6[train_idx,] # use for training
 prepFrz6_test <- prepFrz6[-train_idx,] # do not touch until the very end
 # Find out which sequence features are usable
