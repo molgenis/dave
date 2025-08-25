@@ -56,29 +56,33 @@ sliceBySeqFt <- function(dataFreeze, seqFtSlice)
 }
 
 
-####
-# Train a model
-####
+
+######################################
+# Helper functions to find constants #
+######################################
+is_const_num <- function(x) is.numeric(x) && (sd(x, na.rm = TRUE) == 0 || all(is.na(x)))
+is_const_cat <- function(x) {
+  if (!is.factor(x) && !is.character(x)) return(FALSE)
+  nlevels <- length(unique(stats::na.omit(as.character(x))))
+  nlevels <= 1
+}
+
+
+#################
+# Train a model #
+#################
 trainModelOn <- function(dataFreeze)
 {
-  dataFreeze <- sfDat #debug
+  # Drop columns with constant values
+  const_cols <- names(Filter(identity, lapply(dataFreeze, function(col) is_const_num(col) || is_const_cat(col))))
+  dataFreeze <- dataFreeze[ , setdiff(names(dataFreeze), const_cols), drop = FALSE]
+  
+  # Remove the sequence feature for training and factorize label
   featureRemoval   <- c("seqFt")
   dataFreeze <- dataFreeze %>% select(-any_of(featureRemoval))
   dataFreeze$ann_classificationVKGL <- as.factor(dataFreeze$ann_classificationVKGL)
-  
-  # ???
-  
-  model <- glm(ann_classificationVKGL ~ ., data = dataFreeze, family = binomial)
-  
-  rf <- randomForest(ann_classificationVKGL~., data=dataFreeze)
 
-  
-  #X <- dataFreeze %>% select(-ann_classificationVKGL)
-  #y <- dataFreeze$ann_classificationVKGL
-  
-
-  #dtrain <- xgb.DMatrix(as.matrix(X), label = as.numeric(y))
-  #cv <- xgb.cv(data = dtrain, nfold = 5, nrounds = 100, objective = "binary:logistic", metrics = "logloss", verbose = TRUE, early_stopping_rounds = 10)
-
-  
+  # Run Bayesian generalized linear models via Stan, slow but better for small data sets
+  model <- rstanarm::stan_glm(ann_classificationVKGL ~ ., data = dataFreeze, family = binomial())
+  return(model)
 }
