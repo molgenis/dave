@@ -77,12 +77,13 @@ trainModelOn <- function(dataFreeze)
   const_cols <- names(Filter(identity, lapply(dataFreeze, function(col) is_const_num(col) || is_const_cat(col))))
   dataFreeze <- dataFreeze[ , setdiff(names(dataFreeze), const_cols), drop = FALSE]
   
-  # Remove the sequence feature for training and factorize label
-  featureRemoval   <- c("seqFt")
-  dataFreeze <- dataFreeze %>% select(-any_of(featureRemoval))
-  dataFreeze$ann_classificationVKGL <- as.factor(dataFreeze$ann_classificationVKGL)
-
+  # Remove non-numericals, scale, re-add label as factor
+  featureRemoval   <- c("seqFt", "ann_classificationVKGL")
+  dataNum <- dataFreeze %>% select(-any_of(featureRemoval))
+  dataNumSc <- as.data.frame(scale(dataNum))
+  dataNumSc$ann_classificationVKGL <- as.factor(dataFreeze$ann_classificationVKGL)
+  
   # Run Bayesian generalized linear models via Stan, slow but better for small data sets
-  model <- rstanarm::stan_glm(ann_classificationVKGL ~ ., data = dataFreeze, family = binomial())
+  model <- rstanarm::stan_glm(ann_classificationVKGL ~ ., data = dataNumSc, family = binomial())
   return(model)
 }

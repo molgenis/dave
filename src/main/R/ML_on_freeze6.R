@@ -64,9 +64,10 @@ for(sf in usableSeqFt){
 # Transform to log odds ratios to probabilities via 1 / (1 + exp(-estimate))
 all_est <- all_est %>% mutate(prob_scale = plogis(estimate))
 # Convert into wide format and replace NA with 0
-coef_wide <- dcast(all_est, sf ~ coefficient, value.var = "prob_scale")
+coef_wide <- dcast(all_est, sf ~ coefficient, value.var = "estimate") # estimate or prob_scale
 coef_wide[is.na(coef_wide)] <- 0
 # Show as heatmap for inspection
+coef_wide$`(Intercept)` <- NULL # leave out Intercept ?
 mat <- as.matrix(coef_wide[,-1])
 rownames(mat) <- coef_wide$sf
 pheatmap(mat, color = rev(viridis(100)), cluster_rows = TRUE, cluster_cols = TRUE, scale = "none") # plasma, magma
