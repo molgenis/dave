@@ -18,8 +18,8 @@ prepForML <- function(dataFreeze)
   # Using the delta assumes that positive-negative correlates with pathogenic-benign, but
   # another mechanism is that ANY deviation from 0 is bad, e.g. like how both GAIN and LOSS of function mutations can be pathogenic.
   # Adding absolute values allow ML to capture this too.
-  dataFreeze <- dataFreeze %>% mutate(across(where(is.numeric), ~ abs(.), .names = "abs_{.col}"))
-  
+  # Only apply to colums with at least 1 >0 value and 1 <0 value
+  dataFreeze <- dataFreeze %>% mutate(across(where(is.numeric) & where(~ any(. < 0, na.rm = TRUE) & any(. > 0, na.rm = TRUE)), abs, .names = "abs_{.col}"))  
   return(dataFreeze)
 }
 
