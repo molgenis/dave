@@ -14,6 +14,12 @@ prepForML <- function(dataFreeze)
   # Convert labels into booleans (LB=FALSE, LP=TRUE)
   dataFreeze <- dataFreeze %>% mutate( ann_classificationVKGL = case_when(ann_classificationVKGL == "LB" ~ FALSE, ann_classificationVKGL == "LP" ~ TRUE), ann_classificationVKGL = as.logical(ann_classificationVKGL))
   
+  # Add absolutes:
+  # Using the delta assumes that positive-negative correlates with pathogenic-benign, but
+  # another mechanism is that ANY deviation from 0 is bad, e.g. like how both GAIN and LOSS of function mutations can be pathogenic.
+  # Adding absolute values allow ML to capture this too.
+  dataFreeze <- dataFreeze %>% mutate(across(where(is.numeric), ~ abs(.), .names = "abs_{.col}"))
+  
   return(dataFreeze)
 }
 
