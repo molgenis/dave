@@ -33,15 +33,92 @@ frz6 <- read.csv(frz6loc)
 source(paste(rootDir, "src", "main", "R", "ML_on_freeze6_functions.R", sep="/"))
 
 
+############################################
+# Define which features will be target, 'explainers', or removed.
+#######################################
+# TODO: better engineering, e.g. cumu_bin is similar to cumu_prob, remove more?
+# prediction target
+topLvl <- "ann_classificationVKGL"
+# "explainers" that will be linked to feature importance
+midLvl <- c("delta_total.energy",
+            "delta_ligand_nr_of_predicted_pockets",
+            "delta_DNAb_binding_affinity_pKd",
+            "delta_RNAb_binding_affinity_pKd",
+            "delta_DNAs_cumu_bin",
+            "delta_RNAs_cumu_bin",
+            "delta_ProtS_cumu_bin",
+            "abs_delta_total.energy",
+            "abs_delta_ligand_nr_of_predicted_pockets",
+            "abs_delta_DNAb_binding_affinity_pKd",
+            "abs_delta_RNAb_binding_affinity_pKd",
+            "abs_delta_DNAs_cumu_bin",
+            "abs_delta_RNAs_cumu_bin",
+            "abs_delta_ProtS_cumu_bin"
+            )
+# not usable for training, remove these features
+removeFeat <- c("gene",
+                "TranscriptID",
+                "UniProtID",
+                "dna_variant_chrom",
+                "dna_variant_pos",
+                "dna_variant_ref",
+                "dna_variant_alt",
+                "dna_variant_assembly",
+                "ann_proteinIschaperoned",
+                "ann_proteinLocalization",
+                "delta_aaSeq",
+                "seqFt",
+                "chain")
+
+
 ##########################################################
 # Clean, slice, investigate features and train submodels #
 ##########################################################
 # Cleanup of variables, dummify etc
-prepFrz6 <- prepForML(frz6)
+prepFrz6 <- commonPrepForAllPred(frz6, removeFeat)
 # Before we do anything else, keep 20% of data unused in a balanced way
 train_idx <- createDataPartition(prepFrz6$ann_classificationVKGL, p = 0.8, list = FALSE)
 prepFrz6_train <- prepFrz6[train_idx,] # use for training
 prepFrz6_test <- prepFrz6[-train_idx,] # do not touch until the very end
+
+
+# iterate over prediction targets and make models
+
+for(target in midLvl){
+  #target <- "delta_total.energy" # debug
+  cat(paste0("Training model for ", target, "\n"))
+  # remove all midLvl and topLvl, but not the current prediction target
+  prepFrz6_train2 <- prepFrz6_train %>% select(-all_of(c(setdiff(midLvl, target), topLvl)))
+  
+  x <- prepFrz6_train2 %>% select(-all_of(target))
+  y <- prepFrz6_train2 %>% pull(all_of(target))
+  rf_model <- randomForest(x = x, y = y)
+  
+  preds <- predict(rf_model, newdata = prepFrz6_test)
+  
+  # R²
+  rsq <- 1 - sum(((prepFrz6_test[[target]]) - preds)^2) / sum((prepFrz6_test[[target]] - mean(prepFrz6_test[[target]]))^2)
+  rsq
+  cat(paste0("rsq is ", rsq, "\n"))
+  
+  
+  
+  #rf_model <- randomForest(target ~ ., data = prepFrz6_train2)
+  #model <- trainModel(prepFrz6_train, target)
+}
+
+# variable importance
+importance(rf_model)
+
+# nice plot
+varImpPlot(rf_model)
+
+
+topLvlTrain <- prepFrz6_train %>% select(-any_of(c(midLvl, removeFeat)))
+
+#topLvlTrain <- prepFrz6_train %>% select(matches(paste(featureSelection, collapse="|"))) %>% select(-any_of(c(midLvl, removeThis)))
+
+
 # Find out which sequence features are usable
 usableSeqFt <- seqFtWithMinimumNrPerLabel(prepFrz6_train, ftThr)
 cat(paste0(length(usableSeqFt), " sequence features have ", ftThr, " (or more) benign and ", ftThr, " (or more) pathogenic variants" ))

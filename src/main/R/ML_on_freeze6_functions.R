@@ -1,16 +1,14 @@
-##########################################
-# Basic preparation for machine learning #
-##########################################
-prepForML <- function(dataFreeze)
+#############################################
+# Shared prep steps for predictive modeling #
+#############################################
+commonPrepForAllPred <- function(dataFreeze, removeFeat)
 {
+  # Remove data not used as target or feature variables
+  dataFreeze <- dataFreeze %>% select(-all_of(removeFeat))
+  
   # Select only the "labeled" set: LB and LP
   dataFreeze <- dataFreeze %>% filter(ann_classificationVKGL %in% c("LB", "LP"))
-  
-  # Select only features relevant for training/predicting plus label (ann_classificationVKGL) and grouping (seqFt) 
-  featureSelection <- c("ann_classificationVKGL", "delta_", "seqFt")
-  featureRemoval   <- c("delta_aaSeq", "delta_total.energy")
-  dataFreeze <- dataFreeze %>% select(matches(paste(featureSelection, collapse="|"))) %>% select(-any_of(featureRemoval))
-  
+
   # Convert labels into booleans (LB=FALSE, LP=TRUE)
   dataFreeze <- dataFreeze %>% mutate( ann_classificationVKGL = case_when(ann_classificationVKGL == "LB" ~ FALSE, ann_classificationVKGL == "LP" ~ TRUE), ann_classificationVKGL = as.logical(ann_classificationVKGL))
   
@@ -23,6 +21,16 @@ prepForML <- function(dataFreeze)
   return(dataFreeze)
 }
 
+
+prepTopLvlPred <- function()
+{
+  
+  # Select only features relevant for training/predicting plus label (ann_classificationVKGL) and grouping (seqFt) 
+  featureSelection <- c("ann_classificationVKGL", "delta_")
+  featureRemoval   <- c("delta_aaSeq", "delta_total.energy")
+  dataFreeze <- dataFreeze %>% select(matches(paste(featureSelection, collapse="|"))) %>% select(-any_of(featureRemoval))
+  
+}
 
 ##############################################################
 # Find sequence features with a minimum nr of both LB and LP #
