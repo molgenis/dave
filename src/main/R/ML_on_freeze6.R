@@ -120,12 +120,21 @@ pfun <- function(object, newdata) {
 frz6_new_observ_only_modelFeatures<- frz6_new_observ %>% select(any_of(modelFeatures))
 # nsim should always be >1 to obtain baseline,  but more is better
 frz6_train_without_target <- frz6_train %>% select(-all_of(predictionTarget))
-frz6_new_observ_shap_values <- fastshap::explain(rf_model, shap_only = FALSE,
+frz6_new_observ_explain <- fastshap::explain(rf_model, shap_only = FALSE,
   X = frz6_train_without_target, newdata = frz6_new_observ_only_modelFeatures, pred_wrapper = pfun, nsim = 2, adjust = TRUE
 )
+# 
+frz6_new_observ_shap <- as.data.frame(frz6_new_observ_explain$shapley_values)
+colnames(frz6_new_observ_shap) <- paste0(colnames(frz6_new_observ_explain$shapley_values), ".sph")
+# Add columns for base and final probabilities
+frz6_new_observ_shap$BaseProbability.sph  <- frz6_new_observ_explain$baseline
+frz6_new_observ_shap$FinalProbability.sph <- rowSums(frz6_new_observ_shap) + frz6_new_observ_explain$baseline
+plot(sort(frz6_new_observ_shap$FinalProbability.sph))
 
-frz6_new_observ_shap_values_SHAP_prob_heur <- convert_to_SHAP_probability_heuristic(frz6_new_observ_shap_values)
+# merge back with context for plot!
 
+
+shapDecisionPlot(frz6_new_observ_shap[1,], 10)
 
 ##
 # Explain predictions using SHAP heuristic
