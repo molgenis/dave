@@ -33,7 +33,7 @@ set.seed(1234)
 ##################################
 frz6loc <- paste(rootDir, "data", "freeze6.csv.gz", sep="/")
 frz6 <- read.csv(frz6loc)
-source(paste(rootDir, "src", "main", "R", "SHAPProbHeuristic.R", sep="/"))
+source(paste(rootDir, "src", "main", "R", "SHAPDecisionPlot.R", sep="/"))
 
 
 ############################################
@@ -132,9 +132,21 @@ frz6_new_observ_shap$FinalProbability.sph <- rowSums(frz6_new_observ_shap) + frz
 plot(sort(frz6_new_observ_shap$FinalProbability.sph))
 
 # merge back with context for plot!
+all_vus <- cbind(frz6_new_observ, frz6_new_observ_shap)
+all_vus <- cbind(all_vus, frz6_new_observ_pred_prob)
+#Sanity check
+plot(all_vus$FinalProbability.sph, all_vus$LP)
+
+all_vus_sorted <- all_vus %>% arrange(FinalProbability.sph)
 
 
-shapDecisionPlot(frz6_new_observ_shap[1,], 10)
+shapDecisionPlot(all_vus_sorted[1,])
+shapDecisionPlot(all_vus_sorted[2,])
+shapDecisionPlot(all_vus_sorted[3,])
+
+shapDecisionPlot(all_vus_sorted[11367,])
+shapDecisionPlot(all_vus_sorted[11368,])
+shapDecisionPlot(all_vus_sorted[11369,])
 
 ##
 # Explain predictions using SHAP heuristic
