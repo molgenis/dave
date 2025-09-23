@@ -81,7 +81,7 @@ keep <- c(predictionTarget, modelFeatures, variantContext)
 frz6 <- frz6 %>% select(any_of(keep))
 # divide into train/test and new observations
 frz6_train_test <- frz6 %>% filter(ann_classificationVKGL %in% c("LB", "LP"))
-frz6_new_observ <- frz6 %>% filter(ann_classificationVKGL %in% c("VUS", "CF"))
+frz6_new_observ <- frz6 %>% filter(ann_classificationVKGL %in% c("VUS")) # no 'CF'
 # factorize now, to get LB/LP and VUS/CF factors per set
 frz6_train_test$ann_classificationVKGL <- as.factor(frz6_train_test$ann_classificationVKGL)
 frz6_new_observ$ann_classificationVKGL <- as.factor(frz6_new_observ$ann_classificationVKGL)
@@ -121,14 +121,14 @@ frz6_new_observ_only_modelFeatures<- frz6_new_observ %>% select(any_of(modelFeat
 # nsim should always be >1 to obtain baseline,  but more is better
 frz6_train_without_target <- frz6_train %>% select(-all_of(predictionTarget))
 frz6_new_observ_explain <- fastshap::explain(rf_model, shap_only = FALSE,
-  X = frz6_train_without_target, newdata = frz6_new_observ_only_modelFeatures, pred_wrapper = pfun, nsim = 2, adjust = TRUE
+  X = frz6_train_without_target, newdata = frz6_new_observ_only_modelFeatures, pred_wrapper = pfun, nsim = 10, adjust = TRUE
 )
 # 
 frz6_new_observ_shap <- as.data.frame(frz6_new_observ_explain$shapley_values)
 colnames(frz6_new_observ_shap) <- paste0(colnames(frz6_new_observ_explain$shapley_values), ".sph")
 # Add columns for base and final probabilities
 frz6_new_observ_shap$BaseProbability.sph  <- frz6_new_observ_explain$baseline
-frz6_new_observ_shap$FinalProbability.sph <- rowSums(frz6_new_observ_shap) + frz6_new_observ_explain$baseline
+frz6_new_observ_shap$FinalProbability.sph <- rowSums(frz6_new_observ_shap) # + frz6_new_observ_explain$baseline
 plot(sort(frz6_new_observ_shap$FinalProbability.sph))
 
 # merge back with context for plot!
@@ -139,6 +139,7 @@ plot(all_vus$FinalProbability.sph, all_vus$LP)
 
 all_vus_sorted <- all_vus %>% arrange(FinalProbability.sph)
 
+write.csv(all_vus_sorted[c(1:10, (nrow(all_vus_sorted)-9):(nrow(all_vus_sorted))),], file="vus_top10_bottom10.csv")
 
 shapDecisionPlot(all_vus_sorted[1,])
 shapDecisionPlot(all_vus_sorted[2,])
