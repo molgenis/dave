@@ -128,33 +128,51 @@ frz6_new_observ_shap <- as.data.frame(frz6_new_observ_explain$shapley_values)
 colnames(frz6_new_observ_shap) <- paste0(colnames(frz6_new_observ_explain$shapley_values), ".sph")
 # Add columns for base and final probabilities
 frz6_new_observ_shap$BaseProbability.sph  <- frz6_new_observ_explain$baseline
-frz6_new_observ_shap$FinalProbability.sph <- rowSums(frz6_new_observ_shap) # + frz6_new_observ_explain$baseline
+frz6_new_observ_shap$FinalProbability.sph <- rowSums(frz6_new_observ_shap)
+# Show predicted probabilities
 plot(sort(frz6_new_observ_shap$FinalProbability.sph))
 
-# merge back with context for plot!
+# Merge back with context for further plots
 all_vus <- cbind(frz6_new_observ, frz6_new_observ_shap)
 all_vus <- cbind(all_vus, frz6_new_observ_pred_prob)
-#Sanity check
-plot(all_vus$FinalProbability.sph, all_vus$LP)
-
+# Sanity check: are model probs and SHAP probs lined up correctly?
+plot(all_vus$FinalProbability.sph, all_vus$LP, xlim=c(0,1), ylim=c(0,1))
+# Sanity check: plot vs AlphaMissense (notice imputed value around 0.39)
+plot(all_vus$ann_am_pathogenicity, all_vus$LP, xlim=c(0,1), ylim=c(0,1))
+# Sort by final prob
 all_vus_sorted <- all_vus %>% arrange(FinalProbability.sph)
+# Write to disk for later fast reuse
+vus_pred_loc <- paste(rootDir, "data", "vkgl_apr2024_VUS_pred.csv.gz", sep="/")
+vus_pred_t10b10_loc <- paste(rootDir, "data", "vkgl_apr2024_VUS_pred_top10_bottom10.csv.gz", sep="/")
 
-write.csv(all_vus_sorted[c(1:10, (nrow(all_vus_sorted)-9):(nrow(all_vus_sorted))),], file="vus_top10_bottom10.csv")
+write.csv.gz(all_vus_sorted, file=vus_pred_loc, row.names=F)
+write.csv.gz(all_vus_sorted[c(1:10, (nrow(all_vus_sorted)-9):(nrow(all_vus_sorted))),], file=vus_pred_t10b10_loc, row.names=F)
 
-shapDecisionPlot(all_vus_sorted[1,])
-shapDecisionPlot(all_vus_sorted[2,])
-shapDecisionPlot(all_vus_sorted[3,])
+##########
+# Start point for VUS analysis after writing results previously
+##########
 
-shapDecisionPlot(all_vus_sorted[11367,])
-shapDecisionPlot(all_vus_sorted[11368,])
-shapDecisionPlot(all_vus_sorted[11369,])
+all_vus_sorted <- read.csv(file="vus_pred.csv.gz") # todo check if equal to original
 
-##
-# Explain predictions using SHAP heuristic
-##
+plotrows <- c(1,2,3,11219,11220,11221)
+for(plotrow in plotrows)
+{
+  row <- all_vus_sorted[plotrow,]
+  p <- shapDecisionPlot(row)
+  pdf_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
+  png_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".png"), sep="/")
+  ggsave(filename = pdf_plot_loc, plot = p, device = "pdf", width = 10, height = 6.25)
+  #ggsave(filename = png_plot_loc, plot = p, device = "png", width = 11.111111, height = 6.25) # 16:9 as PNG for full screen slides
+}
 
+# Merge with variants that can received a classification in the meantime
+fr6_changed_clf_apr2024_july2025_loc <- paste(rootDir, "data", "fr6-changed-clf-apr2024-july2025.csv", sep="/")
+fr6_changed_clf_apr2024_july2025 <- read.csv(fr6_changed_clf_apr2024_july2025_loc)
+vus_changed <- merge(x = fr6_changed_clf_apr2024_july2025, y = all_vus_sorted, by.x = c(variantContext,modelFeatures,"ann_classificationVKGL"), by.y = c(variantContext,modelFeatures,"ann_classificationVKGL"))
+# New classification vs prediction
+plot(as.factor(vus_changed$new_classification), vus_changed$FinalProbability.sph)
+# SHAP breakdown plot
+p <- shapDecisionPlot(vus_changed[9,])
+p
 
-#####
-# Combine all results and save to final predictions and explanations
-####
 
