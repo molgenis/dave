@@ -34,6 +34,7 @@ set.seed(1234)
 frz6loc <- paste(rootDir, "data", "freeze6.csv.gz", sep="/")
 frz6 <- read.csv(frz6loc)
 source(paste(rootDir, "src", "main", "R", "SHAPDecisionPlot.R", sep="/"))
+vus_pred_loc <- paste(rootDir, "data", "vkgl_apr2024_VUS_pred.csv.gz", sep="/")
 
 
 ############################################
@@ -142,18 +143,15 @@ plot(all_vus$ann_am_pathogenicity, all_vus$LP, xlim=c(0,1), ylim=c(0,1))
 # Sort by final prob
 all_vus_sorted <- all_vus %>% arrange(FinalProbability.sph)
 # Write to disk for later fast reuse
-vus_pred_loc <- paste(rootDir, "data", "vkgl_apr2024_VUS_pred.csv.gz", sep="/")
-vus_pred_t10b10_loc <- paste(rootDir, "data", "vkgl_apr2024_VUS_pred_top10_bottom10.csv.gz", sep="/")
-
 write.csv.gz(all_vus_sorted, file=vus_pred_loc, row.names=F)
-write.csv.gz(all_vus_sorted[c(1:10, (nrow(all_vus_sorted)-9):(nrow(all_vus_sorted))),], file=vus_pred_t10b10_loc, row.names=F)
 
 ##########
 # Start point for VUS analysis after writing results previously
 ##########
 
-all_vus_sorted <- read.csv(file="vus_pred.csv.gz") # todo check if equal to original
-
+# Load VUS predictions back in
+all_vus_sorted <- read.csv(file=vus_pred_loc)
+# Plot 'most benign' and 'most pathogenic' predictions
 plotrows <- c(1,2,3,11219,11220,11221)
 for(plotrow in plotrows)
 {
