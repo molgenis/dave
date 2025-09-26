@@ -169,8 +169,13 @@ fr6_changed_clf_apr2024_july2025 <- read.csv(fr6_changed_clf_apr2024_july2025_lo
 vus_changed <- merge(x = fr6_changed_clf_apr2024_july2025, y = all_vus_sorted, by.x = c(variantContext,modelFeatures,"ann_classificationVKGL"), by.y = c(variantContext,modelFeatures,"ann_classificationVKGL"))
 # New classification vs prediction
 plot(as.factor(vus_changed$new_classification), vus_changed$FinalProbability.sph)
-# SHAP breakdown plot
-p <- shapDecisionPlot(vus_changed[9,])
-p
+# Make SHAP breakdown plot of each prediction
+for(i in 1:nrow(vus_changed)) {
+  row <- vus_changed[i,]
+  p <- shapDecisionPlot(row)
+  pdf_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
+  ggsave(filename = pdf_plot_loc, plot = p, device = "pdf", width = 10, height = 6.25)
+}
+
 
 
