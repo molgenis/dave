@@ -12,6 +12,8 @@ library(rstanarm)
 library(corrplot)
 library(fastshap)
 library(ggplot2)
+library(cutpointr)
+library(vcfR)
 
 
 #######################
@@ -179,3 +181,39 @@ for(i in 1:nrow(vus_changed)) {
 
 
 
+#### Now on ClinVar data
+# download from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar_20250923.vcf.gz
+# or later from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2025/clinvar_20250923.vcf.gz
+clinvar_loc <- paste(rootDir, "data", "clinvar_20250923.vcf.gz", sep="/")
+clinvarVCF <- read.vcfR(clinvar_loc)
+clinvar <- as.data.frame(clinvarVCF@fix)
+vus_changed_clinv <- merge(x = clinvarVCF, y = all_vus_sorted, by.x = c("CHROM", "POS", "REF", "ALT"), by.y = c( "dna_variant_chrom", "dna_variant_pos", "dna_variant_ref", "dna_variant_alt"))
+vus_changed_clinv_LP <- subset(vus_changed_clinv, grepl("CLNSIG=(Likely_pathogenic|Pathogenic)", INFO))
+vus_changed_clinv_LB <- subset(vus_changed_clinv, grepl("CLNSIG=(Likely_benign|Benign)", INFO))
+vus_changed_clinv_LP$new_classification <- "LP/P"
+vus_changed_clinv_LB$new_classification <- "LB/B"
+vus_changed_clinv_both <- rbind(vus_changed_clinv_LP, vus_changed_clinv_LB)
+plot(as.factor(vus_changed_clinv_both$new_classification), vus_changed_clinv_both$FinalProbability.sph)
+
+# Determine optimal threshold on ClinVar using Youden's Index
+cutpointDF <- subset(vus_changed_clinv_both, new_classification == "LB/B" | new_classification == "LP/P")
+opt_cut <- cutpointr(cutpointDF, FinalProbability.sph, new_classification, direction = ">=", pos_class = "LP/P", neg_class = "LB/B", method = maximize_metric, metric = youden)
+youdenIndex <- opt_cut$optimal_cutpoint
+tp <- sum(cutpointDF[cutpointDF$new_classification=="LP/P",'FinalProbability.sph'] >= youdenIndex)
+fp <- sum(cutpointDF[cutpointDF$new_classification=="LB/B",'FinalProbability.sph'] >= youdenIndex)
+tn <- sum(cutpointDF[cutpointDF$new_classification=="LB/B",'FinalProbability.sph'] < youdenIndex)
+fn <- sum(cutpointDF[cutpointDF$new_classification=="LP/P",'FinalProbability.sph'] < youdenIndex)
+ppv <- 100 *tp/(tp+fp)
+npv <- 100 *tn/(tn+fn)
+sens <- opt_cut$sensitivity*100
+spec <- opt_cut$specificity*100
+
+# Apply this threshold on VKGL
+cutpointDF <- subset(vus_changed, new_classification == "LB" | new_classification == "LP")
+opt_cut <- cutpointr(cutpointDF, FinalProbability.sph, new_classification, direction = ">=", pos_class = "LP", neg_class = "LB", method = maximize_metric, metric = youden)
+youdenIndex <- opt_cut$optimal_cutpoint
+tp <- sum(cutpointDF[cutpointDF$new_classification=="LP",'FinalProbability.sph'] >= youdenIndex)
+fp <- sum(cutpointDF[cutpointDF$new_classification=="LB",'FinalProbability.sph'] >= youdenIndex)
+tn <- sum(cutpointDF[cutpointDF$new_classification=="LB",'FinalProbability.sph'] < youdenIndex)
+fn <- sum(cutpointDF[cutpointDF$new_classification=="LP",'FinalProbability.sph'] < youdenIndex)
+# --> 5 TP, 2 FP, 5 TN, 0 FN
