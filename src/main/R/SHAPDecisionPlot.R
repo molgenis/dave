@@ -17,13 +17,12 @@ formatDelta <- function(input) {
 # Function to make the SHAP decision plot
 # selectRow: data frame row to plot
 shapDecisionPlot <- function(row){
-  featureContribThreshold <- 0 #hardcoded to show all
-  #row <- freeze5[which(rownames(freeze5) == "GJB1/P08034:CA173Y"),] # DEBUG
+  featureContribThreshold <- 0 #hardcoded to show all seperately, but can be increased to group contributions
   rowSPH <- row[, grepl(".sph$", names(row))] # all rows with a feature SHAP probability heuristic
   rowSPH$FinalProbability # Sanity check pt.1: this cumulative P value should match pt.2 later
   rowSPH <- rowSPH[, !grepl("FinalProbability", names(rowSPH))] # Remove cumulative P from data, we won't use it further
-  rowSPHmelt <- reshape2::melt(rowSPH, na.rm = FALSE, id.vars = integer())
-  nAboveFeatContribThr <- sum(abs(rowSPHmelt$value) >= featureContribThreshold)
+  rowSPHmelt <- reshape2::melt(rowSPH, na.rm = FALSE, id.vars = integer()) # melt data for further steps
+  nAboveFeatContribThr <- sum(abs(rowSPHmelt$value) >= featureContribThreshold) # ascertain nr of features above contribution threshold
   other <- sum(rowSPHmelt[rev(order(abs(rowSPHmelt$value)))[(nAboveFeatContribThr+1):dim(rowSPHmelt)[1]],]$value) # Order by absolute value and sum the bottom contributors
   rowSPHmelt <- if(nAboveFeatContribThr==0) { rowSPHmelt[0, ] } else { rowSPHmelt[rev(order(abs(rowSPHmelt$value)))[1:nAboveFeatContribThr],] }# Select only the top contributors
   if (!is.na(other)){rowSPHmelt <- rbind(rowSPHmelt, data.frame(variable="OTHER.sph", value=other))} # Add 'other' unless it was NA (i.e. at a threshold of 0)
@@ -68,8 +67,8 @@ shapDecisionPlot <- function(row){
   
   ## Plot
   rowSPHmelt$valuecs <- rev(cumsum(rev(rowSPHmelt$value)))
-  row$ann_classificationVKGL[row$ann_classificationVKGL == "LB"] <- "LB/B"
-  row$ann_classificationVKGL[row$ann_classificationVKGL == "LP"] <- "LP/P"
+  #row$ann_classificationVKGL[row$ann_classificationVKGL == "LB"] <- "LB/B"
+  #row$ann_classificationVKGL[row$ann_classificationVKGL == "LP"] <- "LP/P"
   if(nrow(rowSPHmelt) < 40) { x_text_size <- 10 } else{ x_text_size <- 5 } # NOTE: This text resizing 'cutoff' may change if the number of features in the model changes!
   p <- ggplot(rowSPHmelt, aes(x = idx, y = valuecs, color = value > 0)) +
     annotation_custom(g, xmin=-Inf, xmax=Inf, ymin=0, ymax=1) +
@@ -95,7 +94,5 @@ shapDecisionPlot <- function(row){
           axis.text.y = element_text(size = x_text_size, colour = "black"), # because of coord flip!
           axis.line = element_line(colour = "black")
     ) + coord_flip()
-  p
-  #ggsave(paste(paste0(row$gene, "_", row$delta_aaSeq, "_thr",featureContribThreshold,".pdf")), plot = p, device = "pdf", width = 10, height = 6.25)
-  #ggsave(paste(paste0(row$gene, "_", row$delta_aaSeq, "_thr",featureContribThreshold,".png")), plot = p, device = "png", width = 11.111111, height = 6.25) # 16:9 as PNG for full screen slides
+  return(p)
 }
