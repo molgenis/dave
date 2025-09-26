@@ -164,9 +164,9 @@ for(plotrow in plotrows)
 }
 
 # Merge with variants that can received a classification in the meantime
-fr6_changed_clf_apr2024_july2025_loc <- paste(rootDir, "data", "fr6-changed-clf-apr2024-july2025.csv", sep="/")
-fr6_changed_clf_apr2024_july2025 <- read.csv(fr6_changed_clf_apr2024_july2025_loc)
-vus_changed <- merge(x = fr6_changed_clf_apr2024_july2025, y = all_vus_sorted, by.x = c(variantContext,modelFeatures,"ann_classificationVKGL"), by.y = c(variantContext,modelFeatures,"ann_classificationVKGL"))
+fr6_from_vus_to_lp_lb_loc <- paste(rootDir, "data", "fr6-vkgl-clf-vus-to-lp-lb-apr2024-july2025.csv", sep="/")
+fr6_from_vus_to_lp_lb <- read.csv(fr6_from_vus_to_lp_lb_loc)
+vus_changed <- merge(x = fr6_from_vus_to_lp_lb, y = all_vus_sorted, by.x = c(variantContext,modelFeatures,"ann_classificationVKGL"), by.y = c(variantContext,modelFeatures,"ann_classificationVKGL"))
 # New classification vs prediction
 plot(as.factor(vus_changed$new_classification), vus_changed$FinalProbability.sph)
 # Make SHAP breakdown plot of each prediction
