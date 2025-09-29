@@ -12,11 +12,17 @@ formatLabels <- function(labelDF) {
     labelRow <- labelDF[i,]
     if (is.na(labelRow$delta)) {    labels <- c(labels, paste(labelRow["Name"])) }
     else if (labelRow$delta == 0){ labels <- c(labels, paste(labelRow["Name"], "is unaffected", sep=" ")) }
-    else if (labelRow$delta > 0) { labels <- c(labels, paste(labelRow["Name"], "increased by", labelRow$delta, labelRow["Unit"], sep=" ")) }
-    else if (labelRow$delta < 0) { labels <- c(labels, paste(labelRow["Name"], "decreased by", labelRow$delta, labelRow["Unit"], sep=" ")) }
+    else if (labelRow$delta > 0) { labels <- c(labels, paste(labelRow["Name"], "increased by", labelRow$delta, unitPlural(labelRow["Unit"], labelRow$delta), sep=" ")) }
+    else if (labelRow$delta < 0) { labels <- c(labels, paste(labelRow["Name"], "decreased by", labelRow$delta, unitPlural(labelRow["Unit"], labelRow$delta), sep=" ")) }
     else {                labels <- c(labels, "ERROR: UNDEFINED STATE") }
   }
   return(labels)
+}
+
+unitPlural <- function(unit, delta) {
+  if(delta==1){return(paste0(unit))}
+  if(delta%%1==0){return(paste0(unit,"s"))}
+  else{ return(unit)}
 }
 
 verdict <- function(finalProb)
@@ -57,14 +63,7 @@ shapDecisionPlot <- function(row){
   
   # Restore order and make labels
   rowSPHmelt <- rowSPHmelt[order(rowSPHmelt$idx), ] # Re-order by index since merging swaps things around
-  
-  
-  ## WIP
-  ##
-  #rowSPHmelt$NamePlusEffect <- paste(rowSPHmelt$Name, sapply(rowSPHmelt$delta, formatDelta), rowSPHmelt$Unit) # Create enhanced labels
- # rowSPHmelt$NamePlusEffect <- apply(rowSPHmelt, 1, formatLabel) # Create enhanced labels
   rowSPHmelt$NamePlusEffect <- formatLabels(rowSPHmelt) # Create enhanced labels
-  
   rowSPHmelt$idx <- factor(rowSPHmelt$idx, levels = rowSPHmelt$idx, labels = rowSPHmelt$NamePlusEffect) # Assign levels and labels to the indices
   
   # Make raster grob with SHAP colors
@@ -97,6 +96,7 @@ shapDecisionPlot <- function(row){
     labs(title = paste("SHAP decision plot for ", row$delta_aaSeq, " in gene ", row$gene, " (",row$UniProtID,"), ", row$dna_variant_assembly, " ",
                        row$dna_variant_chrom, ":", row$dna_variant_pos, row$dna_variant_ref, ">", row$dna_variant_alt, ", VKGL April 2024: ", row$ann_classificationVKGL, sep=""),
          subtitle = "SHAP values do not correlate with feature values, but instead capture feature contributions based on the interactions among all features uniquely for this prediction",
+         tag = "* = if any, one or more   ** = if any",
          x = paste0("Feature contribution to probability of\nbeing pathogenic, in descending order"),
          y = paste0("Cumulative probability heuristic for SHAP values\nFinal probability for being pathogenic is ", round(sum(rowSPHmelt$value), digits=3), ", variant is estimated to be ", verdict(sum(rowSPHmelt$value)))) +
     theme_bw() +
@@ -108,6 +108,8 @@ shapDecisionPlot <- function(row){
           plot.title.position = "plot",
           plot.caption.position =  "plot",
           legend.position="none",
+          plot.tag.position = c(0.2, 0.025),
+          plot.tag=element_text(size=9),
           axis.text.x = element_text(size = 9, colour = "black"),
           axis.text.y = element_text(size = x_text_size, colour = "black"), # because of coord flip!
           axis.line = element_line(colour = "black")
