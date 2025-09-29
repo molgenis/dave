@@ -161,8 +161,8 @@ for(plotrow in plotrows)
   p <- shapDecisionPlot(row)
   pdf_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
   png_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".png"), sep="/")
-  ggsave(filename = pdf_plot_loc, plot = p, device = "pdf", width = 10, height = 6.25)
-  #ggsave(filename = png_plot_loc, plot = p, device = "png", width = 11.111111, height = 6.25) # 16:9 as PNG for full screen slides
+  ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4) # height was 6.25
+  #ggsave(filename = png_plot_loc, plot = p, device = "png", width = 9.777778, height = 5.5) # 16:9 as PNG for full screen slides
 }
 
 # Merge with variants that can received a classification in the meantime
@@ -176,7 +176,7 @@ for(i in 1:nrow(vus_changed)) {
   row <- vus_changed[i,]
   p <- shapDecisionPlot(row)
   pdf_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
-  ggsave(filename = pdf_plot_loc, plot = p, device = "pdf", width = 10, height = 6.25)
+  ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 }
 
 
@@ -187,7 +187,7 @@ for(i in 1:nrow(vus_changed)) {
 clinvar_loc <- paste(rootDir, "data", "clinvar_20250923.vcf.gz", sep="/")
 clinvarVCF <- read.vcfR(clinvar_loc)
 clinvar <- as.data.frame(clinvarVCF@fix)
-vus_changed_clinv <- merge(x = clinvarVCF, y = all_vus_sorted, by.x = c("CHROM", "POS", "REF", "ALT"), by.y = c( "dna_variant_chrom", "dna_variant_pos", "dna_variant_ref", "dna_variant_alt"))
+vus_changed_clinv <- merge(x = clinvar, y = all_vus_sorted, by.x = c("CHROM", "POS", "REF", "ALT"), by.y = c( "dna_variant_chrom", "dna_variant_pos", "dna_variant_ref", "dna_variant_alt"))
 vus_changed_clinv_LP <- subset(vus_changed_clinv, grepl("CLNSIG=(Likely_pathogenic|Pathogenic)", INFO))
 vus_changed_clinv_LB <- subset(vus_changed_clinv, grepl("CLNSIG=(Likely_benign|Benign)", INFO))
 vus_changed_clinv_LP$new_classification <- "LP/P"
@@ -198,7 +198,7 @@ plot(as.factor(vus_changed_clinv_both$new_classification), vus_changed_clinv_bot
 # Determine optimal threshold on ClinVar using Youden's Index
 cutpointDF <- subset(vus_changed_clinv_both, new_classification == "LB/B" | new_classification == "LP/P")
 opt_cut <- cutpointr(cutpointDF, FinalProbability.sph, new_classification, direction = ">=", pos_class = "LP/P", neg_class = "LB/B", method = maximize_metric, metric = youden)
-youdenIndex <- opt_cut$optimal_cutpoint
+youdenIndex <- opt_cut$optimal_cutpoint # = 0.286, use as default threshold
 tp <- sum(cutpointDF[cutpointDF$new_classification=="LP/P",'FinalProbability.sph'] >= youdenIndex)
 fp <- sum(cutpointDF[cutpointDF$new_classification=="LB/B",'FinalProbability.sph'] >= youdenIndex)
 tn <- sum(cutpointDF[cutpointDF$new_classification=="LB/B",'FinalProbability.sph'] < youdenIndex)
@@ -209,11 +209,12 @@ sens <- opt_cut$sensitivity*100
 spec <- opt_cut$specificity*100
 
 # Apply this threshold on VKGL
-cutpointDF <- subset(vus_changed, new_classification == "LB" | new_classification == "LP")
-opt_cut <- cutpointr(cutpointDF, FinalProbability.sph, new_classification, direction = ">=", pos_class = "LP", neg_class = "LB", method = maximize_metric, metric = youden)
-youdenIndex <- opt_cut$optimal_cutpoint
-tp <- sum(cutpointDF[cutpointDF$new_classification=="LP",'FinalProbability.sph'] >= youdenIndex)
-fp <- sum(cutpointDF[cutpointDF$new_classification=="LB",'FinalProbability.sph'] >= youdenIndex)
-tn <- sum(cutpointDF[cutpointDF$new_classification=="LB",'FinalProbability.sph'] < youdenIndex)
-fn <- sum(cutpointDF[cutpointDF$new_classification=="LP",'FinalProbability.sph'] < youdenIndex)
-# --> 5 TP, 2 FP, 5 TN, 0 FN
+#cutpointDF <- subset(vus_changed, new_classification == "LB" | new_classification == "LP")
+#opt_cut <- cutpointr(cutpointDF, FinalProbability.sph, new_classification, direction = ">=", pos_class = "LP", neg_class = "LB", method = maximize_metric, metric = youden)
+#youdenIndex <- opt_cut$optimal_cutpoint # here, 0.278, but we're using ClinVar's youden
+tp <- sum(vus_changed[vus_changed$new_classification=="LP",'FinalProbability.sph'] >= youdenIndex)
+fp <- sum(vus_changed[vus_changed$new_classification=="LB",'FinalProbability.sph'] >= youdenIndex)
+tn <- sum(vus_changed[vus_changed$new_classification=="LB",'FinalProbability.sph'] < youdenIndex)
+fn <- sum(vus_changed[vus_changed$new_classification=="LP",'FinalProbability.sph'] < youdenIndex)
+cat(paste("we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN"))
+# we find 4 TP, 2 FP, 5 TN and 1 FN

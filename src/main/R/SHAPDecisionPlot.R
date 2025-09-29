@@ -2,16 +2,27 @@ library(colorspace)
 library(grid)
 
 # Feature labels and descriptions
-feat <- read.csv(paste(rootDir, "data", "features.csv", sep="/"))
+feat <- read.csv(paste(rootDir, "data", "12features.csv", sep="/"))
 feat$Feature <- paste0(feat$Feature, ".sph")
 
-
 # Function to to format labels
-formatDelta <- function(input) {
-  if (is.na(input)) { return("")}
-  else if (input > 0) { return(paste("increased by", input))}
-  else if (input < 0) { return(paste("decreased by", input))}
-  else { return("is unchanged")}
+formatLabels <- function(labelDF) {
+  labels <- list()
+  for(i in 1:nrow(labelDF)) {
+    labelRow <- labelDF[i,]
+    if (is.na(labelRow$delta)) {    labels <- c(labels, paste(labelRow["Name"])) }
+    else if (labelRow$delta == 0){ labels <- c(labels, paste(labelRow["Name"], "is unaffected", sep=" ")) }
+    else if (labelRow$delta > 0) { labels <- c(labels, paste(labelRow["Name"], "increased by", labelRow$delta, labelRow["Unit"], sep=" ")) }
+    else if (labelRow$delta < 0) { labels <- c(labels, paste(labelRow["Name"], "decreased by", labelRow$delta, labelRow["Unit"], sep=" ")) }
+    else {                labels <- c(labels, "ERROR: UNDEFINED STATE") }
+  }
+  return(labels)
+}
+
+verdict <- function(finalProb)
+{
+  if(finalProb >= 0.286){ return("pathogenic") }
+  else{ return("benign") }
 }
 
 # Function to make the SHAP decision plot
@@ -46,12 +57,19 @@ shapDecisionPlot <- function(row){
   
   # Restore order and make labels
   rowSPHmelt <- rowSPHmelt[order(rowSPHmelt$idx), ] # Re-order by index since merging swaps things around
-  rowSPHmelt$NamePlusEffect <- paste(rowSPHmelt$Name, sapply(rowSPHmelt$delta, formatDelta)) # Create enhanced labels
+  
+  
+  ## WIP
+  ##
+  #rowSPHmelt$NamePlusEffect <- paste(rowSPHmelt$Name, sapply(rowSPHmelt$delta, formatDelta), rowSPHmelt$Unit) # Create enhanced labels
+ # rowSPHmelt$NamePlusEffect <- apply(rowSPHmelt, 1, formatLabel) # Create enhanced labels
+  rowSPHmelt$NamePlusEffect <- formatLabels(rowSPHmelt) # Create enhanced labels
+  
   rowSPHmelt$idx <- factor(rowSPHmelt$idx, levels = rowSPHmelt$idx, labels = rowSPHmelt$NamePlusEffect) # Assign levels and labels to the indices
   
   # Make raster grob with SHAP colors
   lightenFactor <- 0.33
-  nrGradientRows <- nAboveFeatContribThr+1 # Vertical, 1 lane per variable
+  nrGradientRows <- nAboveFeatContribThr # Vertical, 1 lane per variable
   nrGradientCols <- 100 # Horizontal, nice to be smooth
   shapRed <- "#FF0C57"
   shapBlu <- "#1E88E5"
@@ -79,8 +97,8 @@ shapDecisionPlot <- function(row){
     labs(title = paste("SHAP decision plot for ", row$delta_aaSeq, " in gene ", row$gene, " (",row$UniProtID,"), ", row$dna_variant_assembly, " ",
                        row$dna_variant_chrom, ":", row$dna_variant_pos, row$dna_variant_ref, ">", row$dna_variant_alt, ", VKGL April 2024: ", row$ann_classificationVKGL, sep=""),
          subtitle = "SHAP values do not correlate with feature values, but instead capture feature contributions based on the interactions among all features uniquely for this prediction",
-         x = paste0("Features affecting probability by >",(featureContribThreshold*100),"%\nin descending order of impact"),
-         y = paste("Cumulative probability heuristic for SHAP values\nFinal probability for being pathogenic is", round(sum(rowSPHmelt$value), digits=3))) +
+         x = paste0("Feature contribution to probability of\nbeing pathogenic, in descending order"),
+         y = paste0("Cumulative probability heuristic for SHAP values\nFinal probability for being pathogenic is ", round(sum(rowSPHmelt$value), digits=3), ", variant is estimated to be ", verdict(sum(rowSPHmelt$value)))) +
     theme_bw() +
     theme(panel.border = element_blank(),
           panel.grid.major = element_blank(),
