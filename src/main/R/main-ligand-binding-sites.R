@@ -125,3 +125,20 @@ for(i in seq_along(succesfulGenesSub))
 }
 
 
+###########################################################
+# Run a particular mutation manually, keeping all outputs #
+###########################################################
+# --> This is a "hardcoded" example on how to run this on cmdline!
+#
+# cd /Users/joeri/git/vkgl-secretome-protein-stability/data/genes/SLCO2A1/folding-results/GA554R
+# mkdir tmp
+# cp ../../AF-Q92959-F1-model_v4_Repair.pdb tmp 
+# cd tmp
+# /Applications/FoldX/5/foldx_20251231 --command=PositionScan --pdb=AF-Q92959-F1-model_v4_Repair.pdb --out-pdb=true --positions=GA554R
+# /Applications/p2rank_2.5/prank predict -c alphafold -f ARG554_AF-Q92959-F1-model_v4_Repair.pdb -o .
+# 
+# 
+# if error "Unsupported class file major version 68", lower the Java version:
+# /usr/libexec/java_home -V
+# export JAVA_HOME=`/usr/libexec/java_home -v 17`
+#
