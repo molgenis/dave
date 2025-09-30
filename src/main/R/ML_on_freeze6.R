@@ -96,7 +96,18 @@ frz6_test <- frz6_train_test[-train_idx,]
 
 # calculate R-square correlation across features and plot
 cor_r2_mat <- cor(frz6_train[ , !(names(frz6_train) %in% predictionTarget) ])^2
+corrFeatRelabel <- read.csv(paste(rootDir, "data", "12features.csv", sep="/"))
+corrFeatRelabel$Name <- sub("\\*+$", "", corrFeatRelabel$Name)
+#feat$Name <- ifelse(nzchar(feat$Unit), paste0(feat$Name, " (in ", feat$Unit, ")"), feat$Name) # adds the unit, but not needed
+old_names <- rownames(cor_r2_mat) # Get the current names from cor_r2_mat
+lookup <- setNames(corrFeatRelabel$Name, corrFeatRelabel$Feature) # Create a lookup vector from feat
+new_names <- lookup[old_names] # Replace row and column names by matching
+rownames(cor_r2_mat) <- new_names
+colnames(cor_r2_mat) <- new_names
+pdf_plot_loc <- paste(rootDir, "img", "corrplot.pdf", sep="/")
+cairo_pdf(file = pdf_plot_loc, width = 5, height = 5)  # adjust size as needed
 corrplot(cor_r2_mat,  type = "upper", tl.cex=0.7, tl.col = "black", method = "color", addCoef.col = "black",  number.cex = 0.5)
+dev.off()
 
 # fit basic Random Forest model, show feature importance and AUC
 rf_model <- randomForest(ann_classificationVKGL ~ .,data = frz6_train, importance = TRUE)
@@ -104,8 +115,8 @@ preds <- predict(rf_model, newdata = frz6_test)
 print(rf_model)
 importance(rf_model) # optional plot: varImpPlot(rf_model)
 rf_probs <- predict(rf_model, newdata = frz6_test, type = "prob")
-roc_obj <- roc(frz6_test$ann_classificationVKGL, rf_probs[,"LP"])
-auc(roc_obj) # optional plot: plot(roc_obj, col = "blue", lwd = 2, main = "Random Forest ROC Curve")
+roc_obj <- pROC::roc(frz6_test$ann_classificationVKGL, rf_probs[,"LP"])
+pROC::auc(roc_obj) # optional plot: plot(roc_obj, col = "blue", lwd = 2, main = "Random Forest ROC Curve")
 
 
 
@@ -154,7 +165,7 @@ write.csv.gz(all_vus_sorted, file=vus_pred_loc, row.names=F)
 # Load VUS predictions back in
 all_vus_sorted <- read.csv(file=vus_pred_loc)
 # Plot 'most benign' and 'most pathogenic' predictions
-plotrows <- c(1,2,3,11219,11220,11221)
+plotrows <- c(1,2,3,4,5,11217,11218,11219,11220,11221)
 for(plotrow in plotrows)
 {
   row <- all_vus_sorted[plotrow,]
@@ -164,6 +175,13 @@ for(plotrow in plotrows)
   ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4) # height was 6.25
   #ggsave(filename = png_plot_loc, plot = p, device = "png", width = 9.777778, height = 5.5) # 16:9 as PNG for full screen slides
 }
+# as table
+all_vus_sorted$dna <- paste0(all_vus_sorted$dna_variant_chrom,":",all_vus_sorted$dna_variant_pos," ",all_vus_sorted$dna_variant_ref,">",all_vus_sorted$dna_variant_alt)
+all_vus_sorted[plotrows,c("gene","UniProtID","dna","delta_aaSeq","LP")]
+# find with affected ligand top pocket
+#all_vus_ligand_aff <- all_vus_sorted %>% arrange(delta_ligand_rank1_sas_points)
+#all_vus_ligand_aff[plotrows,c("gene","UniProtID","dna","delta_aaSeq","LP","delta_ligand_rank1_sas_points")]
+#p <- shapDecisionPlot(all_vus_ligand_aff[11221,])
 
 # Merge with variants that can received a classification in the meantime
 fr6_from_vus_to_lp_lb_loc <- paste(rootDir, "data", "fr6-vkgl-clf-vus-to-lp-lb-apr2024-july2025.csv", sep="/")
@@ -178,7 +196,11 @@ for(i in 1:nrow(vus_changed)) {
   pdf_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
   ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 }
-
+# as table
+vus_changed_sorted <- vus_changed %>% arrange(LP)
+vus_changed_sorted$verdict <- ifelse(vus_changed_sorted$LP >= 0.286,"P","B")# based on 0.286, see below
+vus_changed_sorted$dna <- paste0(vus_changed_sorted$dna_variant_chrom,":",vus_changed_sorted$dna_variant_pos," ",vus_changed_sorted$dna_variant_ref,">",vus_changed_sorted$dna_variant_alt)
+vus_changed_sorted[,c("gene","TranscriptID","UniProtID","dna","delta_aaSeq","LP", "verdict","new_classification")]
 
 
 #### Now on ClinVar data
@@ -194,6 +216,11 @@ vus_changed_clinv_LP$new_classification <- "LP/P"
 vus_changed_clinv_LB$new_classification <- "LB/B"
 vus_changed_clinv_both <- rbind(vus_changed_clinv_LP, vus_changed_clinv_LB)
 plot(as.factor(vus_changed_clinv_both$new_classification), vus_changed_clinv_both$FinalProbability.sph)
+# find with affected ligand top pocket
+vus_changed_clinv_both_ligand_aff <- vus_changed_clinv_both %>% arrange(delta_ligand_rank1_sas_points)
+vus_changed_clinv_both_ligand_aff[c(1,2,3,707,708,709),c("gene","UniProtID","dna","delta_aaSeq","LP","delta_ligand_rank1_sas_points")]
+p <- shapDecisionPlot(all_vus_ligand_aff[11221,])
+p
 
 # Determine optimal threshold on ClinVar using Youden's Index
 cutpointDF <- subset(vus_changed_clinv_both, new_classification == "LB/B" | new_classification == "LP/P")
@@ -205,16 +232,24 @@ tn <- sum(cutpointDF[cutpointDF$new_classification=="LB/B",'FinalProbability.sph
 fn <- sum(cutpointDF[cutpointDF$new_classification=="LP/P",'FinalProbability.sph'] < youdenIndex)
 ppv <- 100 *tp/(tp+fp)
 npv <- 100 *tn/(tn+fn)
-sens <- opt_cut$sensitivity*100
-spec <- opt_cut$specificity*100
+sens <- tp / (tp + fn)*100
+spec <- tn / (tn + fp)*100
+cat(paste("in ClinVar data we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN"))
+cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec"))
 
 # Apply this threshold on VKGL
 #cutpointDF <- subset(vus_changed, new_classification == "LB" | new_classification == "LP")
 #opt_cut <- cutpointr(cutpointDF, FinalProbability.sph, new_classification, direction = ">=", pos_class = "LP", neg_class = "LB", method = maximize_metric, metric = youden)
 #youdenIndex <- opt_cut$optimal_cutpoint # here, 0.278, but we're using ClinVar's youden
+youdenIndex <- 0.286
 tp <- sum(vus_changed[vus_changed$new_classification=="LP",'FinalProbability.sph'] >= youdenIndex)
 fp <- sum(vus_changed[vus_changed$new_classification=="LB",'FinalProbability.sph'] >= youdenIndex)
 tn <- sum(vus_changed[vus_changed$new_classification=="LB",'FinalProbability.sph'] < youdenIndex)
 fn <- sum(vus_changed[vus_changed$new_classification=="LP",'FinalProbability.sph'] < youdenIndex)
-cat(paste("we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN"))
-# we find 4 TP, 2 FP, 5 TN and 1 FN
+ppv <- 100 *tp/(tp+fp)
+npv <- 100 *tn/(tn+fn)
+sens <- tp / (tp + fn)*100
+spec <- tn / (tn + fp)*100
+cat(paste("when applied to VKGL we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN"))
+cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec"))
+# --> 4 TP, 2 FP, 5 TN and 1 FN
