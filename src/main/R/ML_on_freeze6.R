@@ -1,17 +1,9 @@
-library(crunch)     # To compress results
-library(R.utils)    # for 'gunzip', 'mkdirs'
-library(dplyr)      # Data manipulation
-library(tidyr)      # Data manipulation
-library(xgboost)
+library(crunch)
+library(dplyr)
 library(caret)
 library(randomForest)
-library(reshape2)
-library(pheatmap)
 library(pROC)
-library(rstanarm)
 library(corrplot)
-library(fastshap)
-library(ggplot2)
 library(cutpointr)
 library(vcfR)
 
@@ -120,30 +112,26 @@ pROC::auc(roc_obj) # optional plot: plot(roc_obj, col = "blue", lwd = 2, main = 
 
 
 
-####
-# Apply RF model on new observations to get predictions
-####
-
+################
+# Apply RF model on new observations to get predictions and use SHAP to explain
+################
+# New predictions
 frz6_new_observ_pred_prob <- predict(rf_model, newdata = frz6_new_observ, type = "prob")  # class probabilities
-#aa <- cbind(frz6_new_observ, rf_pred_prob)
-
-# Wrap the predict function (needs to return numeric probs for SHAP)
+# To get SHAP, first wrap the predict function (needs to return numeric probs for SHAP)
 pfun <- function(object, newdata) {
-  predict(object, newdata = newdata, type = "prob")[, "LP"]  # pick probability for "LP"
+  predict(object, newdata = newdata, type = "prob")[, "LP"]
 }
 frz6_new_observ_only_modelFeatures<- frz6_new_observ %>% select(any_of(modelFeatures))
-# nsim should always be >1 to obtain baseline,  but more is better
 frz6_train_without_target <- frz6_train %>% select(-all_of(predictionTarget))
 frz6_new_observ_explain <- fastshap::explain(rf_model, shap_only = FALSE,
   X = frz6_train_without_target, newdata = frz6_new_observ_only_modelFeatures, pred_wrapper = pfun, nsim = 10, adjust = TRUE
 )
-# 
 frz6_new_observ_shap <- as.data.frame(frz6_new_observ_explain$shapley_values)
 colnames(frz6_new_observ_shap) <- paste0(colnames(frz6_new_observ_explain$shapley_values), ".sph")
 # Add columns for base and final probabilities
 frz6_new_observ_shap$BaseProbability.sph  <- frz6_new_observ_explain$baseline
 frz6_new_observ_shap$FinalProbability.sph <- rowSums(frz6_new_observ_shap)
-# Show predicted probabilities
+# Show predicted probabilities as sanity check
 plot(sort(frz6_new_observ_shap$FinalProbability.sph))
 
 # Merge back with context for further plots
@@ -158,8 +146,10 @@ all_vus_sorted <- all_vus %>% arrange(FinalProbability.sph)
 # Write to disk for later fast reuse
 write.csv.gz(all_vus_sorted, file=vus_pred_loc, row.names=F)
 
+
+
 ##########
-# Start point for VUS analysis after writing results previously
+# Starting point for VUS analysis after writing results previously
 ##########
 
 # Load VUS predictions back in
@@ -238,8 +228,8 @@ ppv <- 100 *tp/(tp+fp)
 npv <- 100 *tn/(tn+fn)
 sens <- tp / (tp + fn)*100
 spec <- tn / (tn + fp)*100
-cat(paste("in ClinVar data we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN"))
-cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec"))
+cat(paste("in ClinVar data we determined threshold",youdenIndex,", when applied we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN\n"))
+cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec\n"))
 
 # Apply this threshold on VKGL
 #cutpointDF <- subset(vus_changed, new_classification == "LB" | new_classification == "LP")
@@ -254,6 +244,6 @@ ppv <- 100 *tp/(tp+fp)
 npv <- 100 *tn/(tn+fn)
 sens <- tp / (tp + fn)*100
 spec <- tn / (tn + fp)*100
-cat(paste("when applied to VKGL we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN"))
-cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec"))
+cat(paste("when applied to VKGL we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN\n"))
+cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec\n"))
 # --> 4 TP, 2 FP, 5 TN and 1 FN
