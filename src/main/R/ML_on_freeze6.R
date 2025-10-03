@@ -206,6 +206,7 @@ vus_changed_clinv_LB <- subset(vus_changed_clinv, grepl("CLNSIG=(Likely_benign|B
 vus_changed_clinv_LP$new_classification <- "LP/P"
 vus_changed_clinv_LB$new_classification <- "LB/B"
 vus_changed_clinv_both <- rbind(vus_changed_clinv_LP, vus_changed_clinv_LB)
+table(vus_changed_clinv_both_ligand_aff$new_classification)
 plot(as.factor(vus_changed_clinv_both$new_classification), vus_changed_clinv_both$FinalProbability.sph)
 # find with affected ligand top pocket
 vus_changed_clinv_both_ligand_aff <- vus_changed_clinv_both %>% arrange(delta_ligand_rank1_sas_points)
@@ -247,3 +248,7 @@ spec <- tn / (tn + fp)*100
 cat(paste("when applied to VKGL we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN\n"))
 cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec\n"))
 # --> 4 TP, 2 FP, 5 TN and 1 FN
+
+# Also, in full VUS set, how many would be over and under the threshold?
+nrow(all_vus_sorted[all_vus_sorted$FinalProbability.sph >= youdenIndex, ])
+nrow(all_vus_sorted[all_vus_sorted$FinalProbability.sph < youdenIndex, ])
