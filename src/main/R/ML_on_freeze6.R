@@ -200,12 +200,14 @@ vus_changed_sorted <- vus_changed %>% arrange(LP)
 vus_changed_sorted$verdict <- ifelse(vus_changed_sorted$LP >= threshold,"P","B")
 vus_changed_sorted$dna <- paste0(vus_changed_sorted$dna_variant_chrom,":",vus_changed_sorted$dna_variant_pos," ",vus_changed_sorted$dna_variant_ref,">",vus_changed_sorted$dna_variant_alt)
 vus_changed_sorted[,c("gene","TranscriptID","UniProtID","dna","delta_aaSeq","LP", "verdict","new_classification")]
-
+# Prep for joint boxplot with ClinVar
+vus_changed_sorted_vkgl_min <- vus_changed_sorted[,c("LP", "verdict","new_classification")]
+vus_changed_sorted_vkgl_min$new_classification <- ifelse(vus_changed_sorted_vkgl_min$new_classification == "LP","LP/P","LB/B")
+vus_changed_sorted_vkgl_min$source <- "VKGL"
 
 #### Now on ClinVar data
 # Find variants that were VUS in VKGL April 2024 but have since received a ClinVar classification
-# download from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar_20250923.vcf.gz
-# or later from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2025/clinvar_20250923.vcf.gz
+# download from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2025/clinvar_20250923.vcf.gz
 clinvar_loc <- paste(rootDir, "data", "clinvar_20250923.vcf.gz", sep="/")
 clinvarVCF <- read.vcfR(clinvar_loc)
 clinvar <- as.data.frame(clinvarVCF@fix)
@@ -222,6 +224,10 @@ vus_changed_clinv_LB$new_classification <- "LB/B"
 vus_changed_clinv_both <- rbind(vus_changed_clinv_LP, vus_changed_clinv_LB)
 plot(as.factor(vus_changed_clinv_both$new_classification), vus_changed_clinv_both$FinalProbability.sph)
 table(vus_changed_clinv_both$new_classification)
+# Prep for joint boxplot with VKGL
+vus_changed_sorted_clinvar_min <- vus_changed_clinv_both[,c("LP","new_classification")]
+vus_changed_sorted_clinvar_min$verdict <- ifelse(vus_changed_sorted_clinvar_min$LP >= threshold,"P","B")
+vus_changed_sorted_clinvar_min$source <- "ClinVar"
 # find with affected ligand top pocket
 vus_changed_clinv_both_ligand_aff <- vus_changed_clinv_both %>% arrange(delta_ligand_rank1_sas_points)
 vus_changed_clinv_both_ligand_aff[c(1,2,3,652,653,654),c("gene","UniProtID","dna","delta_aaSeq","LP","delta_ligand_rank1_sas_points")]
@@ -229,6 +235,39 @@ rowLig <- vus_changed_clinv_both_ligand_aff[1,]
 p <- shapDecisionPlot(rowLig, threshold)
 ligand_plot_loc <- paste(rootDir, "img", paste0("special_",rowLig$gene, "_", rowLig$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = ligand_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
+
+# joint boxplot
+shapRed <- "#FF0C57"
+shapBlu <- "#1E88E5"
+jointData <- rbind(vus_changed_sorted_vkgl_min, vus_changed_sorted_clinvar_min)
+jointData$new_classification_by_source <- paste0(jointData$new_classification," in ",jointData$source)
+colnames(jointData)
+p <- ggplot(jointData, aes(x=new_classification_by_source, y=LP, fill=new_classification)) + 
+  geom_boxplot() +
+  scale_fill_manual(values = c("LB/B" = shapBlu, "LP/P" = shapRed)) +
+  theme_bw() +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.caption = element_text(hjust = 0, face= "italic"),
+        plot.subtitle=element_text(size=9),
+        plot.title.position = "plot",
+        plot.caption.position =  "plot",
+        legend.position="none",
+        plot.tag.position = c(0.2, 0.025),
+        plot.tag=element_text(size=9),
+        axis.text.x = element_text(size = 9, colour = "black"),
+        axis.text.y = element_text(size = 9, colour = "black"),
+        axis.line = element_line(colour = "black")
+  ) +
+  labs(title = "Distribution of DAVE1 scores applied to VUS variants in VKGL April 2024",
+     subtitle = "since reclassified as LB/B = (likely) benign, LP/P = (likely) pathogenic in VKGL July 2025 and ClinVar xxx",
+     x = "Expert assertion of pathogenicity",
+     y = "DAVE1 prediction score")
+p
+jointbox_plot_loc <- paste(rootDir, "img", paste0("special_jointbox.pdf"), sep="/")
+ggsave(filename = jointbox_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
+
 
 
 # Apply optimal threshold on VKGL VUS that have since receieved a ClinVar classification
