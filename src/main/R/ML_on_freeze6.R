@@ -240,7 +240,7 @@ ppv <- 100 *tp/(tp+fp)
 npv <- 100 *tn/(tn+fn)
 sens <- tp / (tp + fn)*100
 spec <- tn / (tn + fp)*100
-cat(paste("in ClinVar data we determined threshold",threshold,", when applied we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN\n"))
+cat(paste("in ClinVar data we applied threshold",threshold,", when applied we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN\n"))
 cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec\n"))
 
 # Apply this threshold on VKGL
