@@ -103,11 +103,17 @@ dev.off()
 
 # fit basic Random Forest model, show feature importance and AUC
 rf_model <- randomForest(ann_classificationVKGL ~ .,data = frz6_train, importance = TRUE)
-preds <- predict(rf_model, newdata = frz6_test)
+frz6_test_pred_prob <- predict(rf_model, newdata = frz6_test, type = "prob")  # class probabilities
+# determine optimal prob threshold based on test data
+comb_test_pred <- cbind(frz6_test, frz6_test_pred_prob)
+plot(comb_test_pred$ann_classificationVKGL, comb_test_pred$LP)
+opt_cut <- cutpointr(comb_test_pred, LP, ann_classificationVKGL, direction = ">=", pos_class = "LP", neg_class = "LB", method = maximize_metric, metric = youden)
+youdenIndex <- opt_cut$optimal_cutpoint
+youdenIndex # 0.286
+# print model info and AUC
 print(rf_model)
 importance(rf_model) # optional plot: varImpPlot(rf_model)
-rf_probs <- predict(rf_model, newdata = frz6_test, type = "prob")
-roc_obj <- pROC::roc(frz6_test$ann_classificationVKGL, rf_probs[,"LP"])
+roc_obj <- pROC::roc(comb_test_pred$ann_classificationVKGL, comb_test_pred$LP)
 pROC::auc(roc_obj) # optional plot: plot(roc_obj, col = "blue", lwd = 2, main = "Random Forest ROC Curve")
 
 
