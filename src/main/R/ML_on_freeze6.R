@@ -109,7 +109,7 @@ comb_test_pred <- cbind(frz6_test, frz6_test_pred_prob)
 plot(comb_test_pred$ann_classificationVKGL, comb_test_pred$LP)
 opt_cut <- cutpointr(comb_test_pred, LP, ann_classificationVKGL, direction = ">=", pos_class = "LP", neg_class = "LB", method = maximize_metric, metric = youden)
 youdenIndex <- opt_cut$optimal_cutpoint
-youdenIndex # 0.286
+youdenIndex # optimal threshold is 0.286
 # print model info and AUC
 print(rf_model)
 importance(rf_model) # optional plot: varImpPlot(rf_model)
@@ -157,7 +157,8 @@ write.csv.gz(all_vus_sorted, file=vus_pred_loc, row.names=F)
 ##########
 # Starting point for VUS analysis after writing results previously
 ##########
-
+# Threshold as determined via Youdens Index on test set, see above
+threshold <- 0.286
 # Load VUS predictions back in
 all_vus_sorted <- read.csv(file=vus_pred_loc)
 # Plot 'most benign' and 'most pathogenic' predictions
@@ -194,7 +195,7 @@ for(i in 1:nrow(vus_changed)) {
 }
 # as table
 vus_changed_sorted <- vus_changed %>% arrange(LP)
-vus_changed_sorted$verdict <- ifelse(vus_changed_sorted$LP >= 0.286,"P","B")# based on 0.286, see below
+vus_changed_sorted$verdict <- ifelse(vus_changed_sorted$LP >= threshold,"P","B")
 vus_changed_sorted$dna <- paste0(vus_changed_sorted$dna_variant_chrom,":",vus_changed_sorted$dna_variant_pos," ",vus_changed_sorted$dna_variant_ref,">",vus_changed_sorted$dna_variant_alt)
 vus_changed_sorted[,c("gene","TranscriptID","UniProtID","dna","delta_aaSeq","LP", "verdict","new_classification")]
 
@@ -207,46 +208,48 @@ clinvar_loc <- paste(rootDir, "data", "clinvar_20250923.vcf.gz", sep="/")
 clinvarVCF <- read.vcfR(clinvar_loc)
 clinvar <- as.data.frame(clinvarVCF@fix)
 vus_changed_clinv <- merge(y = clinvar, x = all_vus_sorted, by.y = c("CHROM", "POS", "REF", "ALT"), by.x = c( "dna_variant_chrom", "dna_variant_pos", "dna_variant_ref", "dna_variant_alt"))
-vus_changed_clinv_LP <- subset(vus_changed_clinv, grepl("CLNSIG=(Likely_pathogenic|Pathogenic)", INFO))
-vus_changed_clinv_LB <- subset(vus_changed_clinv, grepl("CLNSIG=(Likely_benign|Benign)", INFO))
+# free up memory
+clinvarVCF <- NULL
+clinvar <- NULL 
+# filter clinvar by quality and classifiction
+vus_changed_clinv_1star <- subset(vus_changed_clinv, !grepl("CLNREVSTAT=no_assertion_criteria_provided", INFO))
+vus_changed_clinv_LP <- subset(vus_changed_clinv_1star, grepl("CLNSIG=(Likely_pathogenic|Pathogenic)", INFO))
+vus_changed_clinv_LB <- subset(vus_changed_clinv_1star, grepl("CLNSIG=(Likely_benign|Benign)", INFO))
 vus_changed_clinv_LP$new_classification <- "LP/P"
 vus_changed_clinv_LB$new_classification <- "LB/B"
 vus_changed_clinv_both <- rbind(vus_changed_clinv_LP, vus_changed_clinv_LB)
-table(vus_changed_clinv_both_ligand_aff$new_classification)
 plot(as.factor(vus_changed_clinv_both$new_classification), vus_changed_clinv_both$FinalProbability.sph)
+table(vus_changed_clinv_both$new_classification)
 # find with affected ligand top pocket
 vus_changed_clinv_both_ligand_aff <- vus_changed_clinv_both %>% arrange(delta_ligand_rank1_sas_points)
-vus_changed_clinv_both_ligand_aff[c(1,2,3,707,708,709),c("gene","UniProtID","dna","delta_aaSeq","LP","delta_ligand_rank1_sas_points")]
+vus_changed_clinv_both_ligand_aff[c(1,2,3,652,653,654),c("gene","UniProtID","dna","delta_aaSeq","LP","delta_ligand_rank1_sas_points")]
 rowLig <- vus_changed_clinv_both_ligand_aff[1,]
 p <- shapDecisionPlot(rowLig)
 ligand_plot_loc <- paste(rootDir, "img", paste0("special_",rowLig$gene, "_", rowLig$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = ligand_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 
 
-# Determine optimal threshold on ClinVar using Youden's Index
-cutpointDF <- subset(vus_changed_clinv_both, new_classification == "LB/B" | new_classification == "LP/P")
-opt_cut <- cutpointr(cutpointDF, FinalProbability.sph, new_classification, direction = ">=", pos_class = "LP/P", neg_class = "LB/B", method = maximize_metric, metric = youden)
-youdenIndex <- opt_cut$optimal_cutpoint # = 0.286, use as default threshold
-tp <- sum(cutpointDF[cutpointDF$new_classification=="LP/P",'FinalProbability.sph'] >= youdenIndex)
-fp <- sum(cutpointDF[cutpointDF$new_classification=="LB/B",'FinalProbability.sph'] >= youdenIndex)
-tn <- sum(cutpointDF[cutpointDF$new_classification=="LB/B",'FinalProbability.sph'] < youdenIndex)
-fn <- sum(cutpointDF[cutpointDF$new_classification=="LP/P",'FinalProbability.sph'] < youdenIndex)
+# Apply optimal threshold on VKGL VUS that have since receieved a ClinVar classification
+cv <- vus_changed_clinv_both # shorten name
+tp <- sum(cv[cv$new_classification=="LP/P",'FinalProbability.sph'] >= threshold)
+fp <- sum(cv[cv$new_classification=="LB/B",'FinalProbability.sph'] >= threshold)
+tn <- sum(cv[cv$new_classification=="LB/B",'FinalProbability.sph'] < threshold)
+fn <- sum(cv[cv$new_classification=="LP/P",'FinalProbability.sph'] < threshold)
 ppv <- 100 *tp/(tp+fp)
 npv <- 100 *tn/(tn+fn)
 sens <- tp / (tp + fn)*100
 spec <- tn / (tn + fp)*100
-cat(paste("in ClinVar data we determined threshold",youdenIndex,", when applied we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN\n"))
+cat(paste("in ClinVar data we determined threshold",threshold,", when applied we find", tp, "TP,", fp, "FP,", tn, "TN and", fn, "FN\n"))
 cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec\n"))
 
 # Apply this threshold on VKGL
 #cutpointDF <- subset(vus_changed, new_classification == "LB" | new_classification == "LP")
 #opt_cut <- cutpointr(cutpointDF, FinalProbability.sph, new_classification, direction = ">=", pos_class = "LP", neg_class = "LB", method = maximize_metric, metric = youden)
 #youdenIndex <- opt_cut$optimal_cutpoint # here, 0.278, but we're using ClinVar's youden
-youdenIndex <- 0.286
-tp <- sum(vus_changed[vus_changed$new_classification=="LP",'FinalProbability.sph'] >= youdenIndex)
-fp <- sum(vus_changed[vus_changed$new_classification=="LB",'FinalProbability.sph'] >= youdenIndex)
-tn <- sum(vus_changed[vus_changed$new_classification=="LB",'FinalProbability.sph'] < youdenIndex)
-fn <- sum(vus_changed[vus_changed$new_classification=="LP",'FinalProbability.sph'] < youdenIndex)
+tp <- sum(vus_changed[vus_changed$new_classification=="LP",'FinalProbability.sph'] >= threshold)
+fp <- sum(vus_changed[vus_changed$new_classification=="LB",'FinalProbability.sph'] >= threshold)
+tn <- sum(vus_changed[vus_changed$new_classification=="LB",'FinalProbability.sph'] < threshold)
+fn <- sum(vus_changed[vus_changed$new_classification=="LP",'FinalProbability.sph'] < threshold)
 ppv <- 100 *tp/(tp+fp)
 npv <- 100 *tn/(tn+fn)
 sens <- tp / (tp + fn)*100
@@ -256,5 +259,5 @@ cat(paste("this means ", ppv, "PPV,", npv, "NPV,", sens, "sens and", spec, "spec
 # --> 4 TP, 2 FP, 5 TN and 1 FN
 
 # Also, in full VUS set, how many would be over and under the threshold?
-nrow(all_vus_sorted[all_vus_sorted$FinalProbability.sph >= youdenIndex, ])
-nrow(all_vus_sorted[all_vus_sorted$FinalProbability.sph < youdenIndex, ])
+nrow(all_vus_sorted[all_vus_sorted$FinalProbability.sph >= threshold, ])
+nrow(all_vus_sorted[all_vus_sorted$FinalProbability.sph < threshold, ])
