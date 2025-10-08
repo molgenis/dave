@@ -115,6 +115,7 @@ print(rf_model)
 importance(rf_model) # optional plot: varImpPlot(rf_model)
 roc_obj <- pROC::roc(comb_test_pred$ann_classificationVKGL, comb_test_pred$LP)
 pROC::auc(roc_obj) # optional plot: plot(roc_obj, col = "blue", lwd = 2, main = "Random Forest ROC Curve")
+#save(rf_model,file = paste(rootDir, "models", "dave1_rf_model.RData", sep="/"))
 
 
 
