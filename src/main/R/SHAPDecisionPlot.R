@@ -99,7 +99,7 @@ shapDecisionPlot <- function(row, thrs){
          subtitle = "SHAP values do not correlate with feature values, but instead capture feature contributions based on the interactions among all features uniquely for this prediction",
          tag = "* = if any, one or more   ** = if any",
          x = paste0("Feature contribution to probability of\nbeing pathogenic, in descending order"),
-         y = paste0("Cumulative probability heuristic for SHAP values, B/P threshold is ",thrs,"\nFinal probability for being pathogenic is ", round(sum(rowSPHmelt$value), digits=3), ", variant is estimated to be ", verdict(sum(rowSPHmelt$value), thrs))) +
+         y = paste0("Cumulative probability heuristic for SHAP values, benign/path. threshold is ",thrs,"\nFinal probability for being pathogenic is ", round(sum(rowSPHmelt$value), digits=3), ", variant is estimated to be ", verdict(sum(rowSPHmelt$value), thrs))) +
     theme_bw() +
     #ylim(0,1) + # force 0-1 scale on Y, but less clear and needs fix for points outside the range
     theme(panel.border = element_blank(),
