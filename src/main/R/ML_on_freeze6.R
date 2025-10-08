@@ -172,6 +172,7 @@ for(plotrow in plotrows)
   ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4) # height was 6.25
   #ggsave(filename = png_plot_loc, plot = p, device = "png", width = 9.777778, height = 5.5) # 16:9 as PNG for full screen slides
 }
+# quick 1 off plot for inspection: shapDecisionPlot(all_vus_sorted[11221,], threshold)
 # as table
 all_vus_sorted$dna <- paste0(all_vus_sorted$dna_variant_chrom,":",all_vus_sorted$dna_variant_pos," ",all_vus_sorted$dna_variant_ref,">",all_vus_sorted$dna_variant_alt)
 all_vus_sorted[plotrows,c("gene","UniProtID","dna","delta_aaSeq","LP")]
