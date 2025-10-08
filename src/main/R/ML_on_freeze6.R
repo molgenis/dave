@@ -166,7 +166,7 @@ plotrows <- c(1,2,3,4,5,11217,11218,11219,11220,11221)
 for(plotrow in plotrows)
 {
   row <- all_vus_sorted[plotrow,]
-  p <- shapDecisionPlot(row)
+  p <- shapDecisionPlot(row, threshold)
   pdf_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
   png_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".png"), sep="/")
   ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4) # height was 6.25
@@ -189,7 +189,7 @@ plot(as.factor(vus_changed$new_classification), vus_changed$FinalProbability.sph
 # Make SHAP breakdown plot of each prediction
 for(i in 1:nrow(vus_changed)) {
   row <- vus_changed[i,]
-  p <- shapDecisionPlot(row)
+  p <- shapDecisionPlot(row, threshold)
   pdf_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
   ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 }
@@ -224,7 +224,7 @@ table(vus_changed_clinv_both$new_classification)
 vus_changed_clinv_both_ligand_aff <- vus_changed_clinv_both %>% arrange(delta_ligand_rank1_sas_points)
 vus_changed_clinv_both_ligand_aff[c(1,2,3,652,653,654),c("gene","UniProtID","dna","delta_aaSeq","LP","delta_ligand_rank1_sas_points")]
 rowLig <- vus_changed_clinv_both_ligand_aff[1,]
-p <- shapDecisionPlot(rowLig)
+p <- shapDecisionPlot(rowLig, threshold)
 ligand_plot_loc <- paste(rootDir, "img", paste0("special_",rowLig$gene, "_", rowLig$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = ligand_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 

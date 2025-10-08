@@ -25,15 +25,15 @@ unitPlural <- function(unit, delta) {
   else{ return(unit)}
 }
 
-verdict <- function(finalProb)
+verdict <- function(finalProb, thrs)
 {
-  if(finalProb >= 0.286){ return("pathogenic") }
+  if(finalProb >= thrs){ return("pathogenic") }
   else{ return("benign") }
 }
 
 # Function to make the SHAP decision plot
 # selectRow: data frame row to plot
-shapDecisionPlot <- function(row){
+shapDecisionPlot <- function(row, thrs){
   featureContribThreshold <- 0 #hardcoded to show all seperately, but can be increased to group contributions
   rowSPH <- row[, grepl(".sph$", names(row))] # all rows with a feature SHAP probability heuristic
   rowSPH$FinalProbability # Sanity check pt.1: this cumulative P value should match pt.2 later
@@ -98,7 +98,7 @@ shapDecisionPlot <- function(row){
          subtitle = "SHAP values do not correlate with feature values, but instead capture feature contributions based on the interactions among all features uniquely for this prediction",
          tag = "* = if any, one or more   ** = if any",
          x = paste0("Feature contribution to probability of\nbeing pathogenic, in descending order"),
-         y = paste0("Cumulative probability heuristic for SHAP values\nFinal probability for being pathogenic is ", round(sum(rowSPHmelt$value), digits=3), ", variant is estimated to be ", verdict(sum(rowSPHmelt$value)))) +
+         y = paste0("Cumulative probability heuristic for SHAP values\nFinal probability for being pathogenic is ", round(sum(rowSPHmelt$value), digits=3), ", variant is estimated to be ", verdict(sum(rowSPHmelt$value), thrs))) +
     theme_bw() +
     theme(panel.border = element_blank(),
           panel.grid.major = element_blank(),
