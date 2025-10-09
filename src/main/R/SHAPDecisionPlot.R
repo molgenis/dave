@@ -44,6 +44,7 @@ shapDecisionPlot <- function(row, thrs){
   rowSPHmelt <- if(nAboveFeatContribThr==0) { rowSPHmelt[0, ] } else { rowSPHmelt[rev(order(abs(rowSPHmelt$value)))[1:nAboveFeatContribThr],] }# Select only the top contributors
   if (!is.na(other)){rowSPHmelt <- rbind(rowSPHmelt, data.frame(variable="OTHER.sph", value=other))} # Add 'other' unless it was NA (i.e. at a threshold of 0)
   rowSPHmelt <- rowSPHmelt[order(abs(rowSPHmelt$value)),] # Re-order by value now that the set is complete
+  rowSPHmelt <- rowSPHmelt[order(rowSPHmelt$variable == "BaseProbability.sph"), ] # move base prob to bottom (in plot: on top)
   row.names(rowSPHmelt) <- NULL # Clear out row names (i.e. row indices), resetting them to 1..n
   rowSPHmelt$idx <- as.numeric(row.names(rowSPHmelt)) # Save the row indices so we can always restore this order
   sum(rowSPHmelt$value) # Sanity check pt.2: sum of P values here should match above (ignoring rounding errors)
