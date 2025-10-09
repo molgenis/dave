@@ -260,13 +260,13 @@ p <- ggplot(jointData, aes(x=new_classification_by_source, y=LP, fill=new_classi
         axis.text.y = element_text(size = 9, colour = "black"),
         axis.line = element_line(colour = "black")
   ) +
-  labs(title = "Distribution of DAVE1 scores applied to VUS variants in VKGL April 2024",
-     subtitle = "since reclassified as LB/B = (likely) benign, LP/P = (likely) pathogenic in VKGL July 2025 and ClinVar xxx",
-     x = "Expert assertion of pathogenicity",
-     y = "DAVE1 prediction score")
+  labs(title = "DAVE1 scores of VKGL April 2024 VUS that have since been classified",
+     subtitle = "LB/B = (likely) benign, LP/P = (likely) pathogenic, in VKGL release July 2025 or ClinVar 2025-09-23",
+     x = "Expert variant classification per source",
+     y = "DAVE1 pathogenicity prediction score")
 p
-jointbox_plot_loc <- paste(rootDir, "img", paste0("special_jointbox.pdf"), sep="/")
-ggsave(filename = jointbox_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
+jointbox_plot_loc <- paste(rootDir, "img", paste0("vkgl-clinvar-reclass-jointbox.pdf"), sep="/")
+ggsave(filename = jointbox_plot_loc, plot = p, device = cairo_pdf, width = 6, height = 4)
 
 
 
