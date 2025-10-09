@@ -96,7 +96,7 @@ lookup <- setNames(corrFeatRelabel$Name, corrFeatRelabel$Feature) # Create a loo
 new_names <- lookup[old_names] # Replace row and column names by matching
 rownames(cor_r2_mat) <- new_names
 colnames(cor_r2_mat) <- new_names
-pdf_plot_loc <- paste(rootDir, "img", "corrplot.pdf", sep="/")
+pdf_plot_loc <- paste(rootDir, "img", "model-feature-correlations.pdf", sep="/")
 cairo_pdf(file = pdf_plot_loc, width = 5, height = 5)  # adjust size as needed
 corrplot(cor_r2_mat,  type = "upper", tl.cex=0.7, tl.col = "black", method = "color", addCoef.col = "black",  number.cex = 0.5)
 dev.off()
@@ -170,7 +170,8 @@ for(plotrow in plotrows)
   p <- shapDecisionPlot(row, threshold)
   pdf_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
   png_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".png"), sep="/")
-  ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4) # height was 6.25
+  # don't save, not using in paper
+  #ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4) # height was 6.25
   #ggsave(filename = png_plot_loc, plot = p, device = "png", width = 9.777778, height = 5.5) # 16:9 as PNG for full screen slides
 }
 # quick 1 off plot for inspection: shapDecisionPlot(all_vus_sorted[11221,], threshold)
@@ -193,17 +194,25 @@ for(i in 1:nrow(vus_changed)) {
   row <- vus_changed[i,]
   p <- shapDecisionPlot(row, threshold)
   pdf_plot_loc <- paste(rootDir, "img", paste0(row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
-  ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
+  # don't save all, select specific row later
+  #ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 }
 # as table
 vus_changed_sorted <- vus_changed %>% arrange(LP)
 vus_changed_sorted$verdict <- ifelse(vus_changed_sorted$LP >= threshold,"P","B")
 vus_changed_sorted$dna <- paste0(vus_changed_sorted$dna_variant_chrom,":",vus_changed_sorted$dna_variant_pos," ",vus_changed_sorted$dna_variant_ref,">",vus_changed_sorted$dna_variant_alt)
 vus_changed_sorted[,c("gene","TranscriptID","UniProtID","dna","delta_aaSeq","LP", "verdict","new_classification")]
+# save select row only
+p <- shapDecisionPlot(vus_changed[9,], threshold)
+pdf_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
+ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 # Prep for joint boxplot with ClinVar
 vus_changed_sorted_vkgl_min <- vus_changed_sorted[,c("LP", "verdict","new_classification")]
 vus_changed_sorted_vkgl_min$new_classification <- ifelse(vus_changed_sorted_vkgl_min$new_classification == "LP","LP/P","LB/B")
 vus_changed_sorted_vkgl_min$source <- "VKGL"
+# show folding energy change
+vus_changed_sorted[,c("gene","UniProtID","delta_aaSeq","LP", "verdict","new_classification", "delta_total.energy")]
+
 
 #### Now on ClinVar data
 # Find variants that were VUS in VKGL April 2024 but have since received a ClinVar classification
@@ -233,8 +242,15 @@ vus_changed_clinv_both_ligand_aff <- vus_changed_clinv_both %>% arrange(delta_li
 vus_changed_clinv_both_ligand_aff[c(1,2,3,652,653,654),c("gene","UniProtID","dna","delta_aaSeq","LP","delta_ligand_rank1_sas_points")]
 rowLig <- vus_changed_clinv_both_ligand_aff[1,]
 p <- shapDecisionPlot(rowLig, threshold)
-ligand_plot_loc <- paste(rootDir, "img", paste0("special_",rowLig$gene, "_", rowLig$delta_aaSeq, ".pdf"), sep="/")
+ligand_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowLig$gene, "_", rowLig$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = ligand_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
+# find with affected protein sites
+vus_changed_clinv_both_protS_aff <- vus_changed_clinv_both %>% arrange(delta_ProtS_cumu_bin)
+vus_changed_clinv_both_protS_aff[c(1,2,3,652,653,654),c("gene","UniProtID","TranscriptID","dna","delta_aaSeq","LP","delta_ProtS_cumu_bin")]
+rowProtS <- vus_changed_clinv_both_protS_aff[2,]
+p <- shapDecisionPlot(rowProtS, threshold)
+rowProtS_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowProtS$gene, "_", rowProtS$delta_aaSeq, ".pdf"), sep="/")
+ggsave(filename = rowProtS_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 
 # joint boxplot
 shapRed <- "#FF0C57"
