@@ -203,8 +203,9 @@ vus_changed_sorted$verdict <- ifelse(vus_changed_sorted$LP >= threshold,"P","B")
 vus_changed_sorted$dna <- paste0(vus_changed_sorted$dna_variant_chrom,":",vus_changed_sorted$dna_variant_pos," ",vus_changed_sorted$dna_variant_ref,">",vus_changed_sorted$dna_variant_alt)
 vus_changed_sorted[,c("gene","TranscriptID","UniProtID","dna","delta_aaSeq","LP", "verdict","new_classification")]
 # save select row only
-p <- shapDecisionPlot(vus_changed[9,], threshold)
-pdf_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",row$gene, "_", row$delta_aaSeq, ".pdf"), sep="/")
+rowWNT7B <- vus_changed_sorted[9,]
+p <- shapDecisionPlot(rowWNT7B, threshold)
+pdf_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowWNT7B$gene, "_", rowWNT7B$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 # Prep for joint boxplot with ClinVar
 vus_changed_sorted_vkgl_min <- vus_changed_sorted[,c("LP", "verdict","new_classification")]
