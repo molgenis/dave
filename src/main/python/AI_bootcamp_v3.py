@@ -13,7 +13,7 @@ from sklearn.metrics import roc_auc_score
 # Data import and initial split
 ###############################
 # Import data
-freeze5 = pd.read_csv("/Users/joeri/git/vkgl-secretome-protein-stability/data/freeze5-provisional-NAs.csv.gz", low_memory=False)
+freeze5 = pd.read_csv("/Users/joeri/git/dave1/data/freeze5-provisional-NAs.csv.gz", low_memory=False)
 # Split into on "labeled" test/validation/train data and "unlabeled" data that we want to apply the model on
 freeze5_LB_LP = freeze5[(freeze5['ann_classificationVKGL'] == 'LB') | (freeze5['ann_classificationVKGL'] == 'LP')]
 freeze5_VUS_CF = freeze5[(freeze5['ann_classificationVKGL'] == 'VUS') | (freeze5['ann_classificationVKGL'] == 'CF')]
@@ -125,5 +125,5 @@ fr5_VUS_CF_SHAP_prob_values = predict_as_prob_scaled_SHAP(fr5_VUS_CF_forPred, ex
 # Combine all with original data and write to file
 allPredsInOne = pd.concat([X_train_SHAP_prob_values, X_val_SHAP_prob_values, X_test_SHAP_prob_values, fr5_VUS_CF_SHAP_prob_values])
 freeze5_plus_pred = pd.concat([freeze5, allPredsInOne], axis=1)
-freeze5_plus_pred.to_csv("/Users/joeri/git/vkgl-secretome-protein-stability/data/freeze5_predictions.csv", index=False)
+freeze5_plus_pred.to_csv("/Users/joeri/git/dave1/data/freeze5_predictions.csv", index=False)
 

@@ -11,7 +11,7 @@ library(gtools)    # pvals to stars
 ##################################
 # Directories and data locations #
 ##################################
-rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
+rootDir <- "/Users/joeri/git/dave1"
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")
 results <- read.csv(freeze1)
 imgDir <- paste(rootDir, "img", sep="/")

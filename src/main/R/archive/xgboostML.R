@@ -3,7 +3,7 @@ library(caTools)
 library(dplyr)
 library(caret)
 
-rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
+rootDir <- "/Users/joeri/git/dave1"
 freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
 data <- read.csv(freeze2)
 

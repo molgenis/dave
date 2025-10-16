@@ -19,15 +19,15 @@ public class VKGLProcessIntoProteinChanges {
         // --> protein-atlas-intracellular-geneIDs-mane-uniprot-random2000 (+.txt / +-withvariants.txt)
         // --> protein-atlas-membrane-geneIDs-mane-uniprot-random2000 (+.txt / +-withvariants.txt)
         String inputGenes = "protein-atlas-membrane-geneIDs-mane-uniprot-random2000";
-        File proteinSetWithMane = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + inputGenes + ".txt");
+        File proteinSetWithMane = new File("/Users/joeri/git/dave1/data/" + inputGenes + ".txt");
         String vkglMissenseFileName = "VKGL_apr2024_annot_missense_nodup_b38.vcf";
-        File vkglMissenseLocation = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + vkglMissenseFileName + ".zip");
+        File vkglMissenseLocation = new File("/Users/joeri/git/dave1/data/" + vkglMissenseFileName + ".zip");
 
         // Output files
         // Directory to write all separate variants files to, creating 1 additional directory per gene:
-        File outputBaseDir = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/genes/");
+        File outputBaseDir = new File("/Users/joeri/git/dave1/data/genes/");
         // File with genes having 1+ variants
-        File genesWithVariants = new File("/Users/joeri/git/vkgl-secretome-protein-stability/data/" + inputGenes + "-withvariants.txt");
+        File genesWithVariants = new File("/Users/joeri/git/dave1/data/" + inputGenes + "-withvariants.txt");
 
         System.out.println("Loading gene/transcript file...");
         HashMap<String, String> geneNameToTranscript = new HashMap<>();

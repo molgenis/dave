@@ -28,7 +28,7 @@ from IPython.core.display import display, HTML
 # Load source data and select only columns that are good for ML
 # add 'ann_am_pathogenicity' to train upon AlphaMissense
 # convert protein localization into booleans
-freeze5 = pd.read_csv("/Users/joeri/git/vkgl-secretome-protein-stability/data/freeze5-provisional.csv.gz", low_memory=False)
+freeze5 = pd.read_csv("/Users/joeri/git/dave1/data/freeze5-provisional.csv.gz", low_memory=False)
 selectColumns = ["ann_classificationVKGL", "ann_proteinIschaperoned", "ann_proteinLocalization", "delta_"]
 freeze5 = freeze5.filter(regex='|'.join(selectColumns))
 freeze5 = freeze5.drop(['delta_aaSeq'], axis=1)

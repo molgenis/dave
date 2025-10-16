@@ -5,7 +5,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.molgenis</groupId>
-    <artifactId>vkgl-secretome-protein-stability</artifactId>
+    <artifactId>dave1</artifactId>
     <version>1.0</version>
     <build>
         <plugins>
@@ -22,7 +22,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <packaging>jar</packaging>
 
     <name>VKGL Secretome protein stability</name>
-    <url>https://github.com/joerivandervelde/vkgl-secretome-protein-stability</url>
+    <url>https://github.com/joerivandervelde/dave1</url>
 
     <dependencies>
         <dependency>

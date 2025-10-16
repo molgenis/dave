@@ -10,7 +10,7 @@ library(gtools)    # pvals to stars
 ##################################
 # Directories and data locations #
 ##################################
-rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
+rootDir <- "/Users/joeri/git/dave1"
 peptidePropPerGeneFile <- paste(rootDir, "data", "peptidePropPerGene.csv", sep="/")
 peptidePropPerGene <- read.csv(peptidePropPerGeneFile)
 imgDir <- paste(rootDir, "img", sep="/")

@@ -7,12 +7,12 @@ library(R.utils)   # for 'gunzip', 'mkdirs'
 # Adjustable settings #
 #######################
 # Example for Unix
-rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability" # root directory that contains README.md, data/, img/, out/, src/, etc.
+rootDir <- "/Users/joeri/git/dave1" # root directory that contains README.md, data/, img/, out/, src/, etc.
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv" # loading processed VKGL protein variants from: /data/genes/{gene}/{vkglProtVarFile}
 foldxExec <- "/Applications/FoldX/5/foldx5MacStd/foldx_20241231" # exact path to the FoldX executable
 p2rankExec <- "/Applications/p2rank_2.5/prank"
 # Example for Windows
-rootDir <- "D:/github/vkgl-secretome-protein-stability"
+rootDir <- "D:/github/dave1"
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv"
 foldxExec <- "C:/\"Program Files\"/FoldX/foldx_20241231.exe"
 java <- r"(C:\Program Files\OpenLogic\jdk-22.0.2.9-hotspot\bin\java.exe)"
@@ -130,7 +130,7 @@ for(i in seq_along(succesfulGenesSub))
 ###########################################################
 # --> This is a "hardcoded" example on how to run this on cmdline!
 #
-# cd /Users/joeri/git/vkgl-secretome-protein-stability/data/genes/SLCO2A1/folding-results/GA554R
+# cd /Users/joeri/git/dave1/data/genes/SLCO2A1/folding-results/GA554R
 # mkdir tmp
 # cp ../../AF-Q92959-F1-model_v4_Repair.pdb tmp 
 # cd tmp

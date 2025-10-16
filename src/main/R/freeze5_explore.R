@@ -8,7 +8,7 @@ library(ggrepel)
 library(pheatmap)
 
 # Set up locations and working dir
-rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability" # root directory that contains README.md, data/, img/, out/, src/, etc.
+rootDir <- "/Users/joeri/git/dave1" # root directory that contains README.md, data/, img/, out/, src/, etc.
 imgDir <- paste(rootDir, "img", sep="/")
 setwd(imgDir)
 

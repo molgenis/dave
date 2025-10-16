@@ -1,7 +1,7 @@
 library(apcluster)
 library(dplyr)
 
-rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
+rootDir <- "/Users/joeri/git/dave1"
 
 # Variants, slow
 freeze1 <- paste(rootDir, "data", "freeze1.csv", sep="/")

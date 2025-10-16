@@ -17,7 +17,7 @@ library(crunch)     # To compress results
 #############################################
 
 # Read CSV
-freeze5 <- read.csv("/Users/joeri/git/vkgl-secretome-protein-stability/data/freeze5.csv.gz", stringsAsFactors = FALSE)
+freeze5 <- read.csv("/Users/joeri/git/dave1/data/freeze5.csv.gz", stringsAsFactors = FALSE)
 
 # Split into "labeled" set = LB or LP and "unlabeled" set = VUS or CF
 freeze5_LB_LP <- freeze5 %>% filter(ann_classificationVKGL %in% c("LB", "LP"))
@@ -175,6 +175,6 @@ allPredsInOne <- bind_rows(
 
 freeze5_plus_pred <- bind_cols(freeze5, allPredsInOne)
 
-write.csv.gz(freeze5_plus_pred, "/Users/joeri/git/vkgl-secretome-protein-stability/data/freeze5_predictions_R.csv.gz", row.names = FALSE, quote = FALSE)
+write.csv.gz(freeze5_plus_pred, "/Users/joeri/git/dave1/data/freeze5_predictions_R.csv.gz", row.names = FALSE, quote = FALSE)
 
 

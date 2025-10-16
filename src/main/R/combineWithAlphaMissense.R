@@ -8,7 +8,7 @@ library(plyr)
 library(dplyr)
 library(crunch)    # Compress results
 
-rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability"
+rootDir <- "/Users/joeri/git/dave1"
 alphaMissenseLoc <- "/Applications/AlphaFold2/AlphaMissense_hg38.tsv.gz"
 freeze3 <- paste(rootDir, "data", "freeze3.csv.gz", sep="/")
 results <- read.csv(freeze3)

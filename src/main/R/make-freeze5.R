@@ -8,9 +8,9 @@ library(crunch)     # To compress results
 #######################
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv" # loading processed VKGL protein variants from: /data/genes/{gene}/{vkglProtVarFile}
 # Example for Unix
-rootDir <- "/Users/joeri/git/vkgl-secretome-protein-stability" # root directory that contains README.md, data/, img/, out/, src/, etc.
+rootDir <- "/Users/joeri/git/dave1" # root directory that contains README.md, data/, img/, out/, src/, etc.
 # Example for Windows
-#rootDir <- "D:/github/vkgl-secretome-protein-stability"
+#rootDir <- "D:/github/dave1"
 
 # Assuming data was produced by main.R and enriched by CombineWithAlhaMissense.R
 # Load the freeze4 data as starting point for creating freeze5
