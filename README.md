@@ -1,82 +1,16 @@
-# dave1
+# Digital Approximation of Variant Effect, version 1 (DAVE1)
 
-There is no doc yet - below just a list of potentially relevant papers.
+Genome diagnostics remain limited by the high fraction of variants of uncertain significance (VUS), largely due to insufficient interpretability of missense variation. Existing pathogenicity predictors offer strong performance but often lack transparency or mechanistic insight. Here, we present the Digital Approximation of Variant Effect, version 1 (DAVE1), an explainable missense variant predictor built on 12 biophysically grounded features spanning stability, hydrophobicity, electrostatics, and molecular interactions. Trained on curated Dutch diagnostic data, DAVE1 achieves reliable classification while decomposing predictions into interpretable feature contributions. This framework enables mechanistic follow-up, reduces VUS burden, and advances clinically actionable variant interpretation.
 
-Mutation Pathogenicity Prediction by a Biology Based Explainable AI Multi-Modal Algorithm
-https://www.medrxiv.org/content/10.1101/2024.06.05.24308476v1.full.pdf
+### Publication
+* _in writing_
 
-Explainable AI for Estimating Pathogenicity of Genetic Variants Using Large-Scale Knowledge Graphs
-https://www.mdpi.com/2072-6694/15/4/1118
+### Key resources
+* [Freeze 6 dataset](data/freeze6.csv.gz) (Gzipped CSV file)
+  * 23417 rows, each a DNA/protein variant (9345 LB, 2703 LP, 11221 VUS and 148 CF)
+  * 81 columns, metadata and features
+* [Modeling and prediction on freeze 6](src/main/R/ML_on_freeze6.R) (R script)
+* [Random Forest prediction model](models/dave1_rf_model.RData) (RData file)
 
-Characterizing and explaining the impact of disease-associated mutations in proteins without known structures or structural homologs
-https://academic.oup.com/bib/article/23/4/bbac187/6596316
-
-SIGMA leverages protein structural information to predict the pathogenicity of missense variants
-https://www.cell.com/cell-reports-methods/pdf/S2667-2375(23)00373-9.pdf
-
-popscreen stability
-https://elifesciences.org/articles/82593
-
-high-throughput experimental
-https://www.nature.com/articles/s41586-023-06328-6
-
-The delicate balance between secreted protein folding and endoplasmic reticulum-associated degradation in human physiology
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4162396/
-
-Pathogenic missense protein variants affect different functional pathways and proteomic features than healthy population variants
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8110273/
-
-"Disulfide bridges can stabilize protein structure and are often present in high abundance in secreted proteins"
-https://microbialcellfactories.biomedcentral.com/articles/10.1186/1475-2859-8-26
-
-reminder to cite: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8745595/
-
-interesting? https://academic.oup.com/nar/article/52/W1/W187/7688983
-
-Analysis of AlphaMissense data in different protein groups and structural context
-https://www.nature.com/articles/s41597-024-03327-8
-
-VUStruct: a compute pipeline for high throughput and personalized structural biology
-https://www.biorxiv.org/content/10.1101/2024.08.06.606224v1.full.pdf
-
-Identification of pathogenic missense mutations using protein stability predictors
-https://www.nature.com/articles/s41598-020-72404-w
-
-Beyond the Loss-of-Function Paradigm
-https://www.annualreviews.org/content/journals/10.1146/annurev-genom-111221-103208
-
-The functional impact of rare variation across the regulatory cascade
-https://www.sciencedirect.com/science/article/pii/S2666979X2300215X
-
-Protein 'charge' and 'Isoelectric point' annotations?
-
-https://rdrr.io/cran/seqinr/man/computePI.html
-https://rdrr.io/cran/Peptides/man/pI.html -> nice
-
-seaborn pair plots?
-https://towardsdatascience.com/python-seaborn-plots-in-r-using-reticulate-fb59cebf61a7
-https://medium.com/@daython3/7-essential-plots-for-categorical-and-numerical-data-4b96c0278106
-https://seaborn.pydata.org/generated/seaborn.pairplot.html
-or GGally?
-https://stackoverflow.com/questions/3735286/create-a-matrix-of-scatterplots-pairs-equivalent-in-ggplot2
-https://ggobi.github.io/ggally/reference/ggpairs.html
-or lattice?
-https://homepage.stat.uiowa.edu/~luke/classes/STAT4580/threenum.html
-
-Accurate proteome-wide missense variant effect prediction with AlphaMissense
-https://www.science.org/doi/10.1126/science.adg7492
-
-also:
-VKGL
-AlphaFold
-FoldX
-BioGRID
-Ensembl
-..
-
-
-Reactome data: gene-pathway set
-https://reactome.org/download-data
-https://reactome.org/download/current/ReactomePathways.gmt.zip
-
-
+### Raw computational results
+* [Wild-type and mutant proteins](data/genes)
