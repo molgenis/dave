@@ -218,13 +218,17 @@ vus_changed_sorted[,c("gene","UniProtID","delta_aaSeq","LP", "verdict","new_clas
 #### Now on ClinVar data
 # Find variants that were VUS in VKGL April 2024 but have since received a ClinVar classification
 # download from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2025/clinvar_20250923.vcf.gz
+# no need to download it reproduce this analysis! instead, skip to 'read ClinVar subset from disk'
 clinvar_loc <- paste(rootDir, "data", "clinvar_20250923.vcf.gz", sep="/")
 clinvarVCF <- read.vcfR(clinvar_loc)
 clinvar <- as.data.frame(clinvarVCF@fix)
 vus_changed_clinv <- merge(y = clinvar, x = all_vus_sorted, by.y = c("CHROM", "POS", "REF", "ALT"), by.x = c( "dna_variant_chrom", "dna_variant_pos", "dna_variant_ref", "dna_variant_alt"))
-# free up memory
-clinvarVCF <- NULL
-clinvar <- NULL 
+# write this subset to disk for later reuse without needing big ClinVar fle
+clinvar_vus_ch_loc <- paste(rootDir, "data", "clinvar_20250923_vcf_vus_changed.csv.gz", sep="/")
+#write.csv.gz(vus_changed_clinv, file=clinvar_vus_ch_loc, row.names=F) # already done
+
+# read ClinVar subset from disk
+vus_changed_clinv <- read.csv(file=clinvar_vus_ch_loc)
 # filter clinvar by quality and classifiction
 vus_changed_clinv_1star <- subset(vus_changed_clinv, !grepl("CLNREVSTAT=no_assertion_criteria_provided", INFO))
 vus_changed_clinv_LP <- subset(vus_changed_clinv_1star, grepl("CLNSIG=(Likely_pathogenic|Pathogenic)", INFO))
