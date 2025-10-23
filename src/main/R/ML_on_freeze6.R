@@ -87,18 +87,18 @@ frz6_train <- frz6_train_test[train_idx,]
 frz6_test <- frz6_train_test[-train_idx,]
 
 # calculate R-square correlation across features and plot
-cor_r2_mat <- cor(frz6_train[ , !(names(frz6_train) %in% predictionTarget) ])^2
+PCC_mat <- cor(frz6_train[ , !(names(frz6_train) %in% predictionTarget) ])
 corrFeatRelabel <- read.csv(paste(rootDir, "data", "12features.csv", sep="/"))
 corrFeatRelabel$Name <- sub("\\*+$", "", corrFeatRelabel$Name)
 #feat$Name <- ifelse(nzchar(feat$Unit), paste0(feat$Name, " (in ", feat$Unit, ")"), feat$Name) # adds the unit, but not needed
-old_names <- rownames(cor_r2_mat) # Get the current names from cor_r2_mat
+old_names <- rownames(PCC_mat) # Get the current names from cor_r2_mat
 lookup <- setNames(corrFeatRelabel$Name, corrFeatRelabel$Feature) # Create a lookup vector from feat
 new_names <- lookup[old_names] # Replace row and column names by matching
-rownames(cor_r2_mat) <- new_names
-colnames(cor_r2_mat) <- new_names
+rownames(PCC_mat) <- new_names
+colnames(PCC_mat) <- new_names
 pdf_plot_loc <- paste(rootDir, "img", "model-feature-correlations.pdf", sep="/")
 cairo_pdf(file = pdf_plot_loc, width = 5, height = 5)  # adjust size as needed
-corrplot(cor_r2_mat,  type = "upper", tl.cex=0.7, tl.col = "black", method = "color", addCoef.col = "black",  number.cex = 0.5)
+corrplot(PCC_mat,  type = "upper", tl.cex=0.7, tl.col = "black", method = "color", addCoef.col = "black",  number.cex = 0.5)
 dev.off()
 
 # fit basic Random Forest model, show feature importance and AUC

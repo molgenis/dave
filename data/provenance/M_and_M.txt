@@ -1,6 +1,7 @@
 
 --alphafold data:
 https://ftp.ebi.ac.uk/pub/databases/alphafold/latest/mane_overlap_v4.tar
+https://ftp.ebi.ac.uk/pub/databases/alphafold/v4/UP000005640_9606_HUMAN_v4.tar
 
 
 
