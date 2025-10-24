@@ -88,7 +88,7 @@ frz6_test <- frz6_train_test[-train_idx,]
 
 # calculate R-square correlation across features and plot
 PCC_mat <- cor(frz6_train[ , !(names(frz6_train) %in% predictionTarget) ])
-corrFeatRelabel <- read.csv(paste(rootDir, "data", "12features.csv", sep="/"))
+corrFeatRelabel <- read.csv(paste(rootDir, "data", "12features.csv", sep="/")2)
 corrFeatRelabel$Name <- sub("\\*+$", "", corrFeatRelabel$Name)
 #feat$Name <- ifelse(nzchar(feat$Unit), paste0(feat$Name, " (in ", feat$Unit, ")"), feat$Name) # adds the unit, but not needed
 old_names <- rownames(PCC_mat) # Get the current names from cor_r2_mat
@@ -202,7 +202,8 @@ vus_changed_sorted <- vus_changed %>% arrange(LP)
 vus_changed_sorted$verdict <- ifelse(vus_changed_sorted$LP >= threshold,"P","B")
 vus_changed_sorted$dna <- paste0(vus_changed_sorted$dna_variant_chrom,":",vus_changed_sorted$dna_variant_pos," ",vus_changed_sorted$dna_variant_ref,">",vus_changed_sorted$dna_variant_alt)
 vus_changed_sorted[,c("gene","TranscriptID","UniProtID","dna","delta_aaSeq","LP", "verdict","new_classification")]
-# save select row only
+# show delta G, find row with highest abs change -> WNT7B, and plot
+vus_changed_sorted[,c("gene","delta_aaSeq","LP", "verdict","new_classification", "delta_total.energy")]
 rowWNT7B <- vus_changed_sorted[9,]
 p <- shapDecisionPlot(rowWNT7B, threshold)
 pdf_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowWNT7B$gene, "_", rowWNT7B$delta_aaSeq, ".pdf"), sep="/")
@@ -211,18 +212,15 @@ ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height
 vus_changed_sorted_vkgl_min <- vus_changed_sorted[,c("LP", "verdict","new_classification")]
 vus_changed_sorted_vkgl_min$new_classification <- ifelse(vus_changed_sorted_vkgl_min$new_classification == "LP","LP/P","LB/B")
 vus_changed_sorted_vkgl_min$source <- "VKGL"
-# show folding energy change
-vus_changed_sorted[,c("gene","UniProtID","delta_aaSeq","LP", "verdict","new_classification", "delta_total.energy")]
-
 
 #### Now on ClinVar data
 # Find variants that were VUS in VKGL April 2024 but have since received a ClinVar classification
 # download from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/archive_2.0/2025/clinvar_20250923.vcf.gz
 # no need to download it reproduce this analysis! instead, skip to 'read ClinVar subset from disk'
-clinvar_loc <- paste(rootDir, "data", "clinvar_20250923.vcf.gz", sep="/")
-clinvarVCF <- read.vcfR(clinvar_loc)
-clinvar <- as.data.frame(clinvarVCF@fix)
-vus_changed_clinv <- merge(y = clinvar, x = all_vus_sorted, by.y = c("CHROM", "POS", "REF", "ALT"), by.x = c( "dna_variant_chrom", "dna_variant_pos", "dna_variant_ref", "dna_variant_alt"))
+#clinvar_loc <- paste(rootDir, "data", "clinvar_20250923.vcf.gz", sep="/")
+#clinvarVCF <- read.vcfR(clinvar_loc)
+#clinvar <- as.data.frame(clinvarVCF@fix)
+#vus_changed_clinv <- merge(y = clinvar, x = all_vus_sorted, by.y = c("CHROM", "POS", "REF", "ALT"), by.x = c( "dna_variant_chrom", "dna_variant_pos", "dna_variant_ref", "dna_variant_alt"))
 # write this subset to disk for later reuse without needing big ClinVar fle
 clinvar_vus_ch_loc <- paste(rootDir, "data", "clinvar_20250923_vcf_vus_changed.csv.gz", sep="/")
 #write.csv.gz(vus_changed_clinv, file=clinvar_vus_ch_loc, row.names=F) # already done
@@ -236,7 +234,6 @@ vus_changed_clinv_LB <- subset(vus_changed_clinv_1star, grepl("CLNSIG=(Likely_be
 vus_changed_clinv_LP$new_classification <- "LP/P"
 vus_changed_clinv_LB$new_classification <- "LB/B"
 vus_changed_clinv_both <- rbind(vus_changed_clinv_LP, vus_changed_clinv_LB)
-plot(as.factor(vus_changed_clinv_both$new_classification), vus_changed_clinv_both$FinalProbability.sph)
 table(vus_changed_clinv_both$new_classification)
 # Prep for joint boxplot with VKGL
 vus_changed_sorted_clinvar_min <- vus_changed_clinv_both[,c("LP","new_classification")]
@@ -244,17 +241,17 @@ vus_changed_sorted_clinvar_min$verdict <- ifelse(vus_changed_sorted_clinvar_min$
 vus_changed_sorted_clinvar_min$source <- "ClinVar"
 # find with affected ligand top pocket
 vus_changed_clinv_both_ligand_aff <- vus_changed_clinv_both %>% arrange(delta_ligand_rank1_sas_points)
-vus_changed_clinv_both_ligand_aff[c(1,2,3,652,653,654),c("gene","UniProtID","dna","delta_aaSeq","LP","delta_ligand_rank1_sas_points")]
-rowLig <- vus_changed_clinv_both_ligand_aff[1,]
-p <- shapDecisionPlot(rowLig, threshold)
-ligand_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowLig$gene, "_", rowLig$delta_aaSeq, ".pdf"), sep="/")
+vus_changed_clinv_both_ligand_aff[c(1,2,3,652,653,654),c("gene","UniProtID","dna","delta_aaSeq","FinalProbability.sph","new_classification","delta_ligand_rank1_sas_points")]
+rowSLCO2A1 <- vus_changed_clinv_both_ligand_aff[1,] # largest absolute delta rank1 SAS points
+p <- shapDecisionPlot(rowSLCO2A1, threshold)
+ligand_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowSLCO2A1$gene, "_", rowSLCO2A1$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = ligand_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 # find with affected protein sites
 vus_changed_clinv_both_protS_aff <- vus_changed_clinv_both %>% arrange(delta_ProtS_cumu_bin)
-vus_changed_clinv_both_protS_aff[c(1,2,3,652,653,654),c("gene","UniProtID","TranscriptID","dna","delta_aaSeq","LP","delta_ProtS_cumu_bin")]
-rowProtS <- vus_changed_clinv_both_protS_aff[2,]
-p <- shapDecisionPlot(rowProtS, threshold)
-rowProtS_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowProtS$gene, "_", rowProtS$delta_aaSeq, ".pdf"), sep="/")
+vus_changed_clinv_both_protS_aff[c(1,2,3,652,653,654),c("gene","UniProtID","TranscriptID","dna","delta_aaSeq","FinalProbability.sph", "new_classification", "delta_ProtS_cumu_bin")]
+rowNKX2_5 <- vus_changed_clinv_both_protS_aff[2,] # largest delta_ProtS_cumu_bin with a DAVE1 pathogenic prediction
+p <- shapDecisionPlot(rowNKX2_5, threshold)
+rowProtS_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowNKX2_5$gene, "_", rowNKX2_5$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = rowProtS_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 
 # joint boxplot
