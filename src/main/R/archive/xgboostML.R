@@ -3,7 +3,7 @@ library(caTools)
 library(dplyr)
 library(caret)
 
-rootDir <- "/Users/joeri/git/dave1"
+rootDir <- "/Users/joeri/git/dave"
 freeze2 <- paste(rootDir, "data", "freeze2.csv.gz", sep="/")
 data <- read.csv(freeze2)
 

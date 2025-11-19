@@ -7,7 +7,7 @@ library(tidyr)      # Data manipulation
 #######################
 # Adjustable settings #
 #######################
-rootDir <- "/Users/joeri/git/dave1" # root directory that contains README.md, data/, img/, out/, src/, etc.
+rootDir <- "/Users/joeri/git/dave" # root directory that contains README.md, data/, img/, out/, src/, etc.
 
 
 ########################

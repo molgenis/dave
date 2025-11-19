@@ -13,13 +13,13 @@ public class Chaperones {
         System.out.println("Starting...");
 
         // input files
-        File chaperonesUniprotGenename = new File("/Users/joeri/git/dave1/data/RAW/chaperones-uniprot-genename.txt");
-        File bioGRID = new File("/Users/joeri/git/dave1/data/RAW/BIOGRID-ORGANISM-Homo_sapiens-4.4.234.tab3.txt");
+        File chaperonesUniprotGenename = new File("/Users/joeri/git/dave/data/RAW/chaperones-uniprot-genename.txt");
+        File bioGRID = new File("/Users/joeri/git/dave/data/RAW/BIOGRID-ORGANISM-Homo_sapiens-4.4.234.tab3.txt");
 
         // output files
-        File chapIntBGLines = new File("/Users/joeri/git/dave1/data/chap-biogrid.txt");
-        File uniqGeneSymbols = new File("/Users/joeri/git/dave1/data/interacting-with-chaperones-genenames.txt");
-        File uniqUniprots = new File("/Users/joeri/git/dave1/data/interacting-with-chaperones-uniprot.txt");
+        File chapIntBGLines = new File("/Users/joeri/git/dave/data/chap-biogrid.txt");
+        File uniqGeneSymbols = new File("/Users/joeri/git/dave/data/interacting-with-chaperones-genenames.txt");
+        File uniqUniprots = new File("/Users/joeri/git/dave/data/interacting-with-chaperones-uniprot.txt");
 
         // data structures
         Set<String> chapGeneSymbols = new TreeSet<>();

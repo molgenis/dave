@@ -14,13 +14,13 @@ library(protr)     # PseAAC/APseAAC features
 # Adjustable settings #
 #######################
 # Example for Unix
-rootDir <- "/Users/joeri/git/dave1" # root directory that contains README.md, data/, img/, out/, src/, etc.
+rootDir <- "/Users/joeri/git/dave" # root directory that contains README.md, data/, img/, out/, src/, etc.
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv" # loading processed VKGL protein variants from: /data/genes/{gene}/{vkglProtVarFile}
 foldxExec <- "/Applications/FoldX/5/foldx5MacStd/foldx_20241231" # exact path to the FoldX executable
 alphaFoldLoc <- "/Applications/AlphaFold2/mane_overlap_v4.tar"
 UP000005640_9606_HUMAN_v4Loc <- "/Applications/AlphaFold2/UP000005640_9606_HUMAN_v4.tar"
 # Example for Windows
-rootDir <- "D:/github/dave1"
+rootDir <- "D:/github/dave"
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv"
 foldxExec <- "C:/\"Program Files\"/FoldX/foldx_20241231.exe"
 alphaFoldLoc <- "D:/mane_overlap_v4.tar"

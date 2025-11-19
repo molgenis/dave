@@ -7,13 +7,13 @@ library(R.utils)    # for 'gunzip', 'mkdirs'
 # Adjustable settings #
 #######################
 # Example for Unix
-rootDir <- "/Users/joeri/git/dave1" # root directory that contains README.md, data/, img/, out/, src/, etc.
+rootDir <- "/Users/joeri/git/dave" # root directory that contains README.md, data/, img/, out/, src/, etc.
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv" # loading processed VKGL protein variants from: /data/genes/{gene}/{vkglProtVarFile}
 foldxExec <- "/Applications/FoldX/5/foldx5MacStd/foldx_20241231" # exact path to the FoldX executable
 glmScoreDir <- "/Users/joeri/git/GLM-Score"
 glmScoreExe <- "GLM-Score"
 # Example for Windows
-rootDir <- "D:/github/dave1"
+rootDir <- "D:/github/dave"
 vkglProtVarFileName <- "VKGL_apr2024_protForFolding.tsv"
 foldxExec <- "C:/\"Program Files\"/FoldX/foldx_20241231.exe"
 glmScoreDir <- "D:/github/GLM-Score"
