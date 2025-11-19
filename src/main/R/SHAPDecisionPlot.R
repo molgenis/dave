@@ -95,7 +95,7 @@ shapDecisionPlot <- function(row, thrs){
     #geom_hline(yintercept=thrs, linetype="solid", linewidth=0.2) + # add threshold inside plot
     #geom_point() + # adding points makes it messy
     scale_color_manual(labels = c("TRUE" = "More pathogenic", "FALSE" = "More benign"), values = c("TRUE" = shapRed, "FALSE" = shapBlu), name = "Impact") +
-    labs(title = paste("DAVE1 decision plot for ", row$delta_aaSeq, " in gene ", row$gene, " (",row$UniProtID,", ",row$TranscriptID,"), ", row$dna_variant_assembly, " ",
+    labs(title = paste("DAVE decision plot for ", row$delta_aaSeq, " in gene ", row$gene, " (",row$UniProtID,", ",row$TranscriptID,"), ", row$dna_variant_assembly, " ",
                        row$dna_variant_chrom, ":", row$dna_variant_pos, row$dna_variant_ref, ">", row$dna_variant_alt, sep=""),
          subtitle = "SHAP values do not correlate with feature values, but instead capture feature contributions based on the interactions among all features uniquely for this prediction",
          tag = "* = if any, one or more   ** = if any",

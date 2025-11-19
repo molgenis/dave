@@ -11,7 +11,7 @@ library(vcfR)
 #######################
 # Adjustable settings #
 #######################
-rootDir <- "/Users/joeri/git/dave1" # root directory that contains README.md, data/, img/, out/, src/, etc.
+rootDir <- "/Users/joeri/git/dave" # root directory that contains README.md, data/, img/, out/, src/, etc.
 
 
 ###################################
@@ -115,7 +115,7 @@ print(rf_model)
 importance(rf_model) # optional plot: varImpPlot(rf_model)
 roc_obj <- pROC::roc(comb_test_pred$ann_classificationVKGL, comb_test_pred$LP)
 pROC::auc(roc_obj) # optional plot: plot(roc_obj, col = "blue", lwd = 2, main = "Random Forest ROC Curve")
-#save(rf_model,file = paste(rootDir, "models", "dave1_rf_model.RData", sep="/"))
+#save(rf_model,file = paste(rootDir, "models", "dave_rf_model.RData", sep="/"))
 
 
 
@@ -206,7 +206,12 @@ vus_changed_sorted[,c("gene","TranscriptID","UniProtID","dna","delta_aaSeq","LP"
 vus_changed_sorted[,c("gene","delta_aaSeq","LP", "verdict","new_classification", "delta_total.energy")]
 rowWNT7B <- vus_changed_sorted[9,]
 p <- shapDecisionPlot(rowWNT7B, threshold)
-pdf_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowWNT7B$gene, "_", rowWNT7B$delta_aaSeq, ".pdf"), sep="/")
+pdf_plot_loc <- paste(rootDir, "img", paste0("DAVE_decision_",rowWNT7B$gene, "_", rowWNT7B$delta_aaSeq, ".pdf"), sep="/")
+ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
+# the only FN
+rowCACNA1A <- vus_changed_sorted[6,]
+p <- shapDecisionPlot(rowCACNA1A, threshold)
+pdf_plot_loc <- paste(rootDir, "img", paste0("DAVE_decision_",rowCACNA1A$gene, "_", rowCACNA1A$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = pdf_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 # Prep for joint boxplot with ClinVar
 vus_changed_sorted_vkgl_min <- vus_changed_sorted[,c("LP", "verdict","new_classification")]
@@ -244,14 +249,14 @@ vus_changed_clinv_both_ligand_aff <- vus_changed_clinv_both %>% arrange(delta_li
 vus_changed_clinv_both_ligand_aff[c(1,2,3,652,653,654),c("gene","UniProtID","dna","delta_aaSeq","FinalProbability.sph","new_classification","delta_ligand_rank1_sas_points")]
 rowSLCO2A1 <- vus_changed_clinv_both_ligand_aff[1,] # largest absolute delta rank1 SAS points
 p <- shapDecisionPlot(rowSLCO2A1, threshold)
-ligand_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowSLCO2A1$gene, "_", rowSLCO2A1$delta_aaSeq, ".pdf"), sep="/")
+ligand_plot_loc <- paste(rootDir, "img", paste0("DAVE_decision_",rowSLCO2A1$gene, "_", rowSLCO2A1$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = ligand_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 # find with affected protein sites
 vus_changed_clinv_both_protS_aff <- vus_changed_clinv_both %>% arrange(delta_ProtS_cumu_bin)
 vus_changed_clinv_both_protS_aff[c(1,2,3,652,653,654),c("gene","UniProtID","TranscriptID","dna","delta_aaSeq","FinalProbability.sph", "new_classification", "delta_ProtS_cumu_bin")]
-rowNKX2_5 <- vus_changed_clinv_both_protS_aff[2,] # largest delta_ProtS_cumu_bin with a DAVE1 pathogenic prediction
+rowNKX2_5 <- vus_changed_clinv_both_protS_aff[2,] # largest delta_ProtS_cumu_bin with a DAVE pathogenic prediction
 p <- shapDecisionPlot(rowNKX2_5, threshold)
-rowProtS_plot_loc <- paste(rootDir, "img", paste0("DAVE1_decision_",rowNKX2_5$gene, "_", rowNKX2_5$delta_aaSeq, ".pdf"), sep="/")
+rowProtS_plot_loc <- paste(rootDir, "img", paste0("DAVE_decision_",rowNKX2_5$gene, "_", rowNKX2_5$delta_aaSeq, ".pdf"), sep="/")
 ggsave(filename = rowProtS_plot_loc, plot = p, device = cairo_pdf, width = 10, height = 4)
 
 # joint boxplot
@@ -278,10 +283,10 @@ p <- ggplot(jointData, aes(x=new_classification_by_source, y=LP, fill=new_classi
         axis.text.y = element_text(size = 9, colour = "black"),
         axis.line = element_line(colour = "black")
   ) +
-  labs(title = "DAVE1 scores of VKGL April 2024 VUS that have since been classified",
+  labs(title = "DAVE scores of VKGL April 2024 VUS that have since been classified",
      subtitle = "LB/B = (likely) benign, LP/P = (likely) pathogenic, in VKGL release July 2025 or ClinVar 2025-09-23",
      x = "Expert variant classification per source",
-     y = "DAVE1 pathogenicity prediction score")
+     y = "DAVE pathogenicity prediction score")
 p
 jointbox_plot_loc <- paste(rootDir, "img", paste0("vkgl-clinvar-reclass-jointbox.pdf"), sep="/")
 ggsave(filename = jointbox_plot_loc, plot = p, device = cairo_pdf, width = 6, height = 4)

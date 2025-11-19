@@ -7,7 +7,7 @@ library(dplyr)
 
 # interesting? https://jtr13.github.io/cc21fall2/introduction-to-xai-explainable-ai-in-r.html
 
-rootDir <- "/Users/joeri/git/dave1"
+rootDir <- "/Users/joeri/git/dave"
 freeze4 <- paste(rootDir, "data", "freeze4.csv.gz", sep="/")
 data <- read.csv(freeze4)
 
@@ -159,7 +159,7 @@ cor.test(biasCheckGeneRes$propLP, biasCheckGeneRes$WT_Xc2.lambda.28, method="ken
 #####
 # VUS classification using model
 #####
-rootDir <- "/Users/joeri/git/dave1"
+rootDir <- "/Users/joeri/git/dave"
 freeze4 <- paste(rootDir, "data", "freeze4.csv.gz", sep="/")
 vusPred <- read.csv(freeze4)
 # For some reproduciblity, set a random seed, though RF is non-deterministic by design

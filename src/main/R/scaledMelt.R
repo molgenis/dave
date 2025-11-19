@@ -8,8 +8,8 @@ library(data.table) # for casting multiple variables
 library(cutpointr) # optimal PPV calc
 library(boot) # bootstrapping of mean
 
-rootDir <- "/Users/joeri/git/dave1"
-#rootDir <- "C:/Users/tk_20/git/dave1"
+rootDir <- "/Users/joeri/git/dave"
+#rootDir <- "C:/Users/tk_20/git/dave"
 imgDir <- paste(rootDir, "img", sep="/")
 setwd(imgDir)
 
