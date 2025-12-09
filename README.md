@@ -3,7 +3,7 @@
 Diagnostic yield in NGS genome diagnostics is constraint by the high fraction of variants of uncertain significance (VUS), in large part due to insufficient interpretability of missense variation. Existing pathogenicity predictors offer strong performance, but often produce an unexplainable score lacking mechanistic insight. Here, we present the Digital Approximation of Variant Effects (MOLGENIS DAVE), an explainable missense variant predictor built on 12 biophysically grounded features spanning stability, hydrophobicity, electrostatics, and molecular interactions. Trained on curated Dutch diagnostic data, DAVE reliably classifies and breaks down predictions into interpretable feature contributions. With a focus on explainability, this framework aims to alleviate the VUS burden, advances clinically actionable variant interpretation and enables mechanistic follow-up.
 
 ### Publication
-* _in writing_
+* Posted on [MedRxiv](https://www.medrxiv.org/content/10.1101/2025.11.25.25340947v1) and currently submitted to a peer-reviewed journal
 
 ### Key resources
 * [Freeze 6 dataset](data/freeze6.csv.gz) (Gzipped CSV file)
