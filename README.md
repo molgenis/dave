@@ -25,5 +25,5 @@ This repository contains both software code and data.
 Unless otherwise stated in a specific file or directory, these licenses apply respectively to code and data.
 
 SPDX identifiers:
-- Code: GPL-3.0-only
+- Code: LGPL-3.0
 - Data: CC-BY-4.0
