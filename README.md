@@ -14,3 +14,16 @@ Diagnostic yield in NGS genome diagnostics is constraint by the high fraction of
 
 ### Raw computational results
 * [Wild-type and mutant proteins](data/genes)
+
+## Licensing
+
+This repository contains both software code and data.
+
+- All source code in this repository is licensed under the GNU General Public License v3.0 (GPL-3.0).
+- All datasets, documentation data, annotations, and other non-code content in this repository are licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+Unless otherwise stated in a specific file or directory, these licenses apply respectively to code and data.
+
+SPDX identifiers:
+- Code: GPL-3.0-only
+- Data: CC-BY-4.0
